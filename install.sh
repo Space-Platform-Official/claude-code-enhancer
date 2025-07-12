@@ -21,6 +21,10 @@ USER_DATA_DIR="$HOME/.local/share/claude-flow"
 SYSTEM_BIN_DIR="/usr/local/bin"
 SYSTEM_DATA_DIR="/usr/local/share/claude-flow"
 
+# Repository configuration
+REPO_URL="https://github.com/Space-Platform-Official/claude-flow-enhancer.git"
+REPO_DIR="$HOME/.claude-flow-repo"
+
 # Function to print colored output
 print_status() {
     echo -e "${BLUE}[INFO]${NC} $1"
@@ -63,6 +67,30 @@ is_in_path() {
     esac
 }
 
+# Function to add repository mode configuration to shell config
+add_repo_config() {
+    local shell_config="$1"
+    
+    if [[ -f "$shell_config" ]]; then
+        # Check if already configured
+        if ! grep -q "CLAUDE_TEMPLATES_DIR" "$shell_config" 2>/dev/null; then
+            echo "" >> "$shell_config"
+            echo "# Claude Flow repository mode configuration" >> "$shell_config"
+            echo "export CLAUDE_TEMPLATES_DIR=\"$REPO_DIR/templates\"" >> "$shell_config"
+            echo "" >> "$shell_config"
+            echo "# Function to update Claude Flow templates" >> "$shell_config"
+            echo "claude-update() {" >> "$shell_config"
+            echo "    echo \"🔄 Updating Claude Flow templates...\"" >> "$shell_config"
+            echo "    cd \"$REPO_DIR\" && git pull" >> "$shell_config"
+            echo "    echo \"✅ Claude Flow templates updated!\"" >> "$shell_config"
+            echo "}" >> "$shell_config"
+            print_success "Added repository configuration to $shell_config"
+        else
+            print_status "Repository configuration already exists in $shell_config"
+        fi
+    fi
+}
+
 # Function to add directory to PATH in shell config
 add_to_path() {
     local dir="$1"
@@ -91,6 +119,7 @@ add_to_path() {
 # Function to install files
 install_files() {
     local install_type="$1"
+    local install_mode="$2"
     local bin_dir data_dir
     
     if [[ "$install_type" == "system" ]]; then
@@ -106,9 +135,33 @@ install_files() {
     # Create directories
     mkdir -p "$bin_dir" "$data_dir"
     
-    # Copy templates
-    print_status "Copying templates to $data_dir/templates"
-    cp -r "$SCRIPT_DIR/templates" "$data_dir/"
+    # Handle templates based on mode
+    if [[ "$install_mode" == "repo" ]]; then
+        # Clone repository instead of copying templates
+        print_status "Using repository mode - cloning templates from Git"
+        if [[ -d "$REPO_DIR" ]]; then
+            print_status "Repository already exists at $REPO_DIR, updating..."
+            cd "$REPO_DIR" && git pull
+        else
+            print_status "Cloning repository to $REPO_DIR"
+            git clone "$REPO_URL" "$REPO_DIR"
+        fi
+        
+        # Set up shell configuration for repo mode
+        local shell_config=""
+        if [[ -n "$ZSH_VERSION" ]] || [[ "$SHELL" == *"zsh"* ]]; then
+            shell_config="$HOME/.zshrc"
+        elif [[ -n "$BASH_VERSION" ]] || [[ "$SHELL" == *"bash"* ]]; then
+            shell_config="$HOME/.bashrc"
+        else
+            shell_config="$HOME/.profile"
+        fi
+        add_repo_config "$shell_config"
+    else
+        # Traditional mode - copy templates
+        print_status "Copying templates to $data_dir/templates"
+        cp -r "$SCRIPT_DIR/templates" "$data_dir/"
+    fi
     
     # Install scripts
     print_status "Installing scripts to $bin_dir"
@@ -141,6 +194,10 @@ install_files() {
     print_status "Available commands:"
     print_status "  claude-install-flow [target-dir]  # Install Claude templates"
     print_status "  claude-merge [target-dir]        # Smart merge CLAUDE.md"
+    if [[ "$install_mode" == "repo" ]]; then
+        print_status "  claude-update                    # Update templates from repository"
+        print_warning "Please run: source $shell_config"
+    fi
 }
 
 # Function to uninstall files
@@ -185,6 +242,7 @@ show_usage() {
     echo "Options:"
     echo "  --user      Install for current user only (~/.local/)"
     echo "  --system    Install system-wide (/usr/local/)"
+    echo "  --repo      Use repository mode (auto-updatable templates)"
     echo "  --uninstall Remove Claude Flow tools"
     echo "  --help      Show this help message"
     echo ""
@@ -194,6 +252,7 @@ show_usage() {
 # Main function
 main() {
     local install_type=""
+    local install_mode="copy"
     local action="install"
     
     # Parse arguments
@@ -205,6 +264,10 @@ main() {
                 ;;
             --system)
                 install_type="system"
+                shift
+                ;;
+            --repo)
+                install_mode="repo"
                 shift
                 ;;
             --uninstall)
@@ -240,8 +303,15 @@ main() {
         exit 1
     fi
     
-    if [[ ! -d "$SCRIPT_DIR/templates" ]]; then
+    # Only check templates directory if not using repo mode
+    if [[ "$install_mode" != "repo" && ! -d "$SCRIPT_DIR/templates" ]]; then
         print_error "Templates directory not found: $SCRIPT_DIR/templates"
+        exit 1
+    fi
+    
+    # Check git availability for repo mode
+    if [[ "$install_mode" == "repo" ]] && ! command_exists git; then
+        print_error "Git is required for repository mode but not found"
         exit 1
     fi
     
@@ -262,7 +332,7 @@ main() {
         # Re-run with sudo for system installation
         exec sudo "$0" --system
     else
-        install_files "$install_type"
+        install_files "$install_type" "$install_mode"
     fi
 }
 
