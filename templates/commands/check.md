@@ -1,47 +1,50 @@
 ---
 allowed-tools: all
-description: Verify code quality, run tests, and ensure production readiness
+description: Orchestrate comprehensive quality workflows across format, cleanup, dedupe, and verify commands
 ---
 
-# 🚨🚨🚨 CRITICAL REQUIREMENT: FIX ALL ERRORS! 🚨🚨🚨
+# 🚨🚨🚨 CRITICAL REQUIREMENT: ORCHESTRATE COMPLETE QUALITY WORKFLOW! 🚨🚨🚨
 
-**THIS IS NOT A REPORTING TASK - THIS IS A FIXING TASK!**
+**THIS IS NOT A REPORTING TASK - THIS IS A COMPREHENSIVE FIXING ORCHESTRATION!**
 
 When you run `/check`, you are REQUIRED to:
 
-1. **IDENTIFY** all errors, warnings, and issues
-2. **FIX EVERY SINGLE ONE** - not just report them!
-3. **USE MULTIPLE AGENTS** to fix issues in parallel:
-   - Spawn one agent to fix linting issues
-   - Spawn another to fix test failures
-   - Spawn more agents for different files/modules
-   - Say: "I'll spawn multiple agents to fix all these issues in parallel"
+1. **ANALYZE PROJECT** and select appropriate quality workflow
+2. **ORCHESTRATE QUALITY COMMANDS** in proper dependency order
+3. **SPAWN MULTIPLE AGENTS** to execute quality commands in parallel:
+   - Agent 1: Execute `/quality/format` for code formatting
+   - Agent 2: Execute `/quality/cleanup` for dead code removal
+   - Agent 3: Execute `/quality/dedupe` for duplicate detection
+   - Agent 4: Execute `/quality/verify` for final validation
+   - Say: "I'll spawn agents to orchestrate the complete quality pipeline"
 4. **DO NOT STOP** until:
-   - ✅ ALL linters pass with ZERO warnings
-   - ✅ ALL tests pass
-   - ✅ Build succeeds
-   - ✅ EVERYTHING is GREEN
+   - ✅ ALL quality commands complete successfully
+   - ✅ ALL format/cleanup/dedupe/verify operations pass
+   - ✅ Complete workflow shows GREEN status
+   - ✅ EVERYTHING is VALIDATED and OPTIMIZED
 
 **FORBIDDEN BEHAVIORS:**
-- ❌ "Here are the issues I found" → NO! FIX THEM!
-- ❌ "The linter reports these problems" → NO! RESOLVE THEM!
-- ❌ "Tests are failing because..." → NO! MAKE THEM PASS!
-- ❌ Stopping after listing issues → NO! KEEP WORKING!
+- ❌ "Here are the quality issues" → NO! ORCHESTRATE FIXES!
+- ❌ "Format command reports problems" → NO! COORDINATE RESOLUTION!
+- ❌ "Cleanup found issues" → NO! MANAGE COMPLETE PIPELINE!
+- ❌ Stopping after individual command results → NO! COMPLETE FULL WORKFLOW!
 
-**MANDATORY WORKFLOW:**
+**MANDATORY ORCHESTRATION WORKFLOW:**
 ```
-1. Run checks → Find issues
-2. IMMEDIATELY spawn agents to fix ALL issues
-3. Re-run checks → Find remaining issues
-4. Fix those too
-5. REPEAT until EVERYTHING passes
+1. Analyze project → Select quality workflow
+2. IMMEDIATELY spawn agents for quality command pipeline
+3. Coordinate format → cleanup → dedupe → verify sequence
+4. Aggregate results and handle failures
+5. REPEAT any failed stages until EVERYTHING passes
 ```
 
 **YOU ARE NOT DONE UNTIL:**
-- All linters pass with zero warnings
-- All tests pass successfully
-- All builds complete without errors
-- Everything shows green/passing status
+- All quality commands execute successfully
+- Format operations complete with zero issues
+- Cleanup removes all dead code and optimizes imports
+- Dedupe eliminates all code duplication
+- Verify validates complete codebase quality
+- Complete orchestrated workflow shows green/passing status
 
 ---
 
