@@ -1,5 +1,0 @@
-Test Results - Sat 12 Jul 2025 22:11:57 AEST
-====================
-Status: PASS
-Mode: quick
-Duration: 0s
