@@ -1,0 +1,9 @@
+Running pre-commit hooks...
+✗ Linting failed
+  src/error.js:15:28 error: Missing semicolon
+  src/error.js:23:10 error: 'unusedVar' is defined but never used
+  src/error.js:45:5 error: Expected indentation of 4 spaces but found 2
+
+✗ 3 linting errors found
+
+Pre-commit hook failed (exit code 1)

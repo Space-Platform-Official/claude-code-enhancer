@@ -57,7 +57,7 @@ templates/
 │   ├── README.md
 │   ├── api-design.md
 │   ├── architect.md
-│   ├── check.md
+│   ├── check.md                 # Legacy monolithic quality check
 │   ├── create-command.md
 │   ├── debug.md
 │   ├── docs.md
@@ -67,6 +67,16 @@ templates/
 │   ├── optimize.md
 │   ├── orchestrate.md
 │   ├── prompt.md
+│   ├── quality/                 # New orchestrated quality suite
+│   │   ├── README.md
+│   │   ├── format.md            # Code formatting and style
+│   │   ├── cleanup.md           # Dead code and import cleanup
+│   │   ├── dedupe.md            # Duplicate detection and merging
+│   │   ├── verify.md            # Quality validation and compliance
+│   │   └── _shared/             # Shared utilities framework
+│   │       ├── utils.md         # Common utility functions
+│   │       ├── safety.md        # Safety mechanisms
+│   │       └── orchestration.md # Workflow coordination
 │   ├── refactor.md
 │   ├── review.md
 │   ├── rollback.md

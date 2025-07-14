@@ -1,0 +1,3 @@
+[feature/test-feature abc1234] feat: add new feature
+ 3 files changed, 42 insertions(+), 7 deletions(-)
+ create mode 100644 test/new-test.js

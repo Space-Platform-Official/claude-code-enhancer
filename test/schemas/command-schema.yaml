@@ -1,0 +1,166 @@
+# YAML Schema for Claude Flow Command Frontmatter Validation
+# This schema defines the required structure and validation rules for command frontmatter
+
+$schema: http://json-schema.org/draft-07/schema#
+$id: https://claude-flow.ai/schemas/command-frontmatter.yaml
+
+title: Claude Flow Command Frontmatter Schema
+description: Schema for validating YAML frontmatter in Claude Flow command files
+
+type: object
+
+required:
+  - allowed-tools
+  - description
+
+properties:
+  allowed-tools:
+    description: Tools that this command is allowed to use
+    oneOf:
+      - type: string
+        enum: ["all", "none"]
+        description: Special permission levels - 'all' for unrestricted access, 'none' for read-only
+      - type: array
+        description: List of specific tools this command can use
+        items:
+          type: string
+          enum: 
+            - "Bash"
+            - "Read"
+            - "Write" 
+            - "Edit"
+            - "MultiEdit"
+            - "Glob"
+            - "Grep"
+            - "LS"
+            - "WebFetch"
+            - "WebSearch"
+            - "TodoWrite"
+            - "NotebookRead"
+            - "NotebookEdit"
+        minItems: 1
+        uniqueItems: true
+
+  description:
+    type: string
+    description: Brief description of what this command does
+    minLength: 10
+    maxLength: 200
+    pattern: "^[A-Z].*[^.]$"
+    examples:
+      - "Smart git commit with automatic validation and conventional commit support"
+      - "Enhanced branch management with naming conventions and workflow automation"
+
+  category:
+    type: string
+    description: Optional category for command organization
+    enum:
+      - "git"
+      - "development"
+      - "testing"
+      - "deployment"
+      - "security"
+      - "documentation"
+      - "refactoring"
+      - "analysis"
+
+  complexity:
+    type: string
+    description: Complexity level indicator
+    enum: ["low", "medium", "high"]
+    default: "medium"
+
+  requires:
+    type: array
+    description: Optional list of dependencies on other commands or shared resources
+    items:
+      type: string
+      pattern: "^[a-zA-Z0-9/_-]+\.md$"
+    uniqueItems: true
+
+  security-level:
+    type: string
+    description: Security classification of the command
+    enum: ["safe", "elevated", "dangerous"]
+    default: "safe"
+
+  experimental:
+    type: boolean
+    description: Whether this command is experimental/beta
+    default: false
+
+  deprecated:
+    type: boolean
+    description: Whether this command is deprecated
+    default: false
+
+  version:
+    type: string
+    description: Command version for tracking changes
+    pattern: "^[0-9]+\.[0-9]+\.[0-9]+$"
+
+additionalProperties: false
+
+# Validation Rules and Constraints
+allOf:
+  # Security constraint: dangerous commands must explicitly list tools
+  - if:
+      properties:
+        security-level:
+          const: "dangerous"
+    then:
+      not:
+        properties:
+          allowed-tools:
+            const: "all"
+      
+  # Experimental commands should have version
+  - if:
+      properties:
+        experimental:
+          const: true
+    then:
+      required:
+        - version
+
+  # Deprecated commands should have replacement info in description
+  - if:
+      properties:
+        deprecated:
+          const: true
+    then:
+      properties:
+        description:
+          pattern: ".*[Dd]eprecated.*"
+
+# Common validation patterns for descriptions
+definitions:
+  secureDescription:
+    type: string
+    not:
+      anyOf:
+        - pattern: "(?i)(password|secret|key|token|credential)"
+        - pattern: "(?i)(hack|exploit|bypass|crack)"
+        - pattern: "(?i)(sudo|root|admin|privilege)"
+
+examples:
+  - allowed-tools: "all"
+    description: "Smart git commit with automatic validation and conventional commit support"
+    category: "git"
+    complexity: "medium"
+    security-level: "safe"
+    version: "1.0.0"
+
+  - allowed-tools: ["Read", "Grep", "LS"]
+    description: "Analyze codebase structure and generate documentation"
+    category: "documentation"
+    complexity: "low"
+    security-level: "safe"
+
+  - allowed-tools: ["Bash", "Edit", "MultiEdit"]
+    description: "Automated refactoring with backup and rollback capabilities"
+    category: "refactoring"
+    complexity: "high"
+    security-level: "elevated"
+    experimental: true
+    version: "0.9.0"

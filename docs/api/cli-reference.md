@@ -232,7 +232,7 @@ Once installed, Claude commands are available in the `.claude/commands/` directo
 |---------|-------------|
 | `api-design.md` | API design and documentation |
 | `architect.md` | Architecture planning and design |
-| `check.md` | Code quality and validation checks |
+| `check.md` | Legacy monolithic quality checks |
 | `create-command.md` | Create new Claude commands |
 | `debug.md` | Debugging assistance |
 | `docs.md` | Documentation generation |
@@ -242,6 +242,11 @@ Once installed, Claude commands are available in the `.claude/commands/` directo
 | `optimize.md` | Performance optimization |
 | `orchestrate.md` | Multi-component orchestration |
 | `prompt.md` | Prompt engineering assistance |
+| **Quality Suite** | **Orchestrated quality commands** |
+| `quality/format.md` | Code formatting and style enforcement |
+| `quality/cleanup.md` | Dead code and import cleanup |
+| `quality/dedupe.md` | Duplicate detection and merging |
+| `quality/verify.md` | Quality validation and compliance |
 | `refactor.md` | Code refactoring |
 | `review.md` | Code review |
 | `rollback.md` | Rollback procedures |
@@ -256,6 +261,32 @@ Commands are markdown files that Claude reads to understand specific tasks. To u
 1. Reference the command file in your conversation
 2. Claude will read and execute the instructions
 3. Commands can be customized for your project
+
+### Quality Suite Usage
+
+The new orchestrated quality suite provides specialized commands for different aspects of code quality:
+
+```bash
+# Individual quality commands
+claude format              # Code formatting and style
+claude cleanup             # Dead code and import cleanup
+claude dedupe              # Duplicate detection and merging
+claude verify              # Quality validation and compliance
+
+# Orchestrated workflows
+claude quality             # Complete quality workflow
+claude quality --workflow=development  # Development-focused workflow
+claude quality --workflow=ci-cd       # CI/CD optimized workflow
+claude quality --selective            # Interactive command selection
+
+# Advanced usage
+claude format --comprehensive         # Multi-pass formatting
+claude cleanup --conservative         # Safe cleanup only
+claude dedupe --interactive          # Guided duplicate resolution
+claude verify --security-only        # Security-focused verification
+```
+
+For detailed usage examples and best practices, see the [Quality Usage Guide](../commands/quality-usage-guide.md) and [Quality System Architecture](../commands/quality-system-architecture.md).
 
 ## Exit Codes
 

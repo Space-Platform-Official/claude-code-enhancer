@@ -1,0 +1,8 @@
+Test Results - Sat 12 Jul 2025 22:11:52 AEST
+====================
+Status: FAIL
+Mode: quick
+Duration: 1s
+
+Failed Phases:
+  - static

@@ -64,6 +64,13 @@ Solving problems
 - [FAQ](troubleshooting/faq.md) - Frequently asked questions
 - [Debugging](troubleshooting/debugging.md) - Advanced debugging
 
+### [Commands](commands/)
+Specialized command systems and workflows
+- [Quality System Architecture](commands/quality-system-architecture.md) - Orchestrated quality command suite
+- [Quality Usage Guide](commands/quality-usage-guide.md) - Practical quality workflow examples
+- [Milestone System](commands/milestone-system-architecture.md) - Project milestone management
+- [Cleanup Architecture](commands/comprehensive-cleanup-architecture.md) - Advanced cleanup strategies
+
 ### [Examples](examples/)
 Learn by doing
 - [JavaScript Project](examples/javascript-project.md) - Node.js setup
@@ -85,6 +92,7 @@ Learn by doing
 1. Read about [Smart Merge](user-guide/smart-merge.md)
 2. Follow the [Migration Guide](examples/migration-guide.md)
 3. Learn [Best Practices](user-guide/best-practices.md)
+4. Explore the [Quality System](commands/quality-usage-guide.md) for code quality workflows
 
 ### I want to contribute
 1. Set up your [Development Environment](development/setup.md)

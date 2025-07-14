@@ -1,0 +1,365 @@
+# Test Configuration for Claude Flow Git Command Testing Framework
+# This file defines test execution profiles, resource limits, and environment settings
+
+# Test execution profiles
+profiles:
+  quick:
+    description: "Fast feedback for development - essential tests only"
+    phases:
+      - static
+      - mock
+    parallel_jobs: 4
+    timeout_minutes: 10
+    retry_failed: false
+    test_selection:
+      static:
+        modes: ["structural", "security-critical"]
+      mock:
+        modes: ["happy", "error"]
+    
+  full:
+    description: "Complete test suite - all tests and validations"
+    phases:
+      - static
+      - mock
+      - integration
+    parallel_jobs: 4
+    timeout_minutes: 30
+    retry_failed: true
+    max_retries: 2
+    test_selection:
+      static:
+        modes: ["all"]
+      mock:
+        modes: ["all"]
+      integration:
+        modes: ["all"]
+    
+  debug:
+    description: "Debug mode - verbose output and extended timeouts"
+    phases:
+      - static
+      - mock
+      - integration
+    parallel_jobs: 1
+    timeout_minutes: 60
+    retry_failed: false
+    debug_output: true
+    verbose: true
+    preserve_artifacts: true
+    test_selection:
+      static:
+        modes: ["all"]
+      mock:
+        modes: ["all"]
+      integration:
+        modes: ["all"]
+    
+  ci:
+    description: "Optimized for CI/CD environments"
+    phases:
+      - static
+      - mock
+      - integration
+    parallel_jobs: "${CI_PARALLEL_JOBS:-8}"
+    timeout_minutes: 45
+    retry_failed: true
+    max_retries: 3
+    report_formats:
+      - junit
+      - json
+    artifact_retention_days: 7
+    fail_fast: false
+
+# Resource limits
+resources:
+  cpu:
+    max_cores: 4
+    per_test_limit: 1
+  memory:
+    max_mb: 2048
+    per_test_mb: 512
+  disk:
+    temp_space_mb: 1024
+    cache_size_mb: 512
+  network:
+    timeout_seconds: 30
+    max_concurrent_connections: 10
+
+# Test environment settings
+environment:
+  # Git configuration for tests
+  git:
+    user_name: "Claude Test Runner"
+    user_email: "test@claude-flow.local"
+    init_branch: "main"
+    test_remote_url: "https://github.com/test/repo.git"
+    
+  # Claude Code settings
+  claude:
+    mock_mode: true
+    response_delay_ms: 100
+    success_rate: 0.95
+    
+  # Security settings
+  security:
+    enable_sandboxing: true
+    allowed_commands:
+      - git
+      - echo
+      - cat
+      - grep
+      - find
+      - test
+    blocked_paths:
+      - /etc
+      - /usr
+      - /System
+      - ~/.ssh
+      - ~/.gnupg
+
+# Performance baselines
+performance:
+  baseline_file: ".cache/performance-baselines.json"
+  regression_threshold_percent: 20
+  improvement_threshold_percent: 20
+  
+  # Expected durations (seconds)
+  expected_durations:
+    static_validation: 10
+    mock_execution: 30
+    integration_tests: 120
+    
+  # Per-test limits
+  test_timeouts:
+    unit_test: 5
+    integration_test: 30
+    e2e_test: 60
+
+# Cache configuration
+cache:
+  enabled: true
+  directory: ".cache"
+  ttl_hours: 24
+  max_size_mb: 1024
+  
+  # What to cache
+  cache_items:
+    - test_results
+    - performance_metrics
+    - git_repositories
+    - mock_responses
+
+# Reporting configuration
+reporting:
+  # Output formats
+  formats:
+    console:
+      enabled: true
+      colors: true
+      verbosity: normal
+      
+    json:
+      enabled: true
+      pretty_print: true
+      include_timings: true
+      include_system_info: true
+      
+    junit:
+      enabled: true
+      include_stdout: false
+      include_properties: true
+      
+    markdown:
+      enabled: true
+      include_charts: true
+      include_badges: true
+      
+    tap:
+      enabled: false
+      version: 13
+  
+  # Report destinations
+  destinations:
+    local:
+      directory: "results"
+      filename_pattern: "test-results-{timestamp}.{format}"
+      
+    artifacts:
+      enabled: "${CI:-false}"
+      retention_days: 30
+      
+  # Metrics to track
+  metrics:
+    - total_tests
+    - passed_tests
+    - failed_tests
+    - skipped_tests
+    - total_duration
+    - avg_test_duration
+    - memory_usage
+    - cpu_usage
+
+# Test data and fixtures
+fixtures:
+  directory: "fixtures"
+  
+  # Mock git responses
+  mock_responses:
+    directory: "fixtures/mock-responses"
+    format: "text"
+    
+  # Test repositories
+  test_repos:
+    small:
+      files: 10
+      commits: 50
+      branches: 3
+      
+    medium:
+      files: 100
+      commits: 500
+      branches: 10
+      
+    large:
+      files: 1000
+      commits: 5000
+      branches: 50
+
+# Parallelization settings
+parallelization:
+  enabled: true
+  strategy: "round-robin"  # round-robin, least-loaded, size-based
+  
+  # Group tests by
+  grouping:
+    by: "phase"  # phase, duration, dependencies
+    max_group_size: 20
+    
+  # Load balancing
+  load_balancing:
+    enabled: true
+    rebalance_interval: 10  # seconds
+
+# Retry configuration
+retry:
+  enabled: true
+  
+  # Retry strategies
+  strategies:
+    flaky_tests:
+      max_attempts: 3
+      delay_seconds: 2
+      backoff_multiplier: 2
+      
+    network_errors:
+      max_attempts: 5
+      delay_seconds: 5
+      backoff_multiplier: 1.5
+      
+    resource_errors:
+      max_attempts: 2
+      delay_seconds: 10
+      
+  # Known flaky tests
+  flaky_tests:
+    - "test_concurrent_operations"
+    - "test_network_latency"
+
+# Integration test settings
+integration:
+  # Claude Code integration
+  claude_code:
+    use_installed: true
+    fallback_to_mock: true
+    mock_response_dir: "fixtures/claude-responses"
+    
+  # Git repository setup
+  git_setup:
+    create_test_repos: true
+    use_bare_repos: false
+    cleanup_after_test: true
+    
+  # Test scenarios
+  scenarios:
+    enabled:
+      - feature_development
+      - hotfix_emergency
+      - release_preparation
+      - conflict_resolution
+      - team_collaboration
+
+# Debugging options
+debug:
+  # Debug output
+  output:
+    show_commands: true
+    show_git_output: true
+    show_timings: true
+    show_memory_usage: true
+    
+  # Preserve artifacts
+  preserve:
+    test_directories: false
+    git_repositories: false
+    log_files: true
+    
+  # Breakpoints
+  breakpoints:
+    enabled: false
+    on_failure: true
+    on_warning: false
+
+# Notification settings (for CI)
+notifications:
+  enabled: "${CI:-false}"
+  
+  # Notification channels
+  channels:
+    github:
+      enabled: true
+      comment_on_pr: true
+      update_status: true
+      
+    slack:
+      enabled: false
+      webhook_url: "${SLACK_WEBHOOK_URL:-}"
+      channel: "#ci-notifications"
+      
+  # When to notify
+  triggers:
+    on_failure: true
+    on_success: false
+    on_regression: true
+    on_improvement: true
+
+# Feature flags
+features:
+  # Experimental features
+  experimental:
+    parallel_phases: false
+    distributed_testing: false
+    ai_test_generation: false
+    
+  # Beta features
+  beta:
+    smart_test_selection: true
+    performance_profiling: true
+    coverage_tracking: false
+
+# Version compatibility
+compatibility:
+  min_bash_version: "4.0"
+  min_git_version: "2.25.0"
+  required_commands:
+    - bash
+    - git
+    - grep
+    - find
+    - sed
+    - awk
+  optional_commands:
+    - parallel
+    - jq
+    - python3
+    - claude

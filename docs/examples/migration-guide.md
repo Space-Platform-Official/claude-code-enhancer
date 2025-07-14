@@ -39,7 +39,7 @@ claude flow migrate
 # 1. Detect existing tools and configurations
 # 2. Create .claude directory
 # 3. Merge with existing configs
-# 4. Set up git hooks
+# 4. Set up git hooks and quality workflows
 # 5. Generate migration report
 ```
 
@@ -562,16 +562,22 @@ npm run validate
 git add .
 git commit -m "Test commit"
 
-# 3. Run CI locally
-claude ci local
+# 3. Run quality checks
+claude quality --comprehensive
 
-# 4. Check integration
+# 4. Test individual quality commands
+claude format --dry-run
+claude verify --quick
+claude cleanup --conservative
+
+# 5. Check integration
 claude doctor
 
 # Output:
 # Claude Flow Health Check
 # ========================
 # ✓ Git hooks installed
+# ✓ Quality workflows configured
 # ✓ Linting configured
 # ✓ Tests passing
 # ✓ Build successful

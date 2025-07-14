@@ -1,0 +1,218 @@
+# Edge Case Test Configuration for Claude Flow
+# Comprehensive configuration for testing edge cases and boundary conditions
+
+edge_cases:
+  # Git repository state edge cases
+  git_state:
+    enabled: true
+    timeout_seconds: 300
+    max_repo_size_mb: 100
+    test_empty_repos: true
+    test_corrupted_repos: true
+    test_detached_head: true
+    test_merge_conflicts: true
+    test_submodules: true
+    test_large_repos: true
+    test_permissions: true
+    
+  # Input validation edge cases
+  input_validation:
+    enabled: true
+    timeout_seconds: 120
+    test_empty_arguments: true
+    test_special_characters: true
+    test_long_arguments: true
+    test_injection_attempts: true
+    test_unicode: true
+    test_encoding: true
+    test_boundary_conditions: true
+    test_path_manipulation: true
+    
+  # Environment edge cases
+  environment:
+    enabled: true
+    timeout_seconds: 180
+    test_missing_git: false  # Don't break actual git installation
+    test_permissions: true
+    test_network_issues: true
+    test_platform_differences: true
+    test_environment_variables: true
+    test_resource_limits: true
+    test_timezone_issues: true
+    
+  # Security edge cases
+  security:
+    enabled: true
+    timeout_seconds: 240
+    test_command_injection: true
+    test_privilege_escalation: false  # Safety first - don't test actual privilege escalation
+    test_credential_exposure: true
+    test_tool_permissions: true
+    test_data_exfiltration: true
+    test_input_sanitization: true
+
+# Safety limits and restrictions
+safety:
+  max_test_duration_minutes: 30
+  max_file_size_mb: 50
+  max_memory_mb: 512
+  max_network_requests: 10
+  max_processes: 5
+  
+  # Commands that are forbidden during testing
+  forbidden_commands:
+    - "rm -rf /"
+    - "sudo"
+    - "chmod 777"
+    - "format"
+    - "mkfs"
+    - "dd if=/dev/zero of=/dev/"
+    - ":(){ :|:& };:"  # Fork bomb
+    
+  # File patterns that should not be created
+  forbidden_files:
+    - "/etc/*"
+    - "/boot/*"
+    - "/sys/*"
+    - "/proc/*"
+    - "C:\\Windows\\*"
+    - "C:\\Program Files\\*"
+
+# Test environment configuration
+environment:
+  test_prefix: "claude-test-"
+  cleanup_on_failure: true
+  preserve_logs: true
+  verbose_output: false
+  
+  # Repository settings
+  git_config:
+    user_name: "Claude Test User"
+    user_email: "test@claude-flow.test"
+    default_branch: "main"
+    gpg_sign: false
+
+# Reporting configuration
+reporting:
+  generate_json: true
+  generate_xml: true
+  generate_markdown: true
+  generate_tap: false
+  
+  # Report destinations
+  results_dir: "test/results/edge-cases"
+  log_level: "info"  # debug, info, warning, error
+  
+  # Failure thresholds
+  thresholds:
+    critical_failures: 0      # Any critical failure fails the build
+    high_vulnerabilities: 2   # More than 2 high vulnerabilities fails
+    medium_vulnerabilities: 5 # More than 5 medium vulnerabilities warns
+    test_failures: 10         # More than 10% test failures fails
+
+# Platform-specific settings
+platforms:
+  darwin:  # macOS
+    case_sensitive_fs: false
+    max_path_length: 1024
+    line_endings: "lf"
+    special_characters_allowed: true
+    
+  linux:
+    case_sensitive_fs: true
+    max_path_length: 4096
+    line_endings: "lf"
+    special_characters_allowed: true
+    
+  windows:
+    case_sensitive_fs: false
+    max_path_length: 260
+    line_endings: "crlf"
+    special_characters_allowed: false
+    forbidden_filename_chars: ["<", ">", ":", "\"", "|", "?", "*"]
+
+# Network testing configuration
+network:
+  timeout_seconds: 10
+  max_retries: 3
+  test_urls:
+    - "https://httpbin.org/status/200"  # For basic HTTP testing
+    - "https://8.8.8.8"                 # For connectivity testing
+  
+  # Don't actually test these in CI/automated environments
+  skip_network_tests_in_ci: true
+
+# Performance benchmarks
+performance:
+  git_operations:
+    status_max_seconds: 5
+    add_max_seconds: 10
+    commit_max_seconds: 15
+    push_max_seconds: 30
+    
+  file_operations:
+    create_max_seconds: 2
+    read_max_seconds: 1
+    delete_max_seconds: 2
+    
+  memory_limits:
+    max_heap_mb: 256
+    max_rss_mb: 512
+
+# Security testing configuration
+security:
+  # Patterns to test for command injection
+  injection_patterns:
+    - "$(whoami)"
+    - "`whoami`"
+    - "; whoami"
+    - "&& whoami"
+    - "|| whoami"
+    - "| whoami"
+    
+  # Credential patterns to detect
+  credential_patterns:
+    - "password="
+    - "api_key="
+    - "secret="
+    - "token="
+    - "-----BEGIN"
+    
+  # Tool permission audit
+  tool_audit:
+    flag_unrestricted_access: true
+    require_security_documentation: true
+    check_dangerous_commands: true
+    
+# Integration settings
+integration:
+  # External tools required for testing
+  required_tools:
+    - "git"
+    - "bash"
+    - "find"
+    - "grep"
+    - "awk"
+    - "sed"
+    
+  # Optional tools that enhance testing
+  optional_tools:
+    - "curl"
+    - "nc"
+    - "nslookup"
+    - "ping"
+    - "lsof"
+    
+# Debug and development settings
+debug:
+  save_test_artifacts: false
+  print_command_output: false
+  stop_on_first_failure: false
+  generate_debug_logs: false
+  
+# Continuous Integration settings
+ci:
+  skip_interactive_tests: true
+  reduce_test_verbosity: true
+  fail_fast: true
+  parallel_execution: false  # Edge cases should run sequentially for safety

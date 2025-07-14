@@ -80,7 +80,8 @@ Templates are organized by:
 
 ### For Projects
 - Maintainable architecture
-- Automated quality checks
+- Orchestrated quality workflows (format, cleanup, dedupe, verify)
+- Automated quality checks with safety mechanisms
 - Clear development guidelines
 - Reduced technical debt
 

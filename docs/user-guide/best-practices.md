@@ -241,9 +241,11 @@ git diff CLAUDE.md
 . "$(dirname "$0")/_/husky.sh"
 
 echo "🔍 Running Claude Flow quality checks..."
-npm run validate || {
+# New orchestrated quality workflow
+claude quality --workflow=pre-commit || {
     echo "❌ Quality checks failed!"
-    echo "Run 'npm run validate' to see details"
+    echo "Run 'claude quality --fix' to resolve issues automatically"
+    echo "Or run 'claude verify' to see detailed report"
     exit 1
 }
 ```

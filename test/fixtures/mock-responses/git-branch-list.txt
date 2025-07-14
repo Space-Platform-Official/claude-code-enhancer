@@ -1,0 +1,4 @@
+  develop
+  feature/old-feature
+  feature/test-feature
+* main
