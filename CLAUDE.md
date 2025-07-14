@@ -4,6 +4,157 @@ We're building production-quality code together. Your role is to create maintain
 
 When you seem stuck or overly complex, I'll redirect you - my guidance helps you stay on track.
 
+## 🚨 MANDATORY COMPLEXITY TRIAGE SYSTEM
+
+**ZERO TOLERANCE FOR OVER-ENGINEERING! CATEGORIZE BEFORE SOLVING!**
+
+### Complexity Classification (MANDATORY FIRST STEP)
+Before implementing ANY solution, you MUST categorize the problem:
+
+#### 🟢 SIMPLE (Default Response)
+- **Single file changes** or basic functionality
+- **Existing patterns** can be reused
+- **Direct implementation** without architectural changes
+- **Time estimate**: < 30 minutes
+
+**Required Response**: Minimal solution using existing patterns
+
+#### 🟡 MEDIUM (Requires Justification)
+- **Multiple file coordination** needed
+- **New patterns** required but within existing architecture
+- **Limited scope** impact (1-2 modules)
+- **Time estimate**: 30 minutes - 2 hours
+
+**Required Response**: Justify complexity, propose simple alternative first
+
+#### 🔴 COMPLEX (Requires User Approval)
+- **Architectural changes** or new abstractions
+- **System-wide impact** (3+ modules affected)
+- **New dependencies** or paradigm shifts
+- **Time estimate**: > 2 hours
+
+**Required Response**: Get explicit user approval: "This requires complex changes affecting [X]. Proceed? Simple alternative: [Y]"
+
+### 🚨 HARD OVER-ENGINEERING BLOCKERS
+
+**ABSOLUTE CONSTRAINTS - NO EXCEPTIONS WITHOUT USER OVERRIDE**
+
+#### Architectural Over-Engineering Blockers
+❌ **FORBIDDEN**: Creating abstractions for single use cases
+❌ **FORBIDDEN**: Adding layers without concrete need (3+ real use cases)
+❌ **FORBIDDEN**: Implementing patterns "for future flexibility"
+❌ **FORBIDDEN**: Creating frameworks within applications
+❌ **FORBIDDEN**: Over-modularizing simple functionality
+
+#### Code Pattern Blockers
+❌ **FORBIDDEN**: Factory patterns for <3 variants
+❌ **FORBIDDEN**: Observer patterns for simple callbacks
+❌ **FORBIDDEN**: Strategy patterns for <4 strategies
+❌ **FORBIDDEN**: Repository patterns for single data source
+❌ **FORBIDDEN**: Dependency injection for <3 dependencies
+
+#### File Structure Blockers
+❌ **FORBIDDEN**: Folders for <3 related files
+❌ **FORBIDDEN**: Separate config files for simple settings
+❌ **FORBIDDEN**: Interface files with single implementation
+❌ **FORBIDDEN**: Utility classes for single functions
+❌ **FORBIDDEN**: Service layers for simple CRUD operations
+
+### 🔍 MANDATORY COMPLEXITY REALITY CHECKS
+
+**STOP AND ANSWER THESE BEFORE CONTINUING**
+
+#### Pre-Implementation Reality Check
+- [ ] **Simplicity Test**: Can this be solved with <10 lines of code changes?
+- [ ] **Existing Pattern Test**: Does an existing pattern solve 80% of this?
+- [ ] **YAGNI Test**: Am I solving problems that don't exist yet?
+- [ ] **User Value Test**: Does this complexity directly benefit the user?
+- [ ] **Maintenance Test**: Will this be easy to understand in 6 months?
+
+#### Implementation Reality Check (Mid-Point)
+- [ ] **Line Count Reality**: Am I writing more code than necessary?
+- [ ] **Abstraction Reality**: Are my abstractions used in multiple places?
+- [ ] **Dependency Reality**: Did I add dependencies that could be avoided?
+- [ ] **Test Reality**: Are my tests more complex than the code?
+- [ ] **Documentation Reality**: Does this need more documentation than code?
+
+#### Completion Reality Check
+- [ ] **Final Simplicity**: Could a junior developer understand this immediately?
+- [ ] **Alternative Reality**: Is there a simpler solution I missed?
+- [ ] **Future Reality**: Will this help or hurt future changes?
+- [ ] **Deletion Reality**: Could I delete 30% of this code and still work?
+
+### 🔒 PROGRESSIVE COMPLEXITY ENFORCEMENT
+
+**ESCALATING MEASURES FOR COMPLEXITY CONTROL**
+
+#### Level 1: Automatic Simplification (SIMPLE problems)
+- **Auto-apply**: Existing patterns and minimal changes
+- **No user interaction**: Proceed with simplest solution
+- **Documentation**: Single-line explanation of approach
+
+#### Level 2: Justified Complexity (MEDIUM problems)
+- **Required justification**: "This complexity is needed because..."
+- **Alternative proposal**: "Simpler alternative would be..."
+- **Impact assessment**: "This affects [specific modules/files]"
+- **User opt-out**: "Reply 'simple' for minimal approach instead"
+
+#### Level 3: Explicit Approval (COMPLEX problems)
+- **Mandatory pause**: Stop and request approval before proceeding
+- **Detailed breakdown**: Full implementation plan with complexity costs
+- **Simple alternative**: Always provide a simpler option
+- **User consent**: Require explicit "proceed with complex solution"
+
+#### Level 4: Complexity Budget (Project-wide)
+- **Track complexity debt**: Maintain running total of complex solutions
+- **Budget limits**: Maximum 3 complex solutions per project
+- **Require cleanup**: Must simplify existing code before adding complexity
+- **Audit requirement**: Review all complex solutions monthly
+
+### 🎛️ USER OVERRIDE MECHANISM
+
+**EXPLICIT CONTROLS FOR INTENTIONAL COMPLEXITY**
+
+#### Override Commands
+```yaml
+# User can explicitly request complex solutions
+user_override:
+  complexity_mode: "simple"        # simple | justified | complex | unrestricted
+  pattern_enforcement: "strict"    # strict | relaxed | disabled
+  reality_checks: "enabled"       # enabled | warnings | disabled
+  auto_simplify: "aggressive"     # aggressive | moderate | minimal
+```
+
+#### Override Scenarios
+**"I need the complex solution"**: Bypass blockers for specific request
+**"Disable simplicity checks"**: Temporarily allow over-engineering
+**"Performance critical"**: Override for optimization requirements
+**"Future-proofing required"**: Allow abstractions for known future needs
+
+#### Override Documentation
+- **Justification required**: Why complexity is necessary
+- **Complexity budget**: Tracks against project complexity limits
+- **Review reminder**: Scheduled cleanup/simplification review
+- **Rollback plan**: How to simplify if complexity proves unnecessary
+
+### 🚨 COMPLEXITY VIOLATION RESPONSES
+
+**AUTOMATED RESPONSES TO OVER-ENGINEERING**
+
+#### Detection Triggers
+- **Abstraction without multiple use cases**: Auto-suggest inline implementation
+- **Deep inheritance**: Propose composition alternative
+- **Excessive configuration**: Suggest convention over configuration
+- **Premature optimization**: Request performance benchmarks first
+- **Gold-plating**: Strip to MVP and ask for explicit feature requests
+
+#### Violation Response Workflow
+1. **Immediate stop**: Halt implementation at violation point
+2. **Simplification proposal**: Offer concrete simpler alternative
+3. **User choice**: Simple solution vs. justified complexity
+4. **Implementation**: Proceed with chosen approach
+5. **Documentation**: Record complexity decision and rationale
+
 ## 🚨 MANDATORY FILE CREATION CONSTRAINTS
 
 **ZERO TOLERANCE FOR UNNECESSARY FILE PROLIFERATION!**
