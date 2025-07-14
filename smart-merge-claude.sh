@@ -88,10 +88,44 @@ check_lock() {
 create_backup() {
     local target_path="$1"
     
+    # Check if backups are disabled
+    if [[ "${CLAUDE_MERGE_BACKUP:-true}" == "false" ]]; then
+        return 0
+    fi
+    
     if [[ -e "$target_path" ]]; then
         local backup_path="${target_path}.backup.$(date +%s)"
         cp -r "$target_path" "$backup_path"
         echo "$backup_path"
+    fi
+}
+
+# Function to clean up old backup files
+cleanup_old_backups() {
+    local target_dir="$1"
+    local retention_hours="${CLAUDE_MERGE_BACKUP_RETENTION:-24}"
+    local cleaned_count=0
+    
+    # Find and clean old backup files
+    while IFS= read -r -d '' backup_file; do
+        if [[ -e "$backup_file" ]]; then
+            # Extract timestamp from backup filename
+            local timestamp=$(echo "$backup_file" | sed 's/.*\.backup\.//')
+            if [[ "$timestamp" =~ ^[0-9]+$ ]]; then
+                local current_time=$(date +%s)
+                local age_hours=$(( (current_time - timestamp) / 3600 ))
+                
+                if [[ $age_hours -gt $retention_hours ]]; then
+                    rm -rf "$backup_file"
+                    ((cleaned_count++))
+                    print_status "Cleaned old backup: $(basename "$backup_file")"
+                fi
+            fi
+        fi
+    done < <(find "$target_dir" -name "*.backup.*" -print0 2>/dev/null)
+    
+    if [[ $cleaned_count -gt 0 ]]; then
+        print_status "Cleaned $cleaned_count old backup files (older than ${retention_hours}h)"
     fi
 }
 
@@ -168,9 +202,14 @@ setup_claude_commands() {
             local final_count=$(find "$commands_dir" -name "*.md" | wc -l)
             print_success "Commands copied successfully ($final_count files)"
             
-            # Clean up backup on success
+            # Clean up backup on success (allow grace period for verification)
             if [[ -n "$backup_path" && -d "$backup_path" ]]; then
-                rm -rf "$backup_path"
+                local grace_period="${CLAUDE_MERGE_BACKUP_GRACE:-0}"
+                if [[ "$grace_period" -eq 0 ]]; then
+                    rm -rf "$backup_path"
+                else
+                    print_status "Backup preserved for ${grace_period}h grace period: $(basename "$backup_path")"
+                fi
             fi
         else
             print_error "Failed to copy commands"
@@ -192,6 +231,16 @@ main() {
     if [[ $# -gt 1 ]] || [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
         echo "Usage: $0 [target-directory]"
         echo "Simple smart merge for CLAUDE.md and command templates"
+        echo ""
+        echo "Environment Variables:"
+        echo "  CLAUDE_MERGE_BACKUP=false         Disable backup creation"
+        echo "  CLAUDE_MERGE_BACKUP_RETENTION=24  Backup retention hours (default: 24)"
+        echo "  CLAUDE_MERGE_BACKUP_GRACE=0       Grace period for successful backups (default: 0)"
+        echo ""
+        echo "Examples:"
+        echo "  $0                                 # Merge in current directory"
+        echo "  CLAUDE_MERGE_BACKUP=false $0      # Merge without backups"
+        echo "  CLAUDE_MERGE_BACKUP_RETENTION=48 $0  # Keep backups for 48 hours"
         exit 1
     fi
 
@@ -210,6 +259,9 @@ main() {
     target_dir="$(cd "$target_dir" && pwd)"
 
     print_status "Starting smart merge for: $target_dir"
+
+    # Clean up old backup files first
+    cleanup_old_backups "$target_dir"
 
     # Find source CLAUDE.md
     local current_claude="$(pwd)/CLAUDE.md"
