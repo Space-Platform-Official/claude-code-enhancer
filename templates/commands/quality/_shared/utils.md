@@ -81,7 +81,7 @@ get_file_size() {
 find_files_filtered() {
     local directory=${1:-.}
     local pattern=${2:-"*"}
-    local exclude_patterns=${3:-".git node_modules __pycache__ .pytest_cache target build dist .DS_Store"}
+    local exclude_patterns=${3:-".git node_modules __pycache__ .pytest_cache target build dist .DS_Store .claude .Claude .CLAUDE"}
     
     local find_cmd="find '$directory' -type f -name '$pattern'"
     
@@ -89,6 +89,9 @@ find_files_filtered() {
     for exclude in $exclude_patterns; do
         find_cmd="$find_cmd ! -path '*/$exclude/*'"
     done
+    
+    # Additional exclusions for .claude-related files and directories
+    find_cmd="$find_cmd ! -name '.claude*' ! -name '*.claude*' ! -path '*/.claude' ! -path '*/.Claude' ! -path '*/.CLAUDE'"
     
     eval "$find_cmd" 2>/dev/null | sort
 }
@@ -1228,7 +1231,7 @@ get_default_quality_config() {
     "create_snapshots": true,
     "auto_cleanup": true,
     "max_file_size": 10485760,
-    "excluded_patterns": [".git", "node_modules", "__pycache__", "target", "build", "dist"],
+    "excluded_patterns": [".git", "node_modules", "__pycache__", "target", "build", "dist", ".claude", ".Claude", ".CLAUDE"],
     "formatters": {
         "javascript": ["prettier", "eslint"],
         "typescript": ["prettier", "eslint"],

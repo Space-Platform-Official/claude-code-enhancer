@@ -128,6 +128,7 @@ setup_execution_environment() {
     # Source shared utilities
     source ".claude/commands/milestone/_shared/context.md"
     source ".claude/commands/milestone/_shared/git-integration.md"
+    source ".claude/commands/milestone/_shared/state.md"
     
     # Create execution directories
     mkdir -p ".milestones/active"
@@ -250,8 +251,8 @@ spawn_task_execution_agent() {
         yq e '(.tasks[] | select(.id == "'$task_id'") | .status) = "in_progress"' -i ".milestones/active/$milestone_id.yaml"
         yq e '(.tasks[] | select(.id == "'$task_id'") | .started_at) = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' -i ".milestones/active/$milestone_id.yaml"
         
-        # Log task start
-        log_milestone_event "$milestone_id" "task_started" "{\"task_id\": \"$task_id\"}"
+        # Log task start with reactive status update
+        log_milestone_event_reactive "$milestone_id" "task_started" "{\"task_id\": \"$task_id\"}"
         
         # Execute task (placeholder for actual task execution)
         execute_milestone_task "$milestone_id" "$task_id"
@@ -260,8 +261,8 @@ spawn_task_execution_agent() {
         yq e '(.tasks[] | select(.id == "'$task_id'") | .status) = "completed"' -i ".milestones/active/$milestone_id.yaml"
         yq e '(.tasks[] | select(.id == "'$task_id'") | .completed_at) = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' -i ".milestones/active/$milestone_id.yaml"
         
-        # Log task completion
-        log_milestone_event "$milestone_id" "task_completed" "{\"task_id\": \"$task_id\"}"
+        # Log task completion with reactive status update
+        log_milestone_event_reactive "$milestone_id" "task_completed" "{\"task_id\": \"$task_id\"}"
         
         # Create milestone commit
         create_milestone_commit "$milestone_id" "$task_id" "Complete task: $(yq e '.tasks[] | select(.id == "'$task_id'") | .title' ".milestones/active/$milestone_id.yaml")"
@@ -291,8 +292,8 @@ spawn_progress_monitoring_agent() {
         yq e '.progress.tasks_completed = '$completed_tasks -i ".milestones/active/$milestone_id.yaml"
         yq e '.progress.last_update = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' -i ".milestones/active/$milestone_id.yaml"
         
-        # Log progress update
-        log_milestone_event "$milestone_id" "progress_updated" "{\"percentage\": $progress_percentage, \"completed_tasks\": $completed_tasks, \"total_tasks\": $total_tasks}"
+        # Log progress update with reactive status update
+        log_milestone_event_reactive "$milestone_id" "progress_updated" "{\"percentage\": $progress_percentage, \"completed_tasks\": $completed_tasks, \"total_tasks\": $total_tasks}"
         
         # Display progress
         display_progress_dashboard "$milestone_id"
@@ -399,7 +400,7 @@ resume_execution_session() {
     yq e '.session.resumed_at = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' -i "$session_file"
     
     # Log resume event
-    log_milestone_event "$milestone_id" "session_resumed" "{\"session_id\": \"$session_id\"}"
+    log_milestone_event_reactive "$milestone_id" "session_resumed" "{\"session_id\": \"$session_id\"}"
     
     # Redeploy execution agents
     deploy_execution_agents "$milestone_id" "$session_id"

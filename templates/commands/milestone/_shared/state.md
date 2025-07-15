@@ -476,4 +476,130 @@ with open('$event_log') as f:
 }
 ```
 
-This state management system provides robust, atomic operations for milestone state persistence with comprehensive event logging and recovery capabilities.
+## Reactive Status Updates
+
+```bash
+# Automatically update milestone status when events occur
+update_milestone_status_reactive() {
+    local milestone_id=$1
+    local trigger_event=$2
+    local event_data=$3
+    
+    # Calculate new status based on current milestone state
+    local milestone_file=".milestones/active/$milestone_id.yaml"
+    if [ ! -f "$milestone_file" ]; then
+        echo "ERROR: Milestone file not found: $milestone_file"
+        return 1
+    fi
+    
+    # Calculate progress percentage from completed tasks
+    local total_tasks=$(yq e '.tasks | length' "$milestone_file" 2>/dev/null || echo "0")
+    local completed_tasks=$(yq e '.tasks[] | select(.status == "completed") | .id' "$milestone_file" 2>/dev/null | wc -l)
+    
+    local progress_percentage=0
+    if [ "$total_tasks" -gt 0 ]; then
+        progress_percentage=$((completed_tasks * 100 / total_tasks))
+    fi
+    
+    # Determine milestone status based on progress
+    local milestone_status="planned"
+    if [ "$progress_percentage" -eq 100 ]; then
+        milestone_status="completed"
+    elif [ "$progress_percentage" -gt 0 ]; then
+        milestone_status="in_progress"
+    fi
+    
+    # Update milestone file atomically
+    acquire_state_lock "$milestone_id"
+    
+    yq e '.status = "'$milestone_status'"' -i "$milestone_file"
+    yq e '.progress.percentage = '$progress_percentage -i "$milestone_file"
+    yq e '.progress.last_update = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' -i "$milestone_file"
+    
+    release_state_lock "$milestone_id"
+    
+    # Log the status update event
+    log_milestone_event "$milestone_id" "status_updated" "{\"old_status\": \"$previous_status\", \"new_status\": \"$milestone_status\", \"progress_percentage\": $progress_percentage, \"trigger_event\": \"$trigger_event\"}"
+    
+    echo "✅ Milestone status updated: $milestone_id → $milestone_status ($progress_percentage%)"
+}
+
+# Watch for milestone events and trigger reactive updates
+watch_milestone_events_reactive() {
+    local milestone_id=$1
+    local event_log=".milestones/state/events/milestone-$milestone_id.jsonl"
+    
+    # Simple file watching using tail
+    if [ -f "$event_log" ]; then
+        tail -f "$event_log" | while read -r event_line; do
+            if [ -n "$event_line" ]; then
+                local event_type=$(echo "$event_line" | python3 -c "import json, sys; print(json.load(sys.stdin).get('event_type', ''))")
+                
+                # Trigger status updates for relevant events
+                case "$event_type" in
+                    "task_completed"|"task_started"|"milestone_modified")
+                        update_milestone_status_reactive "$milestone_id" "$event_type" "$event_line"
+                        ;;
+                esac
+            fi
+        done
+    fi
+}
+
+# Enhanced milestone event logging with automatic status triggers
+log_milestone_event_reactive() {
+    local milestone_id=$1
+    local event_type=$2
+    local event_data=$3
+    local session_id=${4:-"$(get_current_session_id)"}
+    
+    # Log the event using existing function
+    log_milestone_event "$milestone_id" "$event_type" "$event_data" "$session_id"
+    
+    # Trigger automatic status update for relevant events
+    case "$event_type" in
+        "task_completed"|"task_started"|"milestone_modified"|"dependency_resolved")
+            update_milestone_status_reactive "$milestone_id" "$event_type" "$event_data"
+            ;;
+    esac
+}
+
+# Simple milestone update with automatic status calculation
+update_milestone_progress() {
+    local milestone_id=$1
+    local task_id=$2
+    local new_status=$3
+    
+    local milestone_file=".milestones/active/$milestone_id.yaml"
+    
+    # Update task status
+    acquire_state_lock "$milestone_id"
+    yq e '(.tasks[] | select(.id == "'$task_id'") | .status) = "'$new_status'"' -i "$milestone_file"
+    release_state_lock "$milestone_id"
+    
+    # Log event and trigger reactive status update
+    log_milestone_event_reactive "$milestone_id" "task_status_changed" "{\"task_id\": \"$task_id\", \"new_status\": \"$new_status\"}"
+    
+    echo "Task updated: $task_id → $new_status"
+}
+
+# Complete a milestone task and trigger status update
+complete_milestone_task() {
+    local milestone_id=$1
+    local task_id=$2
+    
+    update_milestone_progress "$milestone_id" "$task_id" "completed"
+    
+    # Check if milestone is now complete
+    local milestone_file=".milestones/active/$milestone_id.yaml"
+    local total_tasks=$(yq e '.tasks | length' "$milestone_file")
+    local completed_tasks=$(yq e '.tasks[] | select(.status == "completed") | .id' "$milestone_file" | wc -l)
+    
+    if [ "$completed_tasks" -eq "$total_tasks" ]; then
+        log_milestone_event_reactive "$milestone_id" "milestone_completed" "{\"total_tasks\": $total_tasks}"
+        echo "🎉 Milestone completed: $milestone_id"
+    fi
+}
+```
+
+This state management system provides robust, atomic operations for milestone state persistence with comprehensive event logging, recovery capabilities, and automatic reactive status updates.

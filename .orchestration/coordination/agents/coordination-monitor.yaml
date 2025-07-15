@@ -1,0 +1,38 @@
+id: "coordination-monitor"
+type: "monitoring"
+role: "Coordination Monitoring Agent"
+orchestration_id: "claude-protection-impl"
+session_id: "session-claude-protection-20240715"
+
+status: "active"
+started_at: "2024-07-15T14:02:00Z"
+last_heartbeat: "2024-07-15T14:02:00Z"
+
+capabilities:
+  - "real-time-progress-tracking"
+  - "phase-completion-detection"
+  - "coordination-percentage-calculation"
+  - "event-logging"
+  - "blocker-detection"
+  - "dashboard-generation"
+  - "30-second-updates"
+
+monitoring_targets:
+  - workflow_phases
+  - coordination_percentage
+  - phase_dependencies
+  - success_criteria
+  - system_blockers
+  - agent_coordination
+
+responsibilities:
+  - "Monitor real-time progress of all workflow phases"
+  - "Track coordination percentage and phase completion" 
+  - "Generate progress dashboards every 30 seconds"
+  - "Log all coordination events"
+  - "Detect completion of phases and update status"
+  - "Report coordination issues or blockers immediately"
+
+update_frequency: "30s"
+dashboard_path: "/Users/nashgao/Desktop/claude/claude-code/instruction/.orchestration/coordination/dashboard.md"
+log_path: "/Users/nashgao/Desktop/claude/claude-code/instruction/.orchestration/logs/coordination-monitor.log"
