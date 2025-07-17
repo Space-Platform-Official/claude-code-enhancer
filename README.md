@@ -1,6 +1,6 @@
-# Claude Flow - Development Templates and Tools
+# Claude Code Enhancer - Development Templates and Tools
 
-A comprehensive toolkit for setting up Claude Code configurations and development workflows across different programming languages and frameworks.
+A comprehensive toolkit for enhancing Claude Code configurations and development workflows across different programming languages and frameworks.
 
 ## 📋 Table of Contents
 
@@ -15,7 +15,7 @@ A comprehensive toolkit for setting up Claude Code configurations and developmen
 
 ## Overview
 
-Claude Flow provides intelligent templates and automation scripts to streamline your development setup with Claude Code. It includes pre-configured templates for popular languages and frameworks, along with smart merging capabilities for existing projects.
+Claude Code Enhancer provides intelligent templates and automation scripts to streamline your development setup with Claude Code. It includes pre-configured templates for popular languages and frameworks, along with smart merging capabilities for existing projects.
 
 ### 🚀 Key Features
 
@@ -43,7 +43,7 @@ Choose your preferred installation method:
 ./install.sh --system
 ```
 
-After installation, the tools will be available as `claude-install-flow` and `claude-merge` commands.
+After installation, the tools will be available as `claude-install-flow` and `claude-merge` commands for enhancing your Claude Code setup.
 
 ### Basic Usage
 
@@ -65,20 +65,20 @@ claude-merge /path/to/target
 
 ### 📚 Complete Documentation Hub
 
-Our comprehensive documentation covers every aspect of Claude Flow:
+Our comprehensive documentation covers every aspect of Claude Code Enhancer:
 
 #### 🚀 Getting Started
 - **[Prerequisites](docs/getting-started/prerequisites.md)** - System requirements and dependencies
 - **[Installation Guide](docs/getting-started/installation.md)** - Detailed installation for all platforms
 - **[Quick Start](docs/getting-started/quick-start.md)** - Get up and running in minutes
-- **[First Project Tutorial](docs/getting-started/first-project.md)** - Build your first Claude Flow project
+- **[First Project Tutorial](docs/getting-started/first-project.md)** - Build your first Claude Code enhanced project
 - **[Configuration](docs/getting-started/configuration.md)** - Initial setup and customization
 
 #### 📖 User Guide
 - **[Overview](docs/user-guide/overview.md)** - Features and capabilities
 - **[Using Templates](docs/user-guide/using-templates.md)** - Language and framework templates
 - **[Smart Merge](docs/user-guide/smart-merge.md)** - Intelligent configuration merging
-- **[Customization](docs/user-guide/customization.md)** - Tailoring Claude Flow to your needs
+- **[Customization](docs/user-guide/customization.md)** - Tailoring Claude Code Enhancer to your needs
 - **[Best Practices](docs/user-guide/best-practices.md)** - Professional tips and patterns
 - **[Workflows](docs/user-guide/workflows.md)** - Common development workflows
 
@@ -101,7 +101,7 @@ Our comprehensive documentation covers every aspect of Claude Flow:
 - **[Contributing](docs/development/contributing.md)** - How to contribute
 - **[Testing](docs/development/testing.md)** - Test suite and strategies
 - **[Creating Templates](docs/development/creating-templates.md)** - Build custom templates
-- **[Extending Claude Flow](docs/development/extending-claude-flow.md)** - Add new features
+- **[Extending Claude Code Enhancer](docs/development/extending-claude-code-enhancer.md)** - Add new features
 - **[Code Style](docs/development/code-style.md)** - Coding standards
 
 #### 🚢 Deployment & Operations
@@ -154,7 +154,7 @@ Our comprehensive documentation covers every aspect of Claude Flow:
 
 ### `install.sh` - System Installation
 
-Installs Claude Flow tools system-wide or for the current user.
+Installs Claude Code Enhancer tools system-wide or for the current user.
 
 **Usage:**
 ```bash
@@ -164,12 +164,12 @@ Installs Claude Flow tools system-wide or for the current user.
 **Options:**
 - `--user` - Install for current user only (`~/.local/`)
 - `--system` - Install system-wide (`/usr/local/`)
-- `--uninstall` - Remove Claude Flow tools
+- `--uninstall` - Remove Claude Code Enhancer tools
 - `--help` - Show help message
 
 **Installation Locations:**
-- **User Install:** `~/.local/bin/` and `~/.local/share/claude-flow/`
-- **System Install:** `/usr/local/bin/` and `/usr/local/share/claude-flow/`
+- **User Install:** `~/.local/bin/` and `~/.local/share/claude-code-enhancer/`
+- **System Install:** `/usr/local/bin/` and `/usr/local/share/claude-code-enhancer/`
 
 ### `claude-install-flow` - Template Installation
 
@@ -280,8 +280,8 @@ The `.claude/commands/` directory includes powerful development commands:
 **Template Source Locations** (searched in order):
 1. `$CLAUDE_TEMPLATES_DIR` - Custom template directory
 2. `$CLAUDE_TEMPLATE_SOURCE` - Legacy environment variable
-3. `~/.local/share/claude-flow/templates` - User installation
-4. `/usr/local/share/claude-flow/templates` - System installation
+3. `~/.local/share/claude-code-enhancer/templates` - User installation
+4. `/usr/local/share/claude-code-enhancer/templates` - System installation
 5. Local `templates/` directory - Development mode
 
 **Example:**
@@ -296,7 +296,7 @@ claude-install-flow
 ### Directory Structure
 
 ```
-claude-flow/
+claude-code-enhancer/
 ├── install.sh                 # System installation script
 ├── install-claude-flow.sh     # Template installation script
 ├── smart-merge-claude.sh      # Smart merger script
@@ -336,8 +336,8 @@ cp install-claude-flow.sh.backup install-claude-flow.sh
 ```bash
 # Check template locations
 echo $CLAUDE_TEMPLATES_DIR
-ls ~/.local/share/claude-flow/templates
-ls /usr/local/share/claude-flow/templates
+ls ~/.local/share/claude-code-enhancer/templates
+ls /usr/local/share/claude-code-enhancer/templates
 ```
 
 **PATH issues (user installation):**
@@ -358,12 +358,12 @@ sudo ./install.sh --system
 ### Uninstallation
 
 ```bash
-# Remove all Claude Flow installations
+# Remove all Claude Code Enhancer installations
 ./install.sh --uninstall
 
 # Or manually remove
 rm -f ~/.local/bin/claude-{install-flow,merge}
-rm -rf ~/.local/share/claude-flow
+rm -rf ~/.local/share/claude-code-enhancer
 ```
 
 ## Community & Support
@@ -371,8 +371,8 @@ rm -rf ~/.local/share/claude-flow
 ### 🤝 Getting Help
 
 - **Documentation**: Start with our [comprehensive documentation](docs/)
-- **Issues**: Report bugs or request features on [GitHub Issues](https://github.com/your-repo/claude-flow/issues)
-- **Discussions**: Join community discussions on [GitHub Discussions](https://github.com/your-repo/claude-flow/discussions)
+- **Issues**: Report bugs or request features on [GitHub Issues](https://github.com/Space-Platform-Official/claude-code-enhancer/issues)
+- **Discussions**: Join community discussions on [GitHub Discussions](https://github.com/Space-Platform-Official/claude-code-enhancer/discussions)
 - **Examples**: Check out the [examples directory](docs/examples/) for practical use cases
 
 ### 💡 Resources

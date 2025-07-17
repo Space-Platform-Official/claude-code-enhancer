@@ -1566,4 +1566,768 @@ check_performance_indicators() {
 }
 ```
 
-These safety mechanisms provide comprehensive protection for quality operations with proper validation, backup creation, rollback capabilities, and risk assessment to ensure safe and reliable code quality improvements. The enhancements include advanced rollback mechanisms with selective restoration, enhanced configuration safety with validation, and comprehensive integrity verification with detailed reporting and analysis.
+## .claude Directory Protection Hooks
+
+```bash
+# .claude directory protection and safety mechanisms
+protect_claude_directory() {
+    local target=${1:-.}
+    local operation=$2
+    local dry_run=${3:-false}
+    
+    echo "Activating .claude directory protection..."
+    
+    # Check if .claude directory exists
+    local claude_dir="$target/.claude"
+    if [ ! -d "$claude_dir" ]; then
+        echo "No .claude directory found, skipping protection"
+        return 0
+    fi
+    
+    # Validate .claude directory access
+    if ! validate_claude_access "$claude_dir" "$operation"; then
+        echo "ERROR: .claude directory access validation failed"
+        return 1
+    fi
+    
+    # Check for .claude-specific risks
+    local claude_risk_score=$(assess_claude_operation_risk "$claude_dir" "$operation")
+    if [ "$claude_risk_score" -ge 8 ]; then
+        echo "CRITICAL: High risk operation on .claude directory (score: $claude_risk_score)"
+        return 1
+    fi
+    
+    # Create .claude-specific safety snapshot
+    if [ "$claude_risk_score" -ge 3 ]; then
+        local claude_snapshot=$(create_claude_safety_snapshot "$claude_dir" "$operation")
+        echo "Claude safety snapshot created: $claude_snapshot"
+        export CLAUDE_SAFETY_SNAPSHOT="$claude_snapshot"
+    fi
+    
+    # Set up .claude monitoring
+    setup_claude_monitoring "$claude_dir" "$operation"
+    
+    echo ".claude directory protection activated"
+    return 0
+}
+
+# Validate access to .claude directory
+validate_claude_access() {
+    local claude_dir=$1
+    local operation=$2
+    
+    echo "Validating .claude directory access for operation: $operation"
+    
+    # Check if .claude directory is writable
+    if [ ! -w "$claude_dir" ]; then
+        echo "ERROR: .claude directory is not writable"
+        return 1
+    fi
+    
+    # Check for concurrent .claude operations
+    local claude_lockfile="$claude_dir/.claude-operation.lock"
+    if [ -f "$claude_lockfile" ]; then
+        local lock_pid=$(cat "$claude_lockfile" 2>/dev/null)
+        if [ -n "$lock_pid" ] && kill -0 "$lock_pid" 2>/dev/null; then
+            echo "ERROR: Another .claude operation is running (PID: $lock_pid)"
+            return 1
+        else
+            echo "Removing stale .claude lock file"
+            rm -f "$claude_lockfile"
+        fi
+    fi
+    
+    # Create operation lock
+    echo $$ > "$claude_lockfile"
+    
+    # Check for critical .claude files
+    local critical_claude_files=(
+        "settings.local.json"
+        "commands"
+        "templates"
+    )
+    
+    for critical_file in "${critical_claude_files[@]}"; do
+        local full_path="$claude_dir/$critical_file"
+        if [ -e "$full_path" ]; then
+            echo "PROTECTED: Critical .claude file detected: $critical_file"
+            
+            # Ask for user confirmation for modifications
+            if [[ "$operation" == "cleanup" ]] || [[ "$operation" == "dedupe" ]] || [[ "$operation" == "format" ]]; then
+                read -p "Operation '$operation' may affect .claude/$critical_file. Continue? [y/N]: " response
+                if [[ ! "$response" =~ ^[Yy]$ ]]; then
+                    echo "Operation cancelled to protect .claude directory"
+                    rm -f "$claude_lockfile"
+                    return 1
+                fi
+            fi
+        fi
+    done
+    
+    return 0
+}
+
+# Assess risk level for .claude operations
+assess_claude_operation_risk() {
+    local claude_dir=$1
+    local operation=$2
+    
+    local risk_score=0
+    local risk_factors=()
+    
+    echo "Assessing .claude operation risk..."
+    
+    # Factor 1: Operation type risk for .claude
+    case "$operation" in
+        "verify")
+            risk_score=0
+            ;;
+        "format")
+            risk_score=2
+            risk_factors+=("Format operation on .claude files")
+            ;;
+        "cleanup")
+            risk_score=6
+            risk_factors+=("HIGH RISK: Cleanup operation on .claude directory")
+            ;;
+        "dedupe")
+            risk_score=7
+            risk_factors+=("CRITICAL RISK: Deduplication on .claude directory")
+            ;;
+        *)
+            risk_score=5
+            risk_factors+=("Unknown operation on .claude directory")
+            ;;
+    esac
+    
+    # Factor 2: .claude content complexity
+    local claude_file_count=$(find "$claude_dir" -type f | wc -l)
+    if [ "$claude_file_count" -gt 50 ]; then
+        risk_score=$((risk_score + 2))
+        risk_factors+=("Large .claude directory ($claude_file_count files)")
+    elif [ "$claude_file_count" -gt 20 ]; then
+        risk_score=$((risk_score + 1))
+        risk_factors+=("Medium .claude directory ($claude_file_count files)")
+    fi
+    
+    # Factor 3: Check for custom command files
+    local custom_commands=$(find "$claude_dir/commands" -name "*.md" 2>/dev/null | wc -l)
+    if [ "$custom_commands" -gt 10 ]; then
+        risk_score=$((risk_score + 2))
+        risk_factors+=("Many custom commands ($custom_commands)")
+    fi
+    
+    # Factor 4: Check for settings modifications
+    if [ -f "$claude_dir/settings.local.json" ]; then
+        local settings_size=$(get_file_size "$claude_dir/settings.local.json")
+        if [ "$settings_size" -gt 1024 ]; then
+            risk_score=$((risk_score + 1))
+            risk_factors+=("Complex settings configuration")
+        fi
+    fi
+    
+    # Factor 5: Check for template customizations
+    if [ -d "$claude_dir/templates" ]; then
+        local template_count=$(find "$claude_dir/templates" -name "*.md" 2>/dev/null | wc -l)
+        if [ "$template_count" -gt 5 ]; then
+            risk_score=$((risk_score + 1))
+            risk_factors+=("Custom templates present ($template_count)")
+        fi
+    fi
+    
+    # Factor 6: Check for git integration
+    if [ -d "$(dirname "$claude_dir")/.git" ]; then
+        # Check if .claude is tracked in git
+        if git -C "$(dirname "$claude_dir")" ls-files "$claude_dir" | head -1 | grep -q .; then
+            risk_score=$((risk_score + 1))
+            risk_factors+=(".claude directory is tracked in git")
+        fi
+    fi
+    
+    echo "Claude operation risk assessment: Score $risk_score"
+    echo "Risk factors:"
+    for factor in "${risk_factors[@]}"; do
+        echo "  - $factor"
+    done
+    
+    echo "$risk_score"
+}
+
+# Create .claude-specific safety snapshot
+create_claude_safety_snapshot() {
+    local claude_dir=$1
+    local operation=$2
+    
+    local target_dir=$(dirname "$claude_dir")
+    local snapshot_dir="$target_dir/.quality-snapshots"
+    local timestamp=$(date +%Y%m%d_%H%M%S)
+    local snapshot_name="claude_${operation}_${timestamp}"
+    local snapshot_path="$snapshot_dir/$snapshot_name"
+    
+    mkdir -p "$snapshot_path"
+    
+    echo "Creating .claude safety snapshot: $snapshot_name"
+    
+    # Copy entire .claude directory
+    cp -r "$claude_dir" "$snapshot_path/"
+    
+    # Save .claude-specific metadata
+    cat > "$snapshot_path/claude_metadata.json" <<EOF
+{
+    "timestamp": "$timestamp",
+    "operation": "$operation",
+    "claude_dir": "$claude_dir",
+    "file_count": $(find "$claude_dir" -type f | wc -l),
+    "directory_size": $(du -sb "$claude_dir" | cut -f1),
+    "git_commit": "$(git -C "$(dirname "$claude_dir")" rev-parse HEAD 2>/dev/null || echo "not-in-git")",
+    "protection_level": "high",
+    "snapshot_type": "claude_protection"
+}
+EOF
+    
+    echo "Claude safety snapshot created: $snapshot_path"
+    echo "$snapshot_path"
+}
+
+# Pre-command hook to detect .claude access attempts
+pre_command_claude_hook() {
+    local target=${1:-.}
+    local command=$2
+    local args=("${@:3}")
+    
+    echo "Pre-command .claude protection hook activated"
+    
+    # Check if operation affects .claude directory
+    local claude_dir="$target/.claude"
+    if [ ! -d "$claude_dir" ]; then
+        return 0
+    fi
+    
+    # Detect if command will access .claude directory
+    local affects_claude=false
+    
+    # Check if target directory contains .claude
+    if [[ "$target" == *".claude"* ]] || [[ "$target" -ef "$(dirname "$claude_dir")" ]]; then
+        affects_claude=true
+    fi
+    
+    # Check command arguments for .claude references
+    for arg in "${args[@]}"; do
+        if [[ "$arg" == *".claude"* ]]; then
+            affects_claude=true
+            break
+        fi
+    done
+    
+    if $affects_claude; then
+        echo "CLAUDE ACCESS DETECTED: Command '$command' will access .claude directory"
+        
+        # Perform enhanced validation for .claude access
+        if ! validate_claude_command_safety "$command" "$target" "${args[@]}"; then
+            echo "BLOCKED: Unsafe .claude access attempt"
+            return 1
+        fi
+        
+        # Create pre-operation snapshot for high-risk commands
+        if is_high_risk_claude_command "$command"; then
+            echo "High-risk .claude command detected, creating snapshot..."
+            local pre_snapshot=$(create_claude_safety_snapshot "$claude_dir" "pre_${command}")
+            export CLAUDE_PRE_SNAPSHOT="$pre_snapshot"
+        fi
+        
+        # Set up .claude-specific monitoring
+        setup_claude_command_monitoring "$claude_dir" "$command"
+    fi
+    
+    return 0
+}
+
+# Validate command safety for .claude operations
+validate_claude_command_safety() {
+    local command=$1
+    local target=$2
+    shift 2
+    local args=("$@")
+    
+    echo "Validating .claude command safety: $command"
+    
+    # Define dangerous command patterns for .claude
+    local dangerous_patterns=(
+        "rm.*\.claude"
+        "mv.*\.claude.*trash"
+        "find.*\.claude.*-delete"
+        "sed.*-i.*\.claude"
+        "awk.*\.claude.*>"
+    )
+    
+    # Check for dangerous patterns
+    local full_command="$command ${args[*]}"
+    for pattern in "${dangerous_patterns[@]}"; do
+        if [[ "$full_command" =~ $pattern ]]; then
+            echo "DANGER: Detected dangerous pattern for .claude: $pattern"
+            read -p "This command may damage .claude configuration. Proceed anyway? [y/N]: " response
+            if [[ ! "$response" =~ ^[Yy]$ ]]; then
+                return 1
+            fi
+        fi
+    done
+    
+    # Command-specific safety checks
+    case "$command" in
+        "cleanup"|"clean")
+            echo "WARNING: Cleanup command detected for .claude directory"
+            read -p "Cleanup may remove .claude files. Create backup first? [Y/n]: " response
+            if [[ ! "$response" =~ ^[Nn]$ ]]; then
+                local backup_path=$(create_claude_safety_snapshot "$target/.claude" "pre_cleanup")
+                echo "Backup created: $backup_path"
+            fi
+            ;;
+        "dedupe"|"dedup")
+            echo "CRITICAL: Deduplication on .claude directory is extremely risky"
+            read -p "Deduplication may break .claude configuration. Are you absolutely sure? [y/N]: " response
+            if [[ ! "$response" =~ ^[Yy]$ ]]; then
+                return 1
+            fi
+            ;;
+        "format"|"fmt")
+            echo "INFO: Format command will modify .claude files"
+            ;;
+    esac
+    
+    return 0
+}
+
+# Check if command is high-risk for .claude
+is_high_risk_claude_command() {
+    local command=$1
+    
+    local high_risk_commands=(
+        "cleanup"
+        "clean"
+        "dedupe"
+        "dedup" 
+        "rm"
+        "mv"
+        "delete"
+        "remove"
+    )
+    
+    for risk_cmd in "${high_risk_commands[@]}"; do
+        if [[ "$command" == *"$risk_cmd"* ]]; then
+            return 0
+        fi
+    done
+    
+    return 1
+}
+
+# Setup monitoring for .claude commands
+setup_claude_command_monitoring() {
+    local claude_dir=$1
+    local command=$2
+    
+    echo "Setting up .claude command monitoring for: $command"
+    
+    # Create monitoring log
+    local monitor_log="$claude_dir/.claude-monitor.log"
+    cat > "$monitor_log" <<EOF
+Claude Command Monitoring
+========================
+Command: $command
+Started: $(date)
+PID: $$
+Monitoring Active: true
+
+EOF
+    
+    # Set up file change monitoring if available
+    if command -v inotifywait >/dev/null 2>&1; then
+        # Linux - use inotify
+        nohup inotifywait -m -r -e modify,create,delete "$claude_dir" --format '%T %e %w%f' --timefmt '%Y-%m-%d %H:%M:%S' >> "$monitor_log" 2>&1 &
+        echo $! > "$claude_dir/.claude-monitor.pid"
+    elif command -v fswatch >/dev/null 2>&1; then
+        # macOS - use fswatch
+        nohup fswatch -r "$claude_dir" | while read file; do
+            echo "$(date '+%Y-%m-%d %H:%M:%S') MODIFY $file" >> "$monitor_log"
+        done &
+        echo $! > "$claude_dir/.claude-monitor.pid"
+    else
+        echo "No file monitoring available, using polling method"
+        nohup bash -c "
+            while [ -f '$monitor_log' ]; do
+                find '$claude_dir' -newer '$monitor_log' -type f >> '$monitor_log.changes' 2>/dev/null
+                sleep 2
+            done
+        " &
+        echo $! > "$claude_dir/.claude-monitor.pid"
+    fi
+    
+    echo "Claude monitoring active (PID: $(cat "$claude_dir/.claude-monitor.pid" 2>/dev/null))"
+}
+
+# User confirmation mechanisms for .claude changes
+confirm_claude_operation() {
+    local operation=$1
+    local claude_dir=$2
+    local affected_files=("${@:3}")
+    
+    echo "Claude Operation Confirmation Required"
+    echo "======================================"
+    echo "Operation: $operation"
+    echo "Target: $claude_dir"
+    echo "Affected files: ${#affected_files[@]}"
+    
+    if [ ${#affected_files[@]} -gt 0 ] && [ ${#affected_files[@]} -le 10 ]; then
+        echo "Files to be affected:"
+        for file in "${affected_files[@]}"; do
+            echo "  - $(basename "$file")"
+        done
+    elif [ ${#affected_files[@]} -gt 10 ]; then
+        echo "Files to be affected: (showing first 10)"
+        for i in {0..9}; do
+            if [ -n "${affected_files[$i]}" ]; then
+                echo "  - $(basename "${affected_files[$i]}")"
+            fi
+        done
+        echo "  ... and $((${#affected_files[@]} - 10)) more files"
+    fi
+    
+    echo ""
+    
+    # Risk-based confirmation
+    local risk_score=$(assess_claude_operation_risk "$claude_dir" "$operation")
+    
+    if [ "$risk_score" -ge 7 ]; then
+        echo "⚠️  CRITICAL RISK OPERATION"
+        echo "This operation has a high risk of damaging your .claude configuration."
+        echo "Consider creating a backup before proceeding."
+        echo ""
+        read -p "Type 'YES' to confirm this critical operation: " response
+        if [[ "$response" != "YES" ]]; then
+            echo "Operation cancelled for safety"
+            return 1
+        fi
+    elif [ "$risk_score" -ge 4 ]; then
+        echo "⚠️  MEDIUM RISK OPERATION"
+        echo "This operation may modify important .claude files."
+        echo ""
+        read -p "Do you want to proceed? [y/N]: " response
+        if [[ ! "$response" =~ ^[Yy]$ ]]; then
+            echo "Operation cancelled"
+            return 1
+        fi
+    else
+        echo "ℹ️  LOW RISK OPERATION"
+        read -p "Proceed with .claude operation? [Y/n]: " response
+        if [[ "$response" =~ ^[Nn]$ ]]; then
+            echo "Operation cancelled"
+            return 1
+        fi
+    fi
+    
+    return 0
+}
+
+# Rollback .claude directory to snapshot
+rollback_claude_to_snapshot() {
+    local snapshot_path=$1
+    local claude_dir=${2:-".claude"}
+    
+    if [ ! -d "$snapshot_path" ]; then
+        echo "ERROR: Claude snapshot not found: $snapshot_path"
+        return 1
+    fi
+    
+    if [ ! -f "$snapshot_path/claude_metadata.json" ]; then
+        echo "ERROR: Invalid Claude snapshot (missing metadata): $snapshot_path"
+        return 1
+    fi
+    
+    echo "Rolling back .claude directory to snapshot: $(basename "$snapshot_path")"
+    
+    # Show snapshot metadata
+    if command -v jq >/dev/null 2>&1; then
+        echo "Snapshot information:"
+        jq . "$snapshot_path/claude_metadata.json"
+        echo ""
+    fi
+    
+    # Confirm rollback
+    read -p "This will overwrite current .claude directory. Continue? [y/N]: " response
+    if [[ ! "$response" =~ ^[Yy]$ ]]; then
+        echo "Claude rollback cancelled"
+        return 1
+    fi
+    
+    # Create backup of current .claude before rollback
+    local current_backup=$(create_claude_safety_snapshot "$claude_dir" "pre-rollback")
+    echo "Current .claude backed up to: $current_backup"
+    
+    # Remove current .claude directory
+    if [ -d "$claude_dir" ]; then
+        rm -rf "$claude_dir"
+    fi
+    
+    # Restore from snapshot
+    if [ -d "$snapshot_path/.claude" ]; then
+        cp -r "$snapshot_path/.claude" "$(dirname "$claude_dir")/"
+        echo "Claude directory restored from snapshot"
+    else
+        echo "ERROR: No .claude directory found in snapshot"
+        return 1
+    fi
+    
+    # Clean up monitoring
+    cleanup_claude_monitoring "$claude_dir"
+    
+    echo "Claude rollback completed successfully"
+    return 0
+}
+
+# Cleanup .claude monitoring processes
+cleanup_claude_monitoring() {
+    local claude_dir=$1
+    
+    local monitor_pid_file="$claude_dir/.claude-monitor.pid"
+    local monitor_log="$claude_dir/.claude-monitor.log"
+    
+    if [ -f "$monitor_pid_file" ]; then
+        local monitor_pid=$(cat "$monitor_pid_file")
+        if [ -n "$monitor_pid" ] && kill -0 "$monitor_pid" 2>/dev/null; then
+            echo "Stopping .claude monitoring process (PID: $monitor_pid)"
+            kill "$monitor_pid" 2>/dev/null || true
+        fi
+        rm -f "$monitor_pid_file"
+    fi
+    
+    # Archive monitoring log
+    if [ -f "$monitor_log" ]; then
+        local archive_name="claude-monitor-$(date +%Y%m%d_%H%M%S).log"
+        mv "$monitor_log" "$claude_dir/$archive_name"
+        echo "Monitoring log archived as: $archive_name"
+    fi
+}
+
+# Enhanced .claude integrity verification
+verify_claude_integrity() {
+    local claude_dir=${1:-.claude}
+    local verification_level=${2:-"standard"}
+    
+    echo "Verifying .claude directory integrity (level: $verification_level)..."
+    
+    local errors=0
+    local warnings=0
+    
+    # Check 1: Essential structure
+    if [ ! -d "$claude_dir" ]; then
+        echo "ERROR: .claude directory not found"
+        return 1
+    fi
+    
+    # Check 2: Critical files
+    local essential_files=(
+        "commands"
+        "settings.local.json"
+    )
+    
+    for file in "${essential_files[@]}"; do
+        local full_path="$claude_dir/$file"
+        if [ ! -e "$full_path" ]; then
+            echo "WARNING: Essential .claude file/directory missing: $file"
+            warnings=$((warnings + 1))
+        fi
+    done
+    
+    # Check 3: Settings file validity
+    if [ -f "$claude_dir/settings.local.json" ]; then
+        if ! validate_claude_settings "$claude_dir/settings.local.json"; then
+            echo "ERROR: Invalid .claude settings file"
+            errors=$((errors + 1))
+        fi
+    fi
+    
+    # Check 4: Command files integrity
+    if [ -d "$claude_dir/commands" ]; then
+        local invalid_commands=$(check_claude_commands_integrity "$claude_dir/commands")
+        if [ -n "$invalid_commands" ]; then
+            echo "WARNING: Invalid command files detected:"
+            echo "$invalid_commands" | sed 's/^/  /'
+            warnings=$((warnings + 1))
+        fi
+    fi
+    
+    # Enhanced checks for comprehensive level
+    if [[ "$verification_level" == "comprehensive" ]]; then
+        # Check 5: Template integrity
+        if [ -d "$claude_dir/templates" ]; then
+            local template_issues=$(check_claude_templates_integrity "$claude_dir/templates")
+            if [ -n "$template_issues" ]; then
+                echo "WARNING: Template issues detected:"
+                echo "$template_issues" | sed 's/^/  /'
+                warnings=$((warnings + 1))
+            fi
+        fi
+        
+        # Check 6: File permissions
+        local permission_issues=$(check_claude_permissions "$claude_dir")
+        if [ -n "$permission_issues" ]; then
+            echo "WARNING: Permission issues detected:"
+            echo "$permission_issues" | sed 's/^/  /'
+            warnings=$((warnings + 1))
+        fi
+    fi
+    
+    # Report results
+    echo ".claude integrity verification complete:"
+    echo "  Errors: $errors"
+    echo "  Warnings: $warnings"
+    
+    if [ $errors -gt 0 ]; then
+        echo "CRITICAL: .claude directory integrity compromised"
+        return 1
+    elif [ $warnings -gt 0 ]; then
+        echo "WARNING: .claude directory has minor issues"
+        return 2
+    else
+        echo "SUCCESS: .claude directory integrity verified"
+        return 0
+    fi
+}
+
+# Validate .claude settings file
+validate_claude_settings() {
+    local settings_file=$1
+    
+    if [ ! -f "$settings_file" ]; then
+        return 1
+    fi
+    
+    # Check JSON validity
+    if ! jq empty "$settings_file" >/dev/null 2>&1; then
+        echo "Invalid JSON in settings file"
+        return 1
+    fi
+    
+    # Check for required fields (basic validation)
+    local required_fields=("version")
+    for field in "${required_fields[@]}"; do
+        if ! jq -e ".$field" "$settings_file" >/dev/null 2>&1; then
+            echo "Missing required field in settings: $field"
+            return 1
+        fi
+    done
+    
+    return 0
+}
+
+# Check .claude commands integrity
+check_claude_commands_integrity() {
+    local commands_dir=$1
+    local issues=""
+    
+    if [ ! -d "$commands_dir" ]; then
+        echo "Commands directory not found"
+        return
+    fi
+    
+    # Check all .md files in commands
+    find "$commands_dir" -name "*.md" -type f | while read -r cmd_file; do
+        # Basic markdown validation
+        if [ ! -s "$cmd_file" ]; then
+            issues="$issues\nEmpty command file: $(basename "$cmd_file")"
+        fi
+        
+        # Check for basic command structure
+        if ! grep -q "^#" "$cmd_file"; then
+            issues="$issues\nMissing header in: $(basename "$cmd_file")"
+        fi
+    done
+    
+    echo -e "$issues"
+}
+
+# Setup .claude directory monitoring
+setup_claude_monitoring() {
+    local claude_dir=$1
+    local operation=$2
+    
+    echo "Setting up comprehensive .claude monitoring..."
+    
+    # Create monitoring directory
+    local monitor_dir="$claude_dir/.monitoring"
+    mkdir -p "$monitor_dir"
+    
+    # Record monitoring start
+    cat > "$monitor_dir/session.json" <<EOF
+{
+    "session_id": "$(date +%s)_$$",
+    "operation": "$operation",
+    "started_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+    "monitoring_active": true,
+    "baseline_file_count": $(find "$claude_dir" -type f | wc -l),
+    "baseline_dir_size": $(du -sb "$claude_dir" | cut -f1)
+}
+EOF
+    
+    # Set up cleanup trap
+    trap "cleanup_claude_monitoring '$claude_dir'" EXIT
+    
+    echo "Claude monitoring session established"
+}
+
+# Generate .claude protection report
+generate_claude_protection_report() {
+    local claude_dir=${1:-.claude}
+    local operation=${2:-"unknown"}
+    local report_dir="$claude_dir/.reports"
+    
+    mkdir -p "$report_dir"
+    
+    local timestamp=$(date +%Y%m%d_%H%M%S)
+    local report_file="$report_dir/protection_report_${operation}_${timestamp}.txt"
+    
+    cat > "$report_file" <<EOF
+Claude Directory Protection Report
+==================================
+Generated: $(date)
+Operation: $operation
+Claude Directory: $claude_dir
+
+Protection Status:
+-----------------
+Directory Exists: $([ -d "$claude_dir" ] && echo "✓ Yes" || echo "✗ No")
+Lock File Present: $([ -f "$claude_dir/.claude-operation.lock" ] && echo "✓ Yes" || echo "✗ No")
+Monitoring Active: $([ -f "$claude_dir/.monitoring/session.json" ] && echo "✓ Yes" || echo "✗ No")
+
+File Inventory:
+--------------
+Total Files: $(find "$claude_dir" -type f 2>/dev/null | wc -l)
+Command Files: $(find "$claude_dir/commands" -name "*.md" 2>/dev/null | wc -l)
+Template Files: $(find "$claude_dir/templates" -name "*.md" 2>/dev/null | wc -l)
+Settings Files: $(find "$claude_dir" -name "*.json" 2>/dev/null | wc -l)
+
+Directory Size: $(du -sh "$claude_dir" 2>/dev/null | cut -f1)
+
+Risk Assessment:
+---------------
+Current Risk Score: $(assess_claude_operation_risk "$claude_dir" "$operation")
+
+Integrity Status:
+----------------
+$(verify_claude_integrity "$claude_dir" "standard" 2>&1 | tail -1)
+
+Snapshots Available:
+-------------------
+$(ls -la "$(dirname "$claude_dir")/.quality-snapshots" 2>/dev/null | grep claude_ | wc -l) .claude snapshots available
+
+Last Protection Activity:
+------------------------
+$(tail -5 "$claude_dir/.monitoring/session.json" 2>/dev/null || echo "No monitoring data available")
+EOF
+    
+    echo "Claude protection report generated: $report_file"
+    echo "$report_file"
+}
+```
+
+These safety mechanisms provide comprehensive protection for quality operations with proper validation, backup creation, rollback capabilities, and risk assessment to ensure safe and reliable code quality improvements. The enhancements include advanced rollback mechanisms with selective restoration, enhanced configuration safety with validation, comprehensive integrity verification with detailed reporting and analysis, and specialized .claude directory protection hooks with pre-command validation, risk assessment, user confirmation mechanisms, and dedicated monitoring for .claude operations.
