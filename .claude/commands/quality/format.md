@@ -158,7 +158,7 @@ format_codebase() {
 # Discover files that can be formatted
 discover_formattable_files() {
     local target=$1
-    local exclude_patterns=${EXCLUDE_PATTERNS:-".git node_modules __pycache__ .pytest_cache target build dist coverage .vscode .idea"}
+    local exclude_patterns=${EXCLUDE_PATTERNS:-".git node_modules __pycache__ .pytest_cache target build dist coverage .vscode .idea .claude .Claude .CLAUDE"}
     
     # Language patterns
     local patterns=(
@@ -203,6 +203,9 @@ discover_formattable_files() {
     for exclude in $exclude_patterns; do
         find_cmd="$find_cmd ! -path '*/$exclude/*'"
     done
+    
+    # Additional exclusions for .claude-related files and directories
+    find_cmd="$find_cmd ! -name '.claude*' ! -name '*.claude*' ! -path '*/.claude' ! -path '*/.Claude' ! -path '*/.CLAUDE'"
     
     # Execute and filter
     eval "$find_cmd" 2>/dev/null | while read -r file; do

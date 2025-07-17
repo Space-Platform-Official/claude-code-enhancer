@@ -1,0 +1,33 @@
+id: test-milestone
+title: Test Milestone for Validation
+description: Simple test milestone to verify the simplified status command
+priority: medium
+category: testing
+status: active
+progress: 50
+
+tasks:
+  - id: task-1
+    title: First task
+    status: completed
+    description: This task is complete
+    
+  - id: task-2
+    title: Second task
+    status: in_progress
+    description: This task is in progress
+    
+  - id: task-3
+    title: Third task
+    status: pending
+    description: This task is pending
+    
+  - id: task-4
+    title: Fourth task
+    status: pending
+    description: This task is also pending
+
+timeline:
+  start_date: 2024-07-15
+  due_date: 2024-07-25
+  estimated_completion: 2024-07-23

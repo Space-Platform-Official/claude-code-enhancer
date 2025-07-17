@@ -427,7 +427,7 @@ Create a `.quality-config.json` file in your project root:
     "create_snapshots": true,
     "auto_cleanup": true,
     "max_file_size": 10485760,
-    "excluded_patterns": [".git", "node_modules", "__pycache__"],
+    "excluded_patterns": [".git", "node_modules", "__pycache__", ".claude", ".Claude", ".CLAUDE"],
     "formatters": {
         "javascript": ["prettier", "eslint"],
         "python": ["black", "isort"],

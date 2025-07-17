@@ -33,23 +33,29 @@ When you run `/create-command`, you are REQUIRED to:
 ```
 1. Requirements analysis → Parse user's command description
 2. IMMEDIATELY spawn agents for pattern analysis and generation
-3. Pattern study → Analyze existing command structure exactly
-4. Custom generation → Create command specific to user requirements
-5. VERIFY format → Ensure perfect consistency with existing style
+3. FOLDER-FIRST DETECTION → Check for existing command families
+4. Pattern study → Analyze existing command structure exactly
+5. Hierarchical placement → Apply folder-first logic for command location
+6. Custom generation → Create command specific to user requirements
+7. VERIFY format → Ensure perfect consistency with existing style
 ```
 
 **YOU ARE NOT DONE UNTIL:**
 - Command follows exact format of existing commands
 - All required sections are present and properly formatted
 - Content is contextually appropriate for the specified purpose
-- Command is saved to .claude/commands/ directory
+- Command is saved to **templates/commands/** directory (using folder-first logic)
+- Hierarchical placement rules applied correctly
+- Command invocation pattern updated to match placement
 
 ---
 
 🛑 **MANDATORY COMMAND GENERATION PROTOCOL** 🛑
 1. Re-read ~/.claude/CLAUDE.md RIGHT NOW
 2. Check current TODO.md status
-3. Analyze existing commands in .claude/commands/ for pattern consistency
+3. **SCAN templates/commands/ directory** for existing command families
+4. **APPLY folder-first detection logic** to determine command placement
+5. Analyze existing commands for pattern consistency
 
 Execute comprehensive custom command generation with ZERO tolerance for format deviations.
 
@@ -198,11 +204,37 @@ Verify the generated command against existing patterns:
 - [ ] Checklist formatting is consistent
 - [ ] Final sections follow exact order and format
 
-**Step 5: File Generation and Placement**
-- Generate appropriate filename based on command purpose
-- Save to .claude/commands/ directory
+**Step 5: Intelligent Command Placement Strategy**
+
+**MANDATORY FOLDER-FIRST DETECTION:**
+Before creating any command, you MUST:
+1. **Analyze command name** for existing folder matches
+2. **Check templates/commands/ directory** for similar folder structures
+3. **Apply hierarchical placement rules** based on existing patterns
+4. **Ensure consistent naming conventions** across command families
+
+**Folder Detection Algorithm:**
+```
+Command Name Analysis:
+├── Extract base name (e.g., "milestone-status" → "milestone")
+├── Check if folder exists: templates/commands/[base-name]/
+├── If folder exists: Create as sub-command → [base-name]/[sub-name].md
+├── If no folder: Create as standalone → [command-name].md
+└── Apply naming consistency rules
+```
+
+**Hierarchical Placement Rules:**
+- **Existing folder match**: `milestone-status` → `milestone/status.md`
+- **Related command family**: `git-branch` → `git/branch.md`
+- **Standalone command**: `architect` → `architect.md`
+- **Sub-command hint**: User mentions "sub-command" → force hierarchical placement
+
+**File Generation and Placement:**
+- Generate appropriate filename based on placement strategy
+- Save to **templates/commands/** directory (NOT .claude/commands/)
+- Apply folder-first logic before file creation
 - Ensure file permissions are correct
-- Validate file was created successfully
+- Validate file was created successfully in correct location
 
 **Custom Command Quality Checklist:**
 - [ ] Follows exact YAML front matter format

@@ -176,7 +176,7 @@ cleanup_codebase() {
 # Discover files that can be cleaned up
 discover_cleanable_files() {
     local target=$1
-    local exclude_patterns=${EXCLUDE_PATTERNS:-".git node_modules __pycache__ .pytest_cache target build dist coverage .vscode .idea"}
+    local exclude_patterns=${EXCLUDE_PATTERNS:-".git node_modules __pycache__ .pytest_cache target build dist coverage .vscode .idea .claude .Claude .CLAUDE"}
     
     # Source code patterns (excluding generated files)
     local patterns=(
@@ -216,6 +216,9 @@ discover_cleanable_files() {
     
     # Additional exclusions for generated files
     find_cmd="$find_cmd ! -name '*.min.js' ! -name '*.bundle.js' ! -name '*-compiled.*' ! -name '*.generated.*'"
+    
+    # Additional exclusions for .claude-related files and directories
+    find_cmd="$find_cmd ! -name '.claude*' ! -name '*.claude*' ! -path '*/.claude' ! -path '*/.Claude' ! -path '*/.CLAUDE'"
     
     # Execute and filter
     eval "$find_cmd" 2>/dev/null | while read -r file; do
