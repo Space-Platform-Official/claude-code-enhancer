@@ -71,6 +71,11 @@ When you run `/test integration`, you are REQUIRED to:
 
 Execute comprehensive integration test orchestration for: $ARGUMENTS
 
+**Command-line PHP Control Flags:**
+Parse and respect these flags in $ARGUMENTS:
+- `--no-php`: Skip all PHP-specific behaviors and structure validation
+- `--skip-php-structure-check`: Skip PHP structure validation only
+
 **FORBIDDEN SHORTCUT PATTERNS:**
 - "Integration tests are too complex" → NO, they're essential for system quality
 - "Services are already tested individually" → NO, test interactions

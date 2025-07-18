@@ -1,6 +1,42 @@
 # Test Framework Utilities
 
-This file contains shared utilities for test framework detection, file discovery, and execution across all test commands.
+This file contains shared utilities for test framework detection, file discovery, execution, and PHP structure control across all test commands.
+
+## PHP Structure Control Mechanisms
+
+Users can control PHP-specific test structure generation through multiple mechanisms:
+
+1. **Environment Variable**: `export CLAUDE_PHP_TESTS=false`
+2. **Project files**: `.claude/no-php-tests` or `.no-php-structure`
+3. **Command flags**: `--no-php` or `--skip-php-structure-check`
+
+These controls ensure non-PHP projects aren't forced into PHP-specific test structures.
+
+### Quick Reference
+
+Run any test command with these flags to control PHP behavior:
+```bash
+# Skip all PHP-specific features
+/test unit --no-php
+/test integration --no-php
+
+# Skip only PHP structure validation
+/test unit --skip-php-structure-check
+/test integration --skip-php-structure-check
+
+# Show PHP control help
+show_php_control_help
+```
+
+### Environment Setup
+```bash
+# Disable PHP features globally
+export CLAUDE_PHP_TESTS=false
+
+# Or create a project disable file
+mkdir -p .claude
+touch .claude/no-php-tests
+```
 
 ## Framework Detection
 
@@ -55,6 +91,13 @@ detect_test_framework() {
         fi
     fi
     
+    # PHP frameworks
+    if [ -f "$project_dir/composer.json" ]; then
+        if grep -q "phpunit/phpunit" "$project_dir/composer.json" 2>/dev/null; then
+            detected_frameworks+=("phpunit")
+        fi
+    fi
+    
     # Print detected frameworks
     printf "%s\n" "${detected_frameworks[@]}"
 }
@@ -79,6 +122,9 @@ get_framework_config() {
             ;;
         "mocha")
             echo "config_file:mocha.opts test_pattern:**/*.test.js,**/*.spec.js command:npm test"
+            ;;
+        "phpunit")
+            echo "config_file:phpunit.xml test_pattern:**/*Test.php command:./vendor/bin/phpunit"
             ;;
         *)
             echo "config_file: test_pattern: command:"
@@ -296,6 +342,150 @@ parse_test_results() {
             cat "$output_file"
             ;;
     esac
+}
+```
+
+## PHP Framework and Structure Support
+
+```bash
+# Detect PHP framework
+detect_php_framework() {
+    local project_dir=${1:-.}
+    
+    # Laravel detection
+    if [ -f "$project_dir/artisan" ] && [ -f "$project_dir/composer.json" ]; then
+        if grep -q "laravel/framework" "$project_dir/composer.json" 2>/dev/null; then
+            echo "framework:laravel"
+            return 0
+        fi
+    fi
+    
+    # Symfony detection
+    if [ -f "$project_dir/bin/console" ] && [ -f "$project_dir/composer.json" ]; then
+        if grep -q "symfony/framework-bundle\|symfony/console" "$project_dir/composer.json" 2>/dev/null; then
+            echo "framework:symfony"
+            return 0
+        fi
+    fi
+    
+    # Pure PHP detection (composer.json exists but no specific framework)
+    if [ -f "$project_dir/composer.json" ]; then
+        echo "framework:php"
+        return 0
+    fi
+    
+    # No PHP framework detected
+    return 1
+}
+
+# Check if PHP structure generation is disabled
+is_php_structure_disabled() {
+    local project_dir=${1:-.}
+    
+    # Check environment variable
+    if [ "${CLAUDE_PHP_TESTS:-}" = "false" ]; then
+        return 0
+    fi
+    
+    # Check for .claude/no-php-tests file
+    if [ -f "$project_dir/.claude/no-php-tests" ]; then
+        return 0
+    fi
+    
+    # Check for project-specific disable file
+    if [ -f "$project_dir/.no-php-structure" ]; then
+        return 0
+    fi
+    
+    # PHP structure generation is enabled
+    return 1
+}
+
+# Parse command line arguments for PHP-specific flags
+parse_php_test_flags() {
+    local args="$*"
+    local php_disabled=false
+    local skip_structure_check=false
+    
+    # Check for --no-php flag
+    if echo "$args" | grep -q -- "--no-php"; then
+        php_disabled=true
+    fi
+    
+    # Check for --skip-php-structure-check flag
+    if echo "$args" | grep -q -- "--skip-php-structure-check"; then
+        skip_structure_check=true
+    fi
+    
+    echo "php_disabled:$php_disabled skip_structure_check:$skip_structure_check"
+}
+
+# Display PHP control mechanisms information
+show_php_control_help() {
+    echo ""
+    echo "=== PHP Structure Control Mechanisms ==="
+    echo ""
+    echo "To disable PHP-specific test structure generation and validation:"
+    echo ""
+    echo "1. Environment Variable:"
+    echo "   export CLAUDE_PHP_TESTS=false"
+    echo ""
+    echo "2. Project-level disable file:"
+    echo "   touch .claude/no-php-tests"
+    echo "   # OR"
+    echo "   touch .no-php-structure"
+    echo ""
+    echo "3. Command-line flags:"
+    echo "   --no-php                     Skip all PHP-specific behaviors"
+    echo "   --skip-php-structure-check   Skip PHP structure validation only"
+    echo ""
+    echo "4. Alternative test structures for non-PHP projects:"
+    echo "   - Use standard test/ directory structure"
+    echo "   - Framework-specific patterns (Jest, pytest, Go test, etc.)"
+    echo "   - Custom test organization based on project needs"
+    echo ""
+}
+
+# Get PHP-aware messaging based on opt-out status
+get_php_status_message() {
+    local project_dir=${1:-.}
+    local command_args=${2:-""}
+    
+    # Parse command flags
+    local flags=$(parse_php_test_flags "$command_args")
+    local php_disabled_flag=$(echo "$flags" | sed 's/.*php_disabled:\([^ ]*\).*/\1/')
+    local skip_structure_flag=$(echo "$flags" | sed 's/.*skip_structure_check:\([^ ]*\).*/\1/')
+    
+    # Check if PHP is disabled via any method
+    if [ "$php_disabled_flag" = "true" ] || is_php_structure_disabled "$project_dir"; then
+        echo "PHP structure generation: DISABLED"
+        if [ "$php_disabled_flag" = "true" ]; then
+            echo "Reason: --no-php flag specified"
+        elif [ "${CLAUDE_PHP_TESTS:-}" = "false" ]; then
+            echo "Reason: CLAUDE_PHP_TESTS=false environment variable"
+        elif [ -f "$project_dir/.claude/no-php-tests" ]; then
+            echo "Reason: .claude/no-php-tests file found"
+        elif [ -f "$project_dir/.no-php-structure" ]; then
+            echo "Reason: .no-php-structure file found"
+        fi
+        return 0
+    fi
+    
+    # Check if only structure check is skipped
+    if [ "$skip_structure_flag" = "true" ]; then
+        echo "PHP structure validation: SKIPPED (--skip-php-structure-check flag)"
+        return 0
+    fi
+    
+    # PHP features are enabled
+    if detect_php_framework "$project_dir" >/dev/null 2>&1; then
+        local framework=$(detect_php_framework "$project_dir" | cut -d: -f2)
+        echo "PHP structure generation: ENABLED (detected: $framework)"
+    else
+        echo "PHP structure generation: ENABLED (no PHP framework detected)"
+    fi
+    
+    return 0
 }
 ```
 

@@ -62,6 +62,11 @@ Execute comprehensive unit test execution with ZERO tolerance for incomplete cov
 
 You are executing unit tests for: $ARGUMENTS
 
+**Command-line PHP Control Flags:**
+Parse and respect these flags in $ARGUMENTS:
+- `--no-php`: Skip all PHP-specific behaviors and structure validation
+- `--skip-php-structure-check`: Skip PHP structure validation only
+
 Let me ultrathink about comprehensive unit test execution with parallel agent coordination.
 
 🚨 **REMEMBER: Unit tests are the foundation of code quality and reliability!** 🚨

@@ -1,3 +1,0 @@
-{"timestamp":"2025-07-18T00:53:09Z","event":"orchestration_created","orchestration_id":"hybrid-php-test-structure-1752799993","session_id":"hybrid-session-1752799993","details":{"title":"Hybrid PHP Test Structure Generation System","branch":"feature/hybrid-php-test-structure","total_phases":4}}
-{"timestamp":"2025-07-18T00:53:09Z","event":"orchestration_activated","orchestration_id":"hybrid-php-test-structure-1752799993","session_id":"hybrid-session-1752799993","details":{"status":"coordinating","base_branch":"main"}}
-{"timestamp":"2025-07-18T00:53:09Z","event":"coordination_updated","orchestration_id":"hybrid-php-test-structure-1752799993","details":{"percentage":0,"completed_phases":0,"total_phases":4}}

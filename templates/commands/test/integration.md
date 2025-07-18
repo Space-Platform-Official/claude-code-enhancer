@@ -71,6 +71,11 @@ When you run `/test integration`, you are REQUIRED to:
 
 Execute comprehensive integration test orchestration for: $ARGUMENTS
 
+**Command-line PHP Control Flags:**
+Parse and respect these flags in $ARGUMENTS:
+- `--no-php`: Skip all PHP-specific behaviors and structure validation
+- `--skip-php-structure-check`: Skip PHP structure validation only
+
 **FORBIDDEN SHORTCUT PATTERNS:**
 - "Integration tests are too complex" → NO, they're essential for system quality
 - "Services are already tested individually" → NO, test interactions
@@ -85,11 +90,74 @@ Let me ultrathink about the comprehensive integration testing architecture and o
 **Comprehensive Integration Test Orchestration Protocol:**
 
 **Step 0: System Architecture Analysis**
+- **PHP control validation**: Check PHP structure generation preferences and command flags
+- **Structure validation**: Ensure comprehensive test structure exists (respecting PHP opt-out settings)
 - Map all service dependencies and integration points
 - Identify external systems and third-party services
 - Analyze data flow and communication patterns
 - Document API contracts and message formats
 - Assess service startup order and dependencies
+
+**Integration Test Structure Validation:**
+```bash
+# Validate integration test structure
+validate_integration_structure() {
+    local project_dir=${1:-.}
+    local command_args=${2:-""}
+    
+    echo "=== Integration Test Structure Validation ==="
+    echo ""
+    
+    # Check PHP control mechanisms first
+    local php_status=$(get_php_status_message "$project_dir" "$command_args")
+    echo "$php_status"
+    echo ""
+    
+    # Parse command flags for structure check override
+    local flags=$(parse_php_test_flags "$command_args")
+    local skip_structure_flag=$(echo "$flags" | sed 's/.*skip_structure_check:\([^ ]*\).*/\1/')
+    local php_disabled_flag=$(echo "$flags" | sed 's/.*php_disabled:\([^ ]*\).*/\1/')
+    
+    # Skip PHP structure validation if disabled or overridden
+    if [ "$skip_structure_flag" = "true" ] || [ "$php_disabled_flag" = "true" ] || is_php_structure_disabled "$project_dir"; then
+        echo "✅ Integration test structure validation skipped (PHP features disabled)"
+        return 0
+    fi
+    
+    # Only enforce PHP structure if PHP project is detected
+    if detect_php_framework "$project_dir" >/dev/null 2>&1; then
+        local integration_dirs=("tests/Integration" "tests/Integration/Database" "tests/Integration/Api")
+        
+        # Check for integration test directories
+        for dir in "${integration_dirs[@]}"; do
+            if [ ! -d "$project_dir/$dir" ]; then
+                echo "⚠️  Missing integration test directory: $dir"
+                echo ""
+                echo "🏗️  You need a comprehensive test structure for integration testing!"
+                echo "   Run: /test structure"
+                echo "   This will create the complete integration test infrastructure"
+                echo ""
+                echo "💡 To disable PHP structure validation, use:"
+                echo "   --skip-php-structure-check flag OR"
+                echo "   export CLAUDE_PHP_TESTS=false OR"
+                echo "   touch .claude/no-php-tests"
+                echo ""
+                return 1
+            fi
+        done
+    else
+        # Non-PHP project - check for basic integration test directory
+        if [ ! -d "$project_dir/test/integration" ] && [ ! -d "$project_dir/tests/integration" ] && [ ! -d "$project_dir/integration" ]; then
+            echo "⚠️  No integration test directory found"
+            echo "   Consider creating: test/integration/ or tests/integration/ directory"
+            echo ""
+        fi
+    fi
+    
+    echo "✅ Integration test structure validation completed"
+    return 0
+}
+```
 
 **Step 1: Test Environment Infrastructure**
 
