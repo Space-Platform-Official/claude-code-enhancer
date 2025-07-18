@@ -1,0 +1,155 @@
+orchestration:
+  id: "hybrid-php-test-structure-1752799993"
+  title: "Hybrid PHP Test Structure Generation System"
+  description: "Implement hybrid adaptive test structure generation combining template foundation, intelligent detection, and user customization"
+  type: "feature_implementation"
+  priority: "high"
+  
+metadata:
+  created_at: "2025-07-18T00:53:09Z"
+  created_by: "claude-orchestration"
+  branch: "feature/hybrid-php-test-structure"
+  base_branch: "main"
+  
+status: "coordinating"
+
+execution:
+  started_at: "2025-07-18T00:53:09Z"
+  session_id: "hybrid-session-1752799993"
+
+coordination:
+  percentage: 0
+  phases_completed: 0
+  total_phases: 4
+  last_update: "2025-07-18T00:53:09Z"
+
+dependencies:
+  requires: []
+  blocks: []
+
+workflow:
+  phases:
+    - id: "template-foundation"
+      title: "Phase 1: Template Foundation"
+      description: "Create base PHP test structure templates with framework-specific variants"
+      status: "pending"
+      priority: "critical"
+      estimated_duration: "2-4 weeks"
+      dependencies: []
+      deliverables:
+        - "Base PHP test structure template"
+        - "Framework-specific template variants (Laravel, Symfony, Pure PHP)"
+        - "Basic tool configuration generation (phpstan, phpcs, infection)"
+        - "Integration with existing test commands"
+      tasks:
+        - "Design template architecture for ├── tests/ directory structure"
+        - "Create Unit/, Integration/, Functional/, Performance/, Security/ templates"
+        - "Implement Fixtures/, Support/, bootstrap.php generation"
+        - "Create tools/ directory with phpstan.neon, phpcs.xml, infection.json"
+        - "Create build/ directory with coverage/, logs/, reports/ structure"
+        - "Add Laravel-specific template optimizations"
+        - "Add Symfony-specific template optimizations"
+        - "Add Pure PHP template optimizations"
+        - "Integrate templates with existing /test commands"
+      
+    - id: "detection-layer"
+      title: "Phase 2: Detection Layer"
+      description: "Implement project analysis and intelligent framework detection"
+      status: "pending"
+      priority: "high"
+      estimated_duration: "3-5 weeks"
+      dependencies: ["template-foundation"]
+      deliverables:
+        - "Project analysis engine"
+        - "Framework detection system"
+        - "Code structure analysis"
+        - "Intelligent test placement logic"
+        - "Template selection automation"
+      tasks:
+        - "Build PHP framework detection (Laravel, Symfony, Pure PHP)"
+        - "Implement codebase analysis for Controller/, Service/, Model/ detection"
+        - "Create intelligent test type classification logic"
+        - "Build API endpoint detection for Integration/Api/ tests"
+        - "Implement database model detection for Integration/Database/ tests"
+        - "Create performance-critical code detection"
+        - "Build security-sensitive code detection"
+        - "Implement template selection automation"
+        
+    - id: "configuration-system"
+      title: "Phase 3: Configuration System"
+      description: "Build user customization and configuration management"
+      status: "pending"
+      priority: "medium"
+      estimated_duration: "2-3 weeks"
+      dependencies: ["detection-layer"]
+      deliverables:
+        - "Configuration schema definition"
+        - "User customization interface"
+        - "Configuration validation system"
+        - "Documentation and examples"
+      tasks:
+        - "Design configuration schema for test structure rules"
+        - "Create test placement rule configuration"
+        - "Implement directory customization options"
+        - "Build tool configuration customization"
+        - "Create configuration validation system"
+        - "Add configuration error handling"
+        - "Write comprehensive documentation"
+        - "Create configuration examples"
+        
+    - id: "advanced-features"
+      title: "Phase 4: Advanced Features"
+      description: "Implement advanced features and optimization"
+      status: "pending"
+      priority: "low"
+      estimated_duration: "4-6 weeks"
+      dependencies: ["configuration-system"]
+      deliverables:
+        - "Usage pattern learning"
+        - "Structure evolution recommendations"
+        - "Cross-project consistency tools"
+        - "Advanced tool integration"
+      tasks:
+        - "Implement usage pattern learning system"
+        - "Build structure evolution recommendations"
+        - "Create cross-project structure consistency tools"
+        - "Advanced annotation system integration"
+        - "Performance optimization for large projects"
+        - "Advanced tool chain integration"
+        - "Monitoring and analytics dashboard"
+        - "Community template contribution system"
+
+integration:
+  annotation_system:
+    - "Maintain bidirectional @Verified/@TestedBy annotation support"
+    - "Integrate annotation validation with structured test hierarchy"
+    - "Support method-level annotations within generated structure"
+  
+  test_commands:
+    - "Enhance /test unit to use Unit/ directory structure"
+    - "Enhance /test integration to target Integration/ subdirectories"  
+    - "Enhance /test annotation to validate across structured hierarchy"
+    - "Add /test structure command for on-demand structure generation"
+    
+  tools:
+    - "Configure phpstan.neon for structured test discovery"
+    - "Configure phpcs.xml to include all test directories"
+    - "Configure infection.json for structured mutation testing"
+    - "Integrate with build/ directory for reports and coverage"
+
+validation:
+  success_criteria:
+    - "Complete test structure generated on command execution"
+    - "Framework-specific optimizations working correctly"
+    - "Tool configurations properly generated and functional"
+    - "Existing annotation system continues to work"
+    - "All test commands enhanced to use new structure"
+    - "Documentation complete and examples working"
+    
+  testing_requirements:
+    - "Test with Laravel project structure"
+    - "Test with Symfony project structure" 
+    - "Test with Pure PHP project structure"
+    - "Verify annotation system integration"
+    - "Validate tool configuration generation"
+    - "Test cross-platform compatibility"
