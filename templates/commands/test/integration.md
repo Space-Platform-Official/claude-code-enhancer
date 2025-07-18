@@ -39,6 +39,8 @@ When you run `/test integration`, you are REQUIRED to:
 **NEVER:**
 - ❌ Run integration tests without proper service setup → NO! Environment is critical!
 - ❌ "Unit tests cover this" → NO! Integration tests verify system behavior!
+- ❌ **"Accept any integration test failures"** → NO! 100% SUCCESS RATE MANDATORY!
+- ❌ **"Continue with failing integration tests"** → NO! ALL FAILURES MUST BE FIXED!
 - ❌ Skip database/external service tests → NO! Test real integrations!
 - ❌ Ignore test data management → NO! Proper test data is essential!
 - ❌ Run tests against production systems → NO! Use dedicated test environments!
@@ -50,14 +52,17 @@ When you run `/test integration`, you are REQUIRED to:
 2. IMMEDIATELY spawn agents for parallel integration testing
 3. Service dependency validation → Verify all services are ready
 4. Execute integration tests → Run cross-system validation
-5. Data consistency verification → Check data integrity
-6. VERIFY system behavior under load and failure scenarios
+5. **100% SUCCESS VALIDATION** → BLOCK EXECUTION if any integration test fails
+6. Data consistency verification → Check data integrity only after 100% success
+7. VERIFY system behavior under load and failure scenarios
 ```
 
 **YOU ARE NOT DONE UNTIL:**
+- ✅ **100% INTEGRATION TEST SUCCESS RATE ACHIEVED** - NO FAILURES ALLOWED
 - ✅ ALL integration tests are passing
 - ✅ Service dependencies are properly managed
 - ✅ Cross-system communication is validated
+- ✅ **ZERO FAILED INTEGRATION TESTS** - Any failure must be fixed before proceeding
 - ✅ Data consistency is verified
 - ✅ Error handling and recovery is tested
 - ✅ Performance under realistic load is acceptable
@@ -856,8 +861,114 @@ Each agent will coordinate with others to ensure proper test isolation and compr
 - ❌ Sequential test execution (slow feedback loops)
 - ❌ Incomplete error scenario testing (production failures)
 
+## 🚨 **MANDATORY 100% SUCCESS VALIDATION FOR INTEGRATION TESTS**
+
+**Integration Test Execution with Success Rate Enforcement:**
+```bash
+# Execute integration tests with mandatory 100% success validation
+execute_integration_tests_with_validation() {
+    local project_dir=${1:-.}
+    local command_args=${2:-""}
+    
+    echo "🚨 **CRITICAL: 100% INTEGRATION TEST SUCCESS RATE REQUIRED** 🚨"
+    echo "   ANY FAILING INTEGRATION TESTS WILL BLOCK EXECUTION"
+    echo ""
+    
+    # Validate integration test structure before proceeding (respecting PHP opt-out)
+    if ! validate_integration_structure "$project_dir" "$command_args"; then
+        echo ""
+        echo "❌ Integration test structure validation failed"
+        echo "   Please run '/test structure' first or use --skip-php-structure-check"
+        return 1
+    fi
+    
+    local test_exit_code=0
+    local framework=$(detect_test_framework "$project_dir")
+    
+    case "$framework" in
+        "jest"|"mocha")
+            # JavaScript integration tests
+            npm run test:integration 2>/dev/null || npx jest --testMatch="**/integration/**/*.test.{js,ts}"
+            test_exit_code=$?
+            ;;
+        "pytest")
+            # Python integration tests
+            python -m pytest tests/integration/ -v --tb=short
+            test_exit_code=$?
+            ;;
+        "go-test")
+            # Go integration tests
+            go test -v -tags=integration ./...
+            test_exit_code=$?
+            ;;
+        "rspec")
+            # Ruby integration tests
+            bundle exec rspec spec/integration/
+            test_exit_code=$?
+            ;;
+        "phpunit")
+            # PHP integration tests (if not disabled)
+            local flags=$(parse_php_test_flags "$command_args")
+            local php_disabled=$(echo "$flags" | sed 's/.*php_disabled:\([^ ]*\).*/\1/')
+            
+            if [ "$php_disabled" = "true" ]; then
+                echo "PHPUnit integration tests skipped (--no-php flag specified)"
+                return 0
+            else
+                ./vendor/bin/phpunit tests/Integration/ 2>/dev/null || phpunit tests/Integration/
+                test_exit_code=$?
+            fi
+            ;;
+        *)
+            # Generic integration test execution
+            if [ -f "docker-compose.test.yml" ]; then
+                docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit
+                test_exit_code=$?
+            elif [ -f "Makefile" ] && grep -q "test-integration" Makefile; then
+                make test-integration
+                test_exit_code=$?
+            else
+                echo "No integration test framework detected"
+                return 1
+            fi
+            ;;
+    esac
+    
+    # MANDATORY 100% SUCCESS VALIDATION
+    if [ $test_exit_code -ne 0 ]; then
+        echo ""
+        echo "🚨🚨🚨 **INTEGRATION TEST EXECUTION BLOCKED** 🚨🚨🚨"
+        echo "❌ INTEGRATION TEST SUCCESS RATE: LESS THAN 100%"
+        echo "❌ EXIT CODE: $test_exit_code (NON-ZERO = FAILURE)"
+        echo ""
+        echo "🛑 **EXECUTION HALTED - ALL INTEGRATION TEST FAILURES MUST BE FIXED**"
+        echo ""
+        echo "Required Actions:"
+        echo "1. Fix all failing integration tests"
+        echo "2. Verify service dependencies are properly configured"
+        echo "3. Check database connectivity and test data setup"
+        echo "4. Ensure all external service mocks are working"
+        echo "5. Re-run integration test execution"
+        echo ""
+        echo "🚨 **NO FURTHER STEPS UNTIL 100% INTEGRATION TEST SUCCESS**"
+        return $test_exit_code
+    fi
+    
+    echo ""
+    echo "✅✅✅ **100% INTEGRATION TEST SUCCESS ACHIEVED** ✅✅✅"
+    echo "✅ All integration tests passed successfully"
+    echo "✅ Cross-system communication validated"
+    echo "✅ Service dependencies verified"
+    echo "✅ Proceeding with data consistency verification and performance testing"
+    echo ""
+    
+    return 0
+}
+```
+
 **Final Verification:**
 Before completing integration test orchestration:
+- **Have ALL integration tests achieved 100% success rate?**
 - Are all integration tests passing successfully?
 - Are service dependencies properly managed?
 - Is cross-system communication validated?

@@ -2,6 +2,19 @@
 
 This file contains shared utilities for test framework detection, file discovery, execution, and PHP structure control across all test commands.
 
+## 🚨 **MANDATORY 100% TEST SUCCESS RATE REQUIREMENT**
+
+**ALL test commands in this framework enforce 100% success rate. ANY test failures will block execution.**
+
+This applies to:
+- Unit tests (`/test unit`)
+- Integration tests (`/test integration`)
+- End-to-end tests (`/test e2e`)
+- Performance tests (`/test performance`)
+- All other test command variants
+
+**No exceptions. Fix all test failures before proceeding.**
+
 ## PHP Structure Control Mechanisms
 
 Users can control PHP-specific test structure generation through multiple mechanisms:
@@ -495,6 +508,154 @@ get_php_status_message() {
     fi
     
     return 0
+}
+
+## 🚨 **100% TEST SUCCESS RATE VALIDATION UTILITIES**
+
+# Validate test execution success rate - MUST be 100%
+validate_test_success_rate() {
+    local exit_code=$1
+    local test_type=${2:-"tests"}
+    local framework=${3:-"unknown"}
+    
+    if [ $exit_code -ne 0 ]; then
+        echo ""
+        echo "🚨🚨🚨 **$test_type EXECUTION BLOCKED** 🚨🚨🚨"
+        echo "❌ TEST SUCCESS RATE: LESS THAN 100%"
+        echo "❌ EXIT CODE: $exit_code (NON-ZERO = FAILURE)"
+        echo "❌ FRAMEWORK: $framework"
+        echo ""
+        echo "🛑 **EXECUTION HALTED - ALL TEST FAILURES MUST BE FIXED BEFORE PROCEEDING**"
+        echo ""
+        echo "Required Actions:"
+        echo "1. Fix all failing $test_type"
+        echo "2. Ensure 100% test success rate"
+        echo "3. Re-run test execution"
+        echo ""
+        echo "🚨 **NO FURTHER STEPS UNTIL 100% SUCCESS RATE ACHIEVED**"
+        return $exit_code
+    fi
+    
+    echo ""
+    echo "✅✅✅ **100% $test_type SUCCESS ACHIEVED** ✅✅✅"
+    echo "✅ All $test_type passed successfully"
+    echo "✅ Framework: $framework"
+    echo "✅ Proceeding with next steps"
+    echo ""
+    
+    return 0
+}
+
+# Block execution if test failures detected
+block_on_test_failures() {
+    local exit_code=$1
+    local test_type=${2:-"tests"}
+    local additional_context=${3:-""}
+    
+    if [ $exit_code -ne 0 ]; then
+        echo ""
+        echo "🛑🛑🛑 **CRITICAL FAILURE: $test_type MUST ACHIEVE 100% SUCCESS** 🛑🛑🛑"
+        echo ""
+        echo "FAILURE DETAILS:"
+        echo "- Test Type: $test_type"
+        echo "- Exit Code: $exit_code"
+        echo "- Success Rate: LESS THAN 100% (UNACCEPTABLE)"
+        if [ -n "$additional_context" ]; then
+            echo "- Context: $additional_context"
+        fi
+        echo ""
+        echo "MANDATORY REQUIREMENTS:"
+        echo "- ALL tests must pass (100% success rate)"
+        echo "- NO failing tests are acceptable"
+        echo "- Fix ALL failures before proceeding"
+        echo ""
+        echo "🚨 **EXECUTION PERMANENTLY BLOCKED UNTIL 100% SUCCESS ACHIEVED** 🚨"
+        exit $exit_code
+    fi
+}
+
+# Check if any test file has recent failures
+check_for_recent_test_failures() {
+    local project_dir=${1:-.}
+    local framework=${2:-"auto"}
+    
+    # Look for common test failure indicators
+    local failure_indicators=(
+        "test-results.xml"
+        "junit.xml"
+        "coverage/lcov-report/index.html"
+        ".nyc_output"
+        "pytest_cache"
+        "target/surefire-reports"
+    )
+    
+    local recent_failures=0
+    
+    for indicator in "${failure_indicators[@]}"; do
+        if [ -f "$project_dir/$indicator" ] || [ -d "$project_dir/$indicator" ]; then
+            # Check if file/directory was modified recently (within last hour)
+            if [ $(find "$project_dir/$indicator" -mmin -60 2>/dev/null | wc -l) -gt 0 ]; then
+                echo "⚠️ Recent test activity detected: $indicator"
+                ((recent_failures++))
+            fi
+        fi
+    done
+    
+    if [ $recent_failures -gt 0 ]; then
+        echo ""
+        echo "🚨 WARNING: Recent test execution artifacts found"
+        echo "   Ensure all tests are currently passing at 100% before proceeding"
+        echo "   Run tests manually to verify current status"
+        echo ""
+    fi
+    
+    return $recent_failures
+}
+
+# Enforce 100% success rate across all test types
+enforce_100_percent_success() {
+    echo ""
+    echo "🚨 **CRITICAL ENFORCEMENT: 100% TEST SUCCESS RATE MANDATORY** 🚨"
+    echo ""
+    echo "ENFORCEMENT POLICY:"
+    echo "- Unit Tests: 100% success rate required"
+    echo "- Integration Tests: 100% success rate required"
+    echo "- End-to-End Tests: 100% success rate required"
+    echo "- Performance Tests: 100% success rate required"
+    echo "- ALL Test Types: 100% success rate required"
+    echo ""
+    echo "NO EXCEPTIONS. NO PARTIAL SUCCESS. NO 'GOOD ENOUGH'."
+    echo ""
+    echo "✅ FIX ALL FAILURES BEFORE PROCEEDING ✅"
+    echo ""
+}
+
+# Display test success rate requirements
+show_test_success_requirements() {
+    echo ""
+    echo "=== 100% TEST SUCCESS RATE REQUIREMENTS ==="
+    echo ""
+    echo "MANDATORY POLICY:"
+    echo "• ALL tests must pass (100% success rate)"
+    echo "• Zero tolerance for test failures"
+    echo "• Execution blocked on any test failure"
+    echo "• Fix failures before proceeding"
+    echo ""
+    echo "APPLIES TO:"
+    echo "• Unit tests (/test unit)"
+    echo "• Integration tests (/test integration)"
+    echo "• End-to-end tests (/test e2e)"
+    echo "• Performance tests (/test performance)"
+    echo "• All test command variants"
+    echo ""
+    echo "FAILURE HANDLING:"
+    echo "• Immediate execution halt on failure"
+    echo "• Clear error messages with fix instructions"
+    echo "• No coverage analysis until 100% success"
+    echo "• No deployment until 100% success"
+    echo ""
+    echo "📋 Remember: Quality is non-negotiable."
+    echo ""
 }
 
 # Detect PHP annotation system

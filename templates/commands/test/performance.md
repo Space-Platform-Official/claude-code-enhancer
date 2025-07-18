@@ -39,6 +39,8 @@ When you run `/test performance`, you are REQUIRED to:
 
 **NEVER:**
 - ❌ Skip performance testing → NO! Performance is critical for user experience!
+- ❌ **"Accept any performance test failures"** → NO! 100% SUCCESS RATE MANDATORY!
+- ❌ **"Continue with failing performance tests"** → NO! ALL FAILURES MUST BE FIXED!
 - ❌ Test only under ideal conditions → NO! Test realistic load scenarios!
 - ❌ Ignore performance regressions → NO! Track performance over time!
 - ❌ "Performance is good enough" → NO! Continuously optimize!
@@ -50,14 +52,17 @@ When you run `/test performance`, you are REQUIRED to:
 1. Performance baseline establishment → Set current performance metrics
 2. IMMEDIATELY spawn agents for parallel performance testing
 3. Load and stress testing → Validate system under realistic conditions
-4. Benchmark execution → Test critical functions and operations
-5. Scalability validation → Test scaling characteristics
-6. VERIFY performance targets and optimization opportunities
+4. **100% SUCCESS VALIDATION** → BLOCK EXECUTION if any performance test fails
+5. Benchmark execution → Test critical functions and operations only after 100% success
+6. Scalability validation → Test scaling characteristics
+7. VERIFY performance targets and optimization opportunities
 ```
 
 **YOU ARE NOT DONE UNTIL:**
+- ✅ **100% PERFORMANCE TEST SUCCESS RATE ACHIEVED** - NO FAILURES ALLOWED
 - ✅ ALL performance tests are executed and analyzed
 - ✅ System performance under load is validated
+- ✅ **ZERO FAILED PERFORMANCE TESTS** - Any failure must be fixed before proceeding
 - ✅ Performance bottlenecks are identified and addressed
 - ✅ Scalability characteristics are documented
 - ✅ Performance optimization recommendations are provided

@@ -39,6 +39,8 @@ When you run `/test e2e`, you are REQUIRED to:
 
 **NEVER:**
 - ❌ Skip visual regression testing → NO! UI changes must be validated!
+- ❌ **"Accept any E2E test failures"** → NO! 100% SUCCESS RATE MANDATORY!
+- ❌ **"Continue with failing E2E tests"** → NO! ALL FAILURES MUST BE FIXED!
 - ❌ Test only happy paths → NO! Test error scenarios and edge cases!
 - ❌ Ignore mobile responsiveness → NO! Test all device sizes!
 - ❌ Skip accessibility testing → NO! WCAG compliance is mandatory!
@@ -50,14 +52,17 @@ When you run `/test e2e`, you are REQUIRED to:
 1. Environment setup → Launch test environment and services
 2. IMMEDIATELY spawn agents for parallel E2E testing
 3. Browser automation → Execute user journey tests
-4. Cross-browser validation → Test compatibility across browsers
-5. Performance monitoring → Track user experience metrics
-6. VERIFY complete user workflows and system behavior
+4. **100% SUCCESS VALIDATION** → BLOCK EXECUTION if any E2E test fails
+5. Cross-browser validation → Test compatibility across browsers only after 100% success
+6. Performance monitoring → Track user experience metrics
+7. VERIFY complete user workflows and system behavior
 ```
 
 **YOU ARE NOT DONE UNTIL:**
+- ✅ **100% E2E TEST SUCCESS RATE ACHIEVED** - NO FAILURES ALLOWED
 - ✅ ALL E2E tests are passing across browsers
 - ✅ Complete user journeys are validated
+- ✅ **ZERO FAILED E2E TESTS** - Any failure must be fixed before proceeding
 - ✅ Performance metrics meet standards
 - ✅ Accessibility requirements are met
 - ✅ Visual regressions are caught and fixed

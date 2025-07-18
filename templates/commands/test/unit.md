@@ -22,6 +22,8 @@ When you run `/test/unit`, you are REQUIRED to:
 **FORBIDDEN BEHAVIORS:**
 - ❌ "Run basic npm test command" → NO! Use framework-specific optimizations!
 - ❌ "Skip coverage analysis" → NO! Comprehensive coverage reporting required!
+- ❌ **"Accept any test failures"** → NO! 100% SUCCESS RATE MANDATORY!
+- ❌ **"Continue with failing tests"** → NO! ALL FAILURES MUST BE FIXED!
 - ❌ "Ignore test failures" → NO! Detailed failure analysis and fixing required!
 - ❌ "Single-threaded execution" → NO! Use parallel agent coordination!
 - ❌ "Generic test output" → NO! Framework-specific parsing and reporting!
@@ -32,14 +34,16 @@ When you run `/test/unit`, you are REQUIRED to:
 2. IMMEDIATELY spawn agents for parallel test execution
 3. Test discovery → Find all unit test files and categorize them
 4. Parallel execution → Run tests across multiple agents
-5. Coverage analysis → Generate comprehensive coverage reports
-6. VERIFY results → Ensure all tests pass and coverage meets thresholds
+5. **100% SUCCESS VALIDATION** → BLOCK EXECUTION if any test fails
+6. Coverage analysis → Generate comprehensive coverage reports only after 100% success
+7. VERIFY results → Ensure all tests pass and coverage meets thresholds
 ```
 
 **YOU ARE NOT DONE UNTIL:**
+- ✅ **100% UNIT TEST SUCCESS RATE ACHIEVED** - NO FAILURES ALLOWED
 - ✅ All unit tests discovered and executed successfully
 - ✅ Test coverage analyzed with gap identification
-- ✅ Failed tests analyzed with root cause identification
+- ✅ **ZERO FAILED TESTS** - Any failure must be fixed before proceeding
 - ✅ Performance metrics collected and reported
 - ✅ Actionable recommendations provided for improvements
 - ✅ Test quality validated and documented
@@ -281,36 +285,46 @@ categorize_unit_tests() {
 
 **Framework-Specific Execution:**
 ```bash
-# Execute unit tests with framework optimizations
+# Execute unit tests with framework optimizations and 100% success validation
 execute_unit_tests() {
     local framework=$1
     local project_dir=${2:-.}
     local parallel_agents=${3:-4}
     local command_args=${4:-""}
     
+    echo "🚨 **CRITICAL: 100% UNIT TEST SUCCESS RATE REQUIRED** 🚨"
+    echo "   ANY FAILING TESTS WILL BLOCK EXECUTION"
+    echo ""
+    
     # Silently validate annotations before running tests (respecting PHP opt-out)
     validate_annotations_silently "$project_dir" "$command_args" &
     local annotation_pid=$!
     
+    local test_exit_code=0
+    
     case "$framework" in
         "jest")
-            # Jest with parallel execution
+            # Jest with parallel execution - capture exit code
             npx jest --coverage --maxWorkers=$parallel_agents --verbose --testPathPattern="test|spec"
+            test_exit_code=$?
             ;;
         "pytest")
-            # pytest with parallel execution
+            # pytest with parallel execution - capture exit code
             python -m pytest -v --cov=. --cov-report=html --cov-report=term -n $parallel_agents
+            test_exit_code=$?
             ;;
         "go-test")
-            # Go test with race detection
+            # Go test with race detection - capture exit code
             go test -v -race -coverprofile=coverage.out ./...
+            test_exit_code=$?
             ;;
         "rspec")
-            # RSpec with parallel execution
+            # RSpec with parallel execution - capture exit code
             bundle exec rspec --format documentation --format html --out rspec_results.html
+            test_exit_code=$?
             ;;
         "phpunit")
-            # PHPUnit with coverage (if not disabled)
+            # PHPUnit with coverage (if not disabled) - capture exit code
             local flags=$(parse_php_test_flags "$command_args")
             local php_disabled=$(echo "$flags" | sed 's/.*php_disabled:\([^ ]*\).*/\1/')
             
@@ -319,6 +333,7 @@ execute_unit_tests() {
                 return 0
             else
                 ./vendor/bin/phpunit --coverage-html coverage --coverage-text 2>/dev/null || phpunit --coverage-html coverage --coverage-text
+                test_exit_code=$?
             fi
             ;;
         *)
@@ -329,6 +344,32 @@ execute_unit_tests() {
     
     # Wait for annotation validation to complete
     wait $annotation_pid >/dev/null 2>&1
+    
+    # MANDATORY 100% SUCCESS VALIDATION
+    if [ $test_exit_code -ne 0 ]; then
+        echo ""
+        echo "🚨🚨🚨 **UNIT TEST EXECUTION BLOCKED** 🚨🚨🚨"
+        echo "❌ TEST SUCCESS RATE: LESS THAN 100%"
+        echo "❌ EXIT CODE: $test_exit_code (NON-ZERO = FAILURE)"
+        echo ""
+        echo "🛑 **EXECUTION HALTED - ALL FAILURES MUST BE FIXED BEFORE PROCEEDING**"
+        echo ""
+        echo "Required Actions:"
+        echo "1. Fix all failing unit tests"
+        echo "2. Ensure 100% test success rate"
+        echo "3. Re-run unit test execution"
+        echo ""
+        echo "🚨 **NO COVERAGE ANALYSIS OR FURTHER STEPS UNTIL 100% SUCCESS**"
+        return $test_exit_code
+    fi
+    
+    echo ""
+    echo "✅✅✅ **100% UNIT TEST SUCCESS ACHIEVED** ✅✅✅"
+    echo "✅ All unit tests passed successfully"
+    echo "✅ Proceeding with coverage analysis and reporting"
+    echo ""
+    
+    return 0
 }
 
 # Monitor test execution progress

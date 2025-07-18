@@ -1,248 +1,450 @@
-# Claude Flow System Overview
+# Claude Code Enhancer System Overview
 
 ## Introduction
 
-Claude Flow is a comprehensive development toolkit designed to streamline the integration of Claude Code configurations and best practices into software projects. It provides intelligent template management, automated installation, and smart merging capabilities for development teams using Claude as their AI development partner.
+The Claude Code Enhancer is a sophisticated multi-agent orchestration platform designed to revolutionize software development through intelligent automation, comprehensive quality assurance, and seamless AI-human collaboration. It provides advanced template management, multi-agent coordination, command orchestration, state management, and progressive complexity enforcement for development teams leveraging Claude as their AI development partner.
+
+## Architecture Philosophy
+
+The system is built on five core architectural principles:
+
+1. **Multi-Agent Coordination**: Sophisticated agent spawning and coordination patterns for parallel task execution
+2. **Progressive Complexity Enforcement**: Mandatory complexity triage system preventing over-engineering 
+3. **State-Driven Orchestration**: Comprehensive state management with persistence and resume capabilities
+4. **Safety-First Validation**: Multi-layer safety framework with zero-tolerance quality gates
+5. **Intelligent Integration**: Seamless integration with Git, CI/CD, testing frameworks, and development workflows
 
 ## System Architecture
 
 ### High-Level Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                          Claude Flow System                         │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  ┌─────────────────┐    ┌─────────────────┐    ┌────────────────┐ │
-│  │   Installation   │    │  Template Engine │    │  Smart Merge   │ │
-│  │    Component     │    │                  │    │   Component    │ │
-│  └────────┬─────────┘    └────────┬─────────┘    └───────┬────────┘ │
-│           │                       │                       │         │
-│  ┌────────┴─────────────────────────┴─────────────────────┴────────┐ │
-│  │                     Core Script Framework                        │ │
-│  │  ┌─────────────┐  ┌──────────────┐  ┌───────────────────────┐  │ │
-│  │  │   Bash      │  │   File I/O   │  │  Conflict Resolution │  │ │
-│  │  │  Runtime    │  │   Manager    │  │      Engine          │  │ │
-│  │  └─────────────┘  └──────────────┘  └───────────────────────┘  │ │
-│  └──────────────────────────────────────────────────────────────────┘ │
-│                                                                     │
-│  ┌─────────────────────────────────────────────────────────────────┐ │
-│  │                        Template Library                          │ │
-│  │  ┌─────────────┐  ┌──────────────┐  ┌────────────────────────┐ │ │
-│  │  │  Languages  │  │  Frameworks  │  │     Workflows        │ │ │
-│  │  │  Templates  │  │  Templates   │  │    Templates         │ │ │
-│  │  └─────────────┘  └──────────────┘  └────────────────────────┘ │ │
-│  └─────────────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                          Claude Code Enhancer Platform                           │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  ┌──────────────────┐  ┌─────────────────────┐  ┌─────────────────────────┐   │
+│  │   Multi-Agent    │  │   Command           │  │   Safety & Validation   │   │
+│  │   Coordination   │  │   Orchestration     │  │      Framework          │   │
+│  │     Engine       │  │     Engine          │  │                         │   │
+│  └─────────┬────────┘  └──────────┬──────────┘  └──────────┬──────────────┘   │
+│            │                      │                        │                  │
+│  ┌─────────┴──────────────────────┴────────────────────────┴──────────────┐   │
+│  │                        Core Orchestration Framework                     │   │
+│  │  ┌────────────────┐ ┌─────────────────┐ ┌────────────────────────────┐ │   │
+│  │  │  State         │ │  Complexity     │ │    Progressive             │ │   │
+│  │  │  Management    │ │  Triage         │ │    Disclosure              │ │   │
+│  │  │  Engine        │ │  System         │ │    Engine                  │ │   │
+│  │  └────────────────┘ └─────────────────┘ └────────────────────────────┘ │   │
+│  └─────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────┐   │
+│  │                        Integration Layer                                 │   │
+│  │  ┌────────────┐ ┌─────────────┐ ┌─────────────┐ ┌──────────────────┐   │   │
+│  │  │    Git     │ │   CI/CD     │ │   Testing   │ │    Template      │   │   │
+│  │  │ Integration│ │ Integration │ │ Frameworks  │ │     System       │   │   │
+│  │  └────────────┘ └─────────────┘ └─────────────┘ └──────────────────┘   │   │
+│  └─────────────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-## Core Components
+### Advanced Architecture Components
 
-### 1. Installation System (`install.sh`)
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                        Multi-Agent Coordination Layer                            │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│  Agent Types                           Coordination Patterns                     │
+│  ┌─────────────────┐                   ┌─────────────────────────────────────┐ │
+│  │ • Task Executor │ ←──────────────→   │ • Parallel Execution                │ │
+│  │ • Progress Mon. │                   │ • Event-Driven Coordination        │ │
+│  │ • Git Integr.   │                   │ • State Synchronization             │ │
+│  │ • Dep. Validator│                   │ • Cross-Agent Communication         │ │
+│  │ • Block Detector│                   │ • Session Management                │ │
+│  └─────────────────┘                   └─────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────────┘
 
-The system-level installer that sets up Claude Flow globally or for a specific user:
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                        Command Orchestration Architecture                        │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│  Command Hierarchy                     Execution Flow                           │
+│  ┌─────────────────┐                   ┌─────────────────────────────────────┐ │
+│  │ • Core Commands │ ──── validates ──→ │ • Dependency Resolution             │ │
+│  │ • Sub-Commands  │                   │ • Quality Gate Validation           │ │
+│  │ • Workflows     │                   │ • Multi-Stage Execution             │ │
+│  │ • Shared Utils  │                   │ • Error Handling & Rollback         │ │
+│  └─────────────────┘                   └─────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
 
-- **Purpose**: Deploy Claude Flow tools to system or user paths
+## Core Architectural Components
+
+### 1. Multi-Agent Coordination Engine
+
+Sophisticated agent spawning and coordination system for parallel task execution:
+
+- **Purpose**: Orchestrate multiple specialized agents for complex development workflows
 - **Key Features**:
-  - Auto-detection of appropriate installation type
-  - User-level (`~/.local/`) or system-wide (`/usr/local/`) installation
-  - Automatic backup creation
-  - Clean uninstallation support
-  - PATH configuration guidance
+  - Dynamic agent spawning with role-specific capabilities
+  - Inter-agent communication and state synchronization
+  - Event-driven coordination patterns
+  - Session-aware agent lifecycle management
+  - Real-time monitoring and progress tracking
 
-### 2. Template Installation (`install-claude-flow.sh`)
+### 2. Command Orchestration Engine
 
-The main template deployment script that sets up Claude configurations in projects:
+Hierarchical command system with dependency management and quality gates:
 
-- **Purpose**: Install and configure Claude templates in development projects
+- **Purpose**: Coordinate complex development workflows through intelligent command orchestration
 - **Key Features**:
-  - NPM-based claude-flow package management
-  - Interactive template selection
-  - Intelligent conflict resolution
-  - Idempotent operations
-  - Environment variable support for custom template sources
+  - Hierarchical command organization with folder-first detection
+  - Dependency resolution and validation
+  - Multi-stage execution with quality gates
+  - Error handling and rollback capabilities
+  - Progressive disclosure of functionality
 
-### 3. Smart Merge System (`smart-merge-claude.sh`)
+### 3. Safety and Validation Framework
 
-Advanced merging algorithm for combining existing and new Claude configurations:
+Multi-layer safety system with complexity triage and quality enforcement:
 
-- **Purpose**: Intelligently merge CLAUDE.md files without losing customizations
+- **Purpose**: Prevent over-engineering and ensure production-quality code
 - **Key Features**:
-  - Content-aware merging
-  - Preservation of project-specific configurations
-  - Automatic conflict detection
-  - Command template deployment
-  - Clear merge reporting
+  - Mandatory complexity triage system (Simple/Medium/Complex)
+  - Progressive complexity enforcement with automatic blockers
+  - Quality gates with zero-tolerance for failures
+  - File creation constraints and documentation minimalism
+  - Reality checks and validation pipelines
 
-## Data Flow
+### 4. State Management Engine
 
-### Installation Flow
+Comprehensive state persistence with atomic operations and resume capabilities:
 
-```
-User Request → install.sh
-    ↓
-Detect Installation Type
-    ↓
-Create Directory Structure
-    ↓
-Copy Scripts with Modifications
-    ↓
-Update PATH References
-    ↓
-Create Backups
-    ↓
-Installation Complete
-```
+- **Purpose**: Maintain system state across sessions with interruption recovery
+- **Key Features**:
+  - File-based persistence with atomic operations
+  - Session management with resume functionality
+  - Event logging and audit trails
+  - State synchronization across agents
+  - Backup and recovery mechanisms
 
-### Template Deployment Flow
+### 5. Template System Architecture
 
-```
-Project Directory → install-claude-flow.sh
-    ↓
-Check/Install claude-flow NPM package
-    ↓
-Locate Template Source
-    ↓
-Scan Existing Files
-    ↓
-For Each Template File:
-    ├─→ File Exists? → Conflict Resolution
-    │       ↓
-    │   User Choice:
-    │   ├─→ Keep → No Action
-    │   ├─→ Overwrite → Replace File
-    │   ├─→ Merge Later → Create .new File
-    │   └─→ Skip → Continue
-    │
-    └─→ File Not Exists → Copy Template
-            ↓
-    Generate Merge Report
-```
+Intelligent template inheritance and composition system:
 
-### Smart Merge Flow
+- **Purpose**: Provide flexible, maintainable template management
+- **Key Features**:
+  - Template inheritance and smart composition
+  - Parameterized templates with conditional sections
+  - Template consolidation and deduplication
+  - Framework-aware organization
+  - Progressive disclosure patterns
+
+### 6. Integration Architecture
+
+Seamless integration with development tools and workflows:
+
+- **Purpose**: Integrate with existing development ecosystems
+- **Key Features**:
+  - Git integration with branch management
+  - CI/CD pipeline integration
+  - Testing framework coordination
+  - IDE and editor integration
+  - Cross-platform compatibility
+
+## Data Flow Architecture
+
+### Multi-Agent Coordination Flow
 
 ```
-Source + Target → smart-merge-claude.sh
+Workflow Request → Agent Spawning Engine
     ↓
-Validate Directories
+Complexity Triage (Simple/Medium/Complex)
     ↓
-Analyze CLAUDE.md Files
+Agent Role Assignment:
+    ├─→ Task Execution Agent
+    ├─→ Progress Monitoring Agent  
+    ├─→ Git Integration Agent
+    ├─→ Dependency Validation Agent
+    └─→ Blocker Detection Agent
     ↓
-Extract Unique Content
+Parallel Agent Execution with State Sync
     ↓
-Generate Merged Configuration:
-    ├─→ Existing Project Config
-    └─→ Template Configuration
+Real-time Progress Monitoring
     ↓
-Deploy Command Templates
+Session State Persistence
     ↓
-Update Target Directory
+Completion Validation & Cleanup
+```
+
+### Command Orchestration Flow
+
+```
+Command Invocation → Complexity Classification
+    ↓
+Folder-First Detection & Hierarchy Resolution
+    ↓
+Dependency Validation:
+    ├─→ Prerequisites Check
+    ├─→ Quality Gate Validation
+    └─→ Safety Framework Validation
+    ↓
+Multi-Stage Execution:
+    ├─→ Pre-execution Reality Checks
+    ├─→ Core Implementation
+    ├─→ Post-execution Validation
+    └─→ Quality Assurance Gates
+    ↓
+State Persistence & Event Logging
+```
+
+### Safety and Validation Flow
+
+```
+Implementation Request → Mandatory Complexity Triage
+    ↓
+Classification (🟢 Simple | 🟡 Medium | 🔴 Complex)
+    ↓
+Overengineering Blockers Check:
+    ├─→ Architectural Patterns
+    ├─→ File Creation Constraints
+    └─→ Documentation Limits
+    ↓
+Progressive Complexity Enforcement:
+    ├─→ Level 1: Auto-Simplification
+    ├─→ Level 2: Justified Complexity
+    ├─→ Level 3: Explicit Approval
+    └─→ Level 4: Complexity Budget
+    ↓
+Reality Checks & Validation Gates
+    ↓
+Approved Implementation
+```
+
+### State Management Flow
+
+```
+Operation Start → Session Initialization
+    ↓
+State Directory Creation:
+    ├─→ Active Sessions
+    ├─→ Completed Milestones
+    ├─→ Event Logs
+    └─→ Backup Storage
+    ↓
+Atomic State Operations:
+    ├─→ File Locking
+    ├─→ Transaction Management
+    └─→ Conflict Resolution
+    ↓
+Event Logging & Audit Trail
+    ↓
+Session Persistence for Resume
 ```
 
 ## Key Design Principles
 
-### 1. Non-Destructive Operations
+### 1. Multi-Agent Coordination
 
-- Never overwrites files without user consent
-- Creates `.new` files for manual conflict resolution
-- Preserves existing customizations
+- Sophisticated agent spawning patterns for parallel execution
+- Event-driven coordination with state synchronization
+- Role-specific agent capabilities and responsibilities
+- Session-aware lifecycle management
 
-### 2. Idempotency
+### 2. Progressive Complexity Enforcement
 
-- Safe to run multiple times
-- Detects existing installations
-- Skips unnecessary operations
+- Mandatory complexity triage preventing over-engineering
+- Hard blockers for architectural anti-patterns
+- Reality checks at multiple execution stages
+- User override mechanisms for intentional complexity
 
-### 3. Flexibility
+### 3. State-Driven Orchestration
 
-- Multiple installation methods
-- Environment variable configuration
-- Customizable template sources
+- Comprehensive state management with atomic operations
+- Session persistence enabling interruption recovery
+- Event logging and audit trails
+- Cross-session state consistency
 
-### 4. Transparency
+### 4. Safety-First Validation
 
-- Clear user prompts
-- Detailed merge reports
-- Visible file operations
+- Zero-tolerance quality gates with mandatory success
+- Multi-layer validation pipelines
+- File creation constraints and documentation minimalism
+- Automated error detection and escalation
 
-## Integration Points
+### 5. Intelligent Integration
 
-### 1. NPM Ecosystem
+- Seamless Git integration with branch management
+- CI/CD pipeline coordination
+- Testing framework orchestration
+- Cross-platform compatibility
 
-- Leverages npm for claude-flow package management
-- Supports global and local installations
-- Handles permission requirements
+### 6. Progressive Disclosure
 
-### 2. Shell Environment
+- On-demand content generation
+- Contextual revelation of functionality
+- Usage-driven expansion
+- Cognitive load optimization
 
-- Bash-based for maximum compatibility
-- Handles various shell configurations
-- Works with version managers (nvm, gvm)
+## Integration Architecture
 
-### 3. File System
+### 1. Git Integration Layer
 
-- Cross-platform path handling
-- Proper permission management
-- Atomic file operations
+- Advanced branch management with milestone tracking
+- Automated commit generation with meaningful messages
+- Conflict detection and resolution strategies
+- Repository state monitoring and synchronization
 
-## Security Considerations
+### 2. CI/CD Integration Framework
 
-### 1. Permission Handling
+- Pipeline orchestration with quality gates
+- Automated testing integration
+- Deployment workflow coordination
+- Environment-specific configuration management
 
-- Detects and reports permission issues
-- Suggests appropriate sudo usage
-- Respects user/system boundaries
+### 3. Testing Framework Coordination
 
-### 2. Input Validation
+- Multi-framework test execution (Jest, PHPUnit, pytest, etc.)
+- Coverage analysis and reporting
+- Test result aggregation and validation
+- Performance and integration testing coordination
 
-- Validates all file paths
-- Sanitizes user inputs
-- Prevents directory traversal
+### 4. Development Environment Integration
 
-### 3. Safe Defaults
+- IDE and editor integration points
+- Development server coordination
+- Live reload and hot module replacement
+- Debugging and profiling tool integration
 
-- Conservative merge strategies
-- Explicit user confirmation
-- Backup creation
+### 5. Package Management Integration
 
-## Extensibility
+- NPM, Composer, pip, Cargo ecosystem support
+- Dependency management and vulnerability scanning
+- Lock file management and consistency
+- Multi-language project coordination
 
-### 1. Template System
+### 6. Cross-Platform Compatibility
 
-- Easy addition of new language templates
-- Framework-specific configurations
-- Workflow automation templates
+- OS-agnostic path and command handling
+- Shell environment detection and adaptation
+- Permission management across platforms
+- Container and virtualization support
 
-### 2. Script Modularity
+## Security Architecture
 
-- Clear function separation
-- Reusable components
-- Easy maintenance
+### 1. Multi-Layer Permission Management
 
-### 3. Configuration
+- Granular permission detection and validation
+- Least-privilege execution principles
+- Secure file operation patterns
+- User/system boundary enforcement
 
-- Environment variable support
-- Multiple template source locations
-- Customizable installation paths
+### 2. Input Validation and Sanitization
 
-## Performance Characteristics
+- Comprehensive input validation for all user inputs
+- Path traversal prevention mechanisms
+- Command injection protection
+- File content validation and sanitization
 
-### 1. Efficiency
+### 3. Secure State Management
 
-- Minimal external dependencies
-- Fast file operations
-- Efficient conflict detection
+- Encrypted session storage for sensitive data
+- Atomic file operations preventing race conditions
+- Secure backup and recovery mechanisms
+- Event logging with tamper detection
 
-### 2. Scalability
+### 4. Agent Security Framework
 
-- Handles large template libraries
-- Supports complex project structures
-- Batch operations
+- Agent capability sandboxing
+- Inter-agent communication security
+- Resource usage monitoring and limits
+- Malicious agent detection and isolation
 
-### 3. Resource Usage
+### 5. Integration Security
 
-- Low memory footprint
-- Minimal CPU usage
-- Efficient disk I/O
+- Secure Git credential management
+- CI/CD pipeline security validation
+- Third-party tool integration security
+- Network communication encryption
 
-This architecture enables Claude Flow to provide a robust, user-friendly solution for managing Claude Code configurations across diverse development environments while maintaining flexibility and safety.
+## Extensibility Architecture
+
+### 1. Plugin Architecture
+
+- Dynamic command plugin loading
+- Custom agent type registration
+- Template engine extensions
+- Integration point plugins
+
+### 2. Template System Extensibility
+
+- Hierarchical template inheritance
+- Custom template engine support
+- Framework-specific template families
+- Dynamic template generation
+
+### 3. Agent Framework Extensions
+
+- Custom agent type development
+- Agent capability extension points
+- Coordination pattern customization
+- Monitoring and metrics plugins
+
+### 4. Integration Framework
+
+- Custom tool integration points
+- API extension mechanisms
+- Webhook and event system integration
+- Third-party service connectors
+
+### 5. Configuration Management
+
+- Hierarchical configuration system
+- Environment-specific overrides
+- Dynamic configuration reloading
+- Configuration validation and schema support
+
+## Performance Architecture
+
+### 1. Parallel Execution Optimization
+
+- Multi-agent parallel processing
+- Asynchronous task coordination
+- Resource-aware agent scheduling
+- Load balancing across execution agents
+
+### 2. State Management Performance
+
+- Efficient file-based persistence
+- Atomic operation optimization
+- Incremental state updates
+- Memory-efficient event streaming
+
+### 3. Integration Performance
+
+- Optimized Git operations with minimal overhead
+- Efficient testing framework coordination
+- Smart caching for repeated operations
+- Network request optimization
+
+### 4. Scalability Characteristics
+
+- Horizontal scaling through agent multiplication
+- Template system optimized for large libraries
+- Efficient handling of complex project structures
+- Batch operation optimization
+
+### 5. Resource Management
+
+- Memory-efficient agent lifecycle management
+- CPU usage optimization through intelligent scheduling
+- Disk I/O optimization with batching
+- Network bandwidth management
+
+### 6. Monitoring and Optimization
+
+- Real-time performance metrics
+- Bottleneck detection and reporting
+- Automatic performance tuning
+- Resource usage analysis and optimization
+
+This architecture enables the Claude Code Enhancer to provide a sophisticated, production-ready solution for AI-assisted development workflows while maintaining exceptional performance, security, and reliability across diverse development environments.
