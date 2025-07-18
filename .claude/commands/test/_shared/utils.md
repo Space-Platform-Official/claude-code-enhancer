@@ -299,6 +299,102 @@ parse_test_results() {
 }
 ```
 
+## PHP Annotation System Support
+
+```bash
+# Detect PHP annotation system
+detect_php_annotations() {
+    local project_dir=${1:-.}
+    local annotation_script="$project_dir/test/test/annotation-automation.php"
+    local annotation_shell="$project_dir/test/test/annotation-automation.sh"
+    
+    if [ -f "$annotation_script" ]; then
+        echo "system:php script:$annotation_script shell:$annotation_shell"
+        return 0
+    else
+        echo "ERROR: PHP annotation system not found"
+        return 1
+    fi
+}
+
+# Get annotation system configuration
+get_annotation_system_config() {
+    local project_dir=${1:-.}
+    local config_file="$project_dir/test/test/annotation-automation.json"
+    
+    if [ -f "$config_file" ]; then
+        echo "config_file:$config_file"
+        if command -v php >/dev/null 2>&1; then
+            echo "source_dir:$(php -r "echo json_decode(file_get_contents('$config_file'), true)['source_directory'] ?? 'src';" 2>/dev/null || echo 'src')"
+            echo "test_dir:$(php -r "echo json_decode(file_get_contents('$config_file'), true)['test_directory'] ?? 'test/Cases';" 2>/dev/null || echo 'test/Cases')"
+        else
+            echo "source_dir:src test_dir:test/Cases"
+        fi
+    else
+        echo "config_file: source_dir:src test_dir:test/Cases"
+    fi
+}
+
+# Validate annotation system installation
+validate_annotation_system() {
+    local project_dir=${1:-.}
+    local annotation_script="$project_dir/test/test/annotation-automation.php"
+    local annotation_shell="$project_dir/test/test/annotation-automation.sh"
+    
+    # Check PHP availability
+    if ! command -v php >/dev/null 2>&1; then
+        echo "ERROR: PHP not found"
+        return 1
+    fi
+    
+    # Check annotation scripts
+    if [ ! -f "$annotation_script" ]; then
+        echo "ERROR: Annotation PHP script not found at $annotation_script"
+        return 1
+    fi
+    
+    if [ ! -f "$annotation_shell" ]; then
+        echo "WARNING: Annotation shell script not found at $annotation_shell"
+    fi
+    
+    # Check script permissions
+    if [ ! -x "$annotation_script" ]; then
+        echo "WARNING: Annotation PHP script not executable"
+    fi
+    
+    if [ -f "$annotation_shell" ] && [ ! -x "$annotation_shell" ]; then
+        echo "WARNING: Annotation shell script not executable"
+    fi
+    
+    echo "✅ PHP annotation system validated"
+    return 0
+}
+
+# Execute annotation command
+execute_annotation_command() {
+    local command=$1
+    local project_dir=${2:-.}
+    local format=${3:-"console"}
+    local annotation_script="$project_dir/test/test/annotation-automation.php"
+    local annotation_shell="$project_dir/test/test/annotation-automation.sh"
+    
+    # Validate system first
+    if ! validate_annotation_system "$project_dir"; then
+        return 1
+    fi
+    
+    # Prefer shell script if available and executable
+    if [ -f "$annotation_shell" ] && [ -x "$annotation_shell" ]; then
+        "$annotation_shell" "$command" --format="$format"
+    elif [ -f "$annotation_script" ]; then
+        php "$annotation_script" "$command" --format="$format"
+    else
+        echo "ERROR: No annotation execution method available"
+        return 1
+    fi
+}
+```
+
 ## Cross-platform Compatibility
 
 ```bash

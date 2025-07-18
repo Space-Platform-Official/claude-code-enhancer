@@ -421,6 +421,10 @@ validate_environment_requirements() {
         fi
     done
     
+    # Check MCP server availability
+    local mcp_errors=$(check_mcp_server_availability "$milestone_id")
+    ((errors+=mcp_errors))
+    
     # Check environment variables
     local required_env_vars=$(yq e '.requirements.environment[]? // empty' "$milestone_file" 2>/dev/null)
     for env_var in $required_env_vars; do
@@ -440,6 +444,108 @@ validate_environment_requirements() {
     fi
     
     return $errors
+}
+
+# Check MCP server availability
+check_mcp_server_availability() {
+    local milestone_id=$1
+    local milestone_file=".milestones/active/$milestone_id.yaml"
+    local errors=0
+    
+    # Check if MCP servers are configured
+    local mcp_servers=$(yq e '.requirements.mcp_servers[]? // empty' "$milestone_file" 2>/dev/null)
+    
+    if [ -z "$mcp_servers" ]; then
+        echo "ℹ️  No MCP servers configured for milestone"
+        return 0
+    fi
+    
+    echo "=== MCP Server Availability Check ==="
+    
+    for server in $mcp_servers; do
+        case "$server" in
+            "github")
+                if check_github_mcp_server; then
+                    echo "✅ GitHub MCP server available"
+                else
+                    echo "❌ ERROR: GitHub MCP server not available"
+                    ((errors++))
+                fi
+                ;;
+            "git")
+                if check_git_mcp_server; then
+                    echo "✅ Git MCP server available"
+                else
+                    echo "❌ ERROR: Git MCP server not available"
+                    ((errors++))
+                fi
+                ;;
+            "docker")
+                if check_docker_mcp_server; then
+                    echo "✅ Docker MCP server available"
+                else
+                    echo "❌ ERROR: Docker MCP server not available"
+                    ((errors++))
+                fi
+                ;;
+            *)
+                echo "⚠️  WARNING: Unknown MCP server type: $server"
+                ;;
+        esac
+    done
+    
+    return $errors
+}
+
+# Check GitHub MCP server availability
+check_github_mcp_server() {
+    # Check if GitHub CLI is available
+    if ! command -v gh >/dev/null 2>&1; then
+        echo "    GitHub CLI (gh) not found"
+        return 1
+    fi
+    
+    # Check if authenticated
+    if ! gh auth status >/dev/null 2>&1; then
+        echo "    GitHub CLI not authenticated"
+        return 1
+    fi
+    
+    return 0
+}
+
+# Check Git MCP server availability
+check_git_mcp_server() {
+    # Check if git is available
+    if ! command -v git >/dev/null 2>&1; then
+        echo "    Git not found"
+        return 1
+    fi
+    
+    # Check if in a git repository
+    if ! git rev-parse --git-dir >/dev/null 2>&1; then
+        echo "    Not in a git repository"
+        return 1
+    fi
+    
+    return 0
+}
+
+# Check Docker MCP server availability
+check_docker_mcp_server() {
+    # Check if docker is available
+    if ! command -v docker >/dev/null 2>&1; then
+        echo "    Docker not found"
+        return 1
+    fi
+    
+    # Check if docker daemon is running
+    if ! docker info >/dev/null 2>&1; then
+        echo "    Docker daemon not running"
+        return 1
+    fi
+    
+    return 0
 }
 
 # Validate filesystem permissions
