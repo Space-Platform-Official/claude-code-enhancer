@@ -74,6 +74,7 @@ Let me ultrathink about comprehensive unit test execution with parallel agent co
 - Identify test file patterns and naming conventions
 - Check for existing test configuration files
 - Verify test environment setup
+- **Silent annotation validation**: Validate method-level annotations without CLI output
 
 **Step 1: Test Discovery and Categorization**
 
@@ -102,6 +103,27 @@ find_unit_tests() {
             return 1
             ;;
     esac
+}
+
+# Silent annotation validation for unit testing
+validate_annotations_silently() {
+    local project_dir=${1:-.}
+    
+    # Check for PHP annotation system
+    if detect_php_annotations "$project_dir" >/dev/null 2>&1; then
+        # Run annotation validation silently and capture results
+        local annotation_result=$(execute_annotation_command "validate" "$project_dir" "json" 2>/dev/null)
+        local annotation_status=$?
+        
+        # Store results for later reporting
+        echo "$annotation_result" > /tmp/unit-test-annotations.json 2>/dev/null
+        
+        # Return status without output
+        return $annotation_status
+    fi
+    
+    # No annotation system found, skip silently
+    return 0
 }
 
 # Categorize tests by speed and complexity
@@ -134,6 +156,7 @@ categorize_unit_tests() {
 - Slow Test Agent: Execute complex unit tests with detailed analysis
 - Coverage Agent: Analyze test coverage and identify gaps
 - Quality Agent: Validate test quality and suggest improvements
+- Annotation Agent: Silently validate method-level annotations in background
 - Reporting Agent: Generate comprehensive test reports and metrics"
 ```
 
@@ -146,6 +169,10 @@ execute_unit_tests() {
     local framework=$1
     local project_dir=${2:-.}
     local parallel_agents=${3:-4}
+    
+    # Silently validate annotations before running tests
+    validate_annotations_silently "$project_dir" &
+    local annotation_pid=$!
     
     case "$framework" in
         "jest")
@@ -169,6 +196,9 @@ execute_unit_tests() {
             return 1
             ;;
     esac
+    
+    # Wait for annotation validation to complete
+    wait $annotation_pid >/dev/null 2>&1
 }
 
 # Monitor test execution progress
@@ -322,11 +352,46 @@ generate_quality_report() {
     # Coverage analysis
     identify_coverage_gaps "$framework"
     
+    # Include annotation validation results if available
+    include_annotation_results_summary
+    
     # Performance metrics
     echo ""
     echo "=== Performance Metrics ==="
     echo "Test execution time: $(get_test_execution_time)"
     echo "Average test duration: $(calculate_average_test_duration)"
+}
+
+# Include annotation validation summary in test report
+include_annotation_results_summary() {
+    if [ -f "/tmp/unit-test-annotations.json" ]; then
+        echo ""
+        echo "=== Annotation Validation Summary ==="
+        
+        # Parse annotation results silently and show summary
+        local annotation_summary=$(php -r "
+        \$results = json_decode(file_get_contents('/tmp/unit-test-annotations.json'), true);
+        if (isset(\$results['method_linkage_analysis']['summary'])) {
+            \$summary = \$results['method_linkage_analysis']['summary'];
+            \$total_methods = (\$summary['totalSourceMethods'] ?? 0);
+            \$with_annotations = (\$summary['methodsWithVerified'] ?? 0);
+            \$coverage = \$total_methods > 0 ? round((\$with_annotations / \$total_methods) * 100, 1) : 0;
+            echo \"Annotation Coverage: \$coverage% (\$with_annotations/\$total_methods methods)\";
+            if ((\$summary['invalidMethodLinks'] ?? 0) > 0) {
+                echo \" - \" . (\$summary['invalidMethodLinks'] ?? 0) . \" invalid links\";
+            }
+        }
+        " 2>/dev/null)
+        
+        if [ -n "$annotation_summary" ]; then
+            echo "$annotation_summary"
+        else
+            echo "Annotation validation completed"
+        fi
+        
+        # Clean up temporary file
+        rm -f "/tmp/unit-test-annotations.json" 2>/dev/null
+    fi
 }
 ```
 
@@ -449,8 +514,10 @@ monitor_test_performance() {
 - [ ] Parallel execution configured and working
 - [ ] Coverage analysis completed with gap identification
 - [ ] Test quality validated against best practices
+- [ ] **Silent annotation validation completed** (if PHP system available)
 - [ ] Failed tests analyzed with root cause identification
 - [ ] Performance metrics collected and reported
+- [ ] **Annotation coverage summary included** in quality report
 - [ ] Actionable recommendations provided
 
 **Anti-Patterns to Avoid:**
@@ -466,21 +533,26 @@ Before completing unit test execution:
 - Have I executed all unit tests with proper framework configuration?
 - Are coverage reports generated with gap analysis?
 - Have I analyzed and reported on test failures?
+- **Has annotation validation been completed silently** (if PHP system available)?
+- **Is annotation coverage summary included** in the quality report?
 - Are performance metrics collected and optimization tips provided?
 - Do I have actionable recommendations for improvement?
 
 **Final Commitment:**
 - **I will**: Execute all unit tests with comprehensive coverage analysis
 - **I will**: Use parallel agents for optimal performance
+- **I will**: **Silently validate annotations** without cluttering CLI output
+- **I will**: **Include annotation coverage** in quality reports when available
 - **I will**: Provide detailed failure analysis and actionable recommendations
 - **I will**: Validate test quality and suggest improvements
 - **I will**: Generate comprehensive reports with performance metrics
 - **I will NOT**: Skip coverage analysis or quality validation
+- **I will NOT**: **Output annotation validation details** during test execution
 - **I will NOT**: Ignore test failures or performance issues
 - **I will NOT**: Use single-threaded execution without parallelization
 - **I will NOT**: Provide generic reports without actionable insights
 
 **REMEMBER:**
-This is UNIT TEST EXECUTION mode - comprehensive testing with coverage analysis, quality validation, and performance optimization. The goal is to ensure code quality and reliability through thorough unit testing.
+This is UNIT TEST EXECUTION mode - comprehensive testing with coverage analysis, quality validation, silent annotation validation, and performance optimization. The goal is to ensure code quality and reliability through thorough unit testing with integrated annotation coverage reporting.
 
 Executing comprehensive unit test execution protocol with parallel agent coordination...
