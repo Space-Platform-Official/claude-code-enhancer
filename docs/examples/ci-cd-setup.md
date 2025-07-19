@@ -1166,8 +1166,644 @@ env:
     key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
 ```
 
+## Enterprise CI/CD Patterns
+
+<details>
+<summary>🏢 Enterprise-Grade Pipeline Configurations</summary>
+
+### Advanced Security Integration
+
+**Supply Chain Security:**
+```yaml
+# .github/workflows/security.yml
+name: Security Checks
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  supply-chain:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: SLSA Builder
+        uses: slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@v1.5.0
+        with:
+          go-version: 1.21
+      
+      - name: Sigstore Cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: 'v2.0.0'
+      
+      - name: Sign artifacts
+        run: |
+          cosign sign --yes ${{ env.REGISTRY }}/app:${{ github.sha }}
+      
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: ./
+          format: spdx-json
+      
+      - name: Scan with Grype
+        uses: anchore/scan-action@v3
+        with:
+          path: "."
+          fail-build: true
+          severity-cutoff: high
+```
+
+**Zero-Trust Architecture:**
+```yaml
+# Multi-environment promotion with approval gates
+deployment-pipeline:
+  strategy:
+    environments:
+      - name: development
+        auto_deploy: true
+        required_reviewers: 0
+      - name: staging
+        auto_deploy: false
+        required_reviewers: 1
+        protection_rules:
+          - required_status_checks: [security-scan, performance-test]
+      - name: production
+        auto_deploy: false
+        required_reviewers: 2
+        protection_rules:
+          - required_status_checks: [staging-deployment-success]
+          - restrict_pushes: true
+          - required_conversation_resolution: true
+```
+
+### Multi-Cloud Deployment
+
+**AWS + Azure + GCP:**
+```yaml
+# .github/workflows/multi-cloud.yml
+multi-cloud-deploy:
+  strategy:
+    matrix:
+      cloud:
+        - provider: aws
+          region: us-east-1
+          service: ecs
+        - provider: azure
+          region: eastus
+          service: container-instances
+        - provider: gcp
+          region: us-central1
+          service: cloud-run
+  
+  steps:
+    - name: Deploy to ${{ matrix.cloud.provider }}
+      uses: ./.github/actions/deploy-${{ matrix.cloud.provider }}
+      with:
+        region: ${{ matrix.cloud.region }}
+        service: ${{ matrix.cloud.service }}
+        image: ${{ env.REGISTRY }}/app:${{ github.sha }}
+```
+
+</details>
+
+<details>
+<summary>🔄 Advanced Workflow Patterns</summary>
+
+### Matrix Testing with Comprehensive Coverage
+
+```yaml
+# Complete matrix testing strategy
+test-matrix:
+  strategy:
+    fail-fast: false
+    matrix:
+      include:
+        # Frontend combinations
+        - language: node
+          version: 16
+          os: ubuntu-latest
+          browser: chrome
+          env: development
+        - language: node
+          version: 18
+          os: ubuntu-latest
+          browser: firefox
+          env: staging
+        - language: node
+          version: 20
+          os: macos-latest
+          browser: safari
+          env: production
+        
+        # Backend combinations
+        - language: python
+          version: '3.9'
+          os: ubuntu-latest
+          database: postgresql
+          cache: redis
+        - language: python
+          version: '3.11'
+          os: ubuntu-latest
+          database: mysql
+          cache: memcached
+        
+        # Cross-platform testing
+        - language: go
+          version: '1.21'
+          os: windows-latest
+          arch: amd64
+        - language: go
+          version: '1.21'
+          os: ubuntu-latest
+          arch: arm64
+```
+
+### Conditional Pipeline Optimization
+
+```yaml
+# Smart pipeline execution based on changes
+jobs:
+  detect-changes:
+    outputs:
+      frontend: ${{ steps.changes.outputs.frontend }}
+      backend: ${{ steps.changes.outputs.backend }}
+      infrastructure: ${{ steps.changes.outputs.infrastructure }}
+      documentation: ${{ steps.changes.outputs.documentation }}
+    
+    steps:
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
+              - 'shared/types/**'
+            backend:
+              - 'backend/**'
+              - 'shared/types/**'
+              - 'database/**'
+            infrastructure:
+              - 'terraform/**'
+              - 'k8s/**'
+              - 'docker/**'
+            documentation:
+              - 'docs/**'
+              - '*.md'
+              - '.github/**'
+  
+  # Conditional job execution
+  frontend-tests:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.frontend == 'true'
+    strategy:
+      matrix:
+        test-type: [unit, integration, e2e, visual-regression]
+    steps:
+      - name: Run ${{ matrix.test-type }} tests
+        run: npm run test:${{ matrix.test-type }}
+```
+
+</details>
+
+<details>
+<summary>🚀 Performance and Optimization</summary>
+
+### Build Optimization Strategies
+
+**Intelligent Caching:**
+```yaml
+# Advanced caching strategy
+- name: Cache build dependencies
+  uses: actions/cache@v3
+  with:
+    path: |
+      ~/.npm
+      ~/.cache/pip
+      ~/.cargo/registry
+      ~/.cargo/git
+      ~/.cache/go-build
+      ~/go/pkg/mod
+    key: ${{ runner.os }}-deps-${{ hashFiles('**/package-lock.json', '**/requirements.txt', '**/Cargo.lock', '**/go.sum') }}
+    restore-keys: |
+      ${{ runner.os }}-deps-
+
+# Docker layer caching
+- name: Setup Docker Buildx
+  uses: docker/setup-buildx-action@v2
+  with:
+    driver-opts: |
+      network=host
+      image=moby/buildkit:buildx-stable-1
+      
+- name: Build with cache
+  uses: docker/build-push-action@v4
+  with:
+    context: .
+    platforms: linux/amd64,linux/arm64
+    cache-from: type=gha
+    cache-to: type=gha,mode=max
+    push: true
+    tags: ${{ env.REGISTRY }}/app:${{ github.sha }}
+```
+
+**Parallel Job Execution:**
+```yaml
+# Maximized parallelization
+stages:
+  preparation:
+    jobs: [checkout, cache-dependencies]
+  
+  validation:
+    needs: preparation
+    jobs: [lint-frontend, lint-backend, type-check, security-scan]
+  
+  testing:
+    needs: validation
+    jobs: [unit-tests, integration-tests, contract-tests]
+  
+  quality:
+    needs: testing
+    jobs: [coverage-report, sonar-analysis, performance-benchmark]
+  
+  build:
+    needs: quality
+    jobs: [build-frontend, build-backend, build-mobile]
+  
+  deploy:
+    needs: build
+    jobs: [deploy-staging, deploy-preview]
+```
+
+### Performance Monitoring Integration
+
+```yaml
+# Performance testing in CI
+performance-tests:
+  steps:
+    - name: Lighthouse CI
+      uses: treosh/lighthouse-ci-action@v9
+      with:
+        configPath: '.lighthouserc.json'
+        uploadArtifacts: true
+        temporaryPublicStorage: true
+    
+    - name: Web Vitals Monitoring
+      run: |
+        npm run test:performance
+        npm run analyze:bundle-size
+    
+    - name: Load Testing with Artillery
+      run: |
+        npm install -g artillery
+        artillery run load-test-config.yml
+    
+    - name: Performance Regression Check
+      uses: benchmark-action/github-action-benchmark@v1
+      with:
+        tool: 'customSmallerIsBetter'
+        output-file-path: performance-results.json
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        auto-push: true
+        alert-threshold: '200%'
+        comment-on-alert: true
+```
+
+</details>
+
+## Advanced Troubleshooting Guide
+
+<details>
+<summary>🔧 Common CI/CD Issues and Solutions</summary>
+
+### Build Failures
+
+**Memory Issues:**
+```yaml
+# Increase Node.js memory for large builds
+env:
+  NODE_OPTIONS: "--max-old-space-size=8192"
+  GRADLE_OPTS: "-Xmx4g -XX:MaxMetaspaceSize=1g"
+  MAVEN_OPTS: "-Xmx3g"
+
+# For GitHub Actions
+runs-on: ubuntu-latest-8-cores  # Use larger runners
+```
+
+**Timeout Issues:**
+```yaml
+# Set appropriate timeouts
+jobs:
+  test:
+    timeout-minutes: 30
+    steps:
+      - name: Run tests with timeout
+        timeout-minutes: 20
+        run: npm test
+```
+
+**Flaky Test Handling:**
+```yaml
+# Retry mechanism for flaky tests
+- name: Run tests with retry
+  uses: nick-fields/retry@v2
+  with:
+    timeout_minutes: 10
+    max_attempts: 3
+    retry_on: error
+    command: npm test
+
+# Quarantine flaky tests
+- name: Run stable tests
+  run: npm test -- --grep "^(?!.*flaky).*$"
+  
+- name: Run flaky tests separately
+  continue-on-error: true
+  run: npm test -- --grep "flaky"
+```
+
+### Dependency Issues
+
+**Lock File Conflicts:**
+```bash
+# Clean dependency resolution
+rm -rf node_modules package-lock.json
+npm install
+npm audit fix
+
+# For Python
+pip-compile --upgrade requirements.in
+pip-sync
+
+# For Go
+go mod tidy
+go mod verify
+```
+
+**Security Vulnerabilities:**
+```yaml
+# Automated security updates
+- name: Security audit
+  run: |
+    npm audit --audit-level high
+    pip safety check
+    go list -json -m all | nancy sleuth
+
+# Automated dependency updates
+- name: Update dependencies
+  uses: renovatebot/github-action@v34.100.0
+  with:
+    configurationFile: .github/renovate.json
+    token: ${{ secrets.RENOVATE_TOKEN }}
+```
+
+### Environment-Specific Issues
+
+**Cross-Platform Compatibility:**
+```yaml
+# Handle path differences
+- name: Set paths (Unix)
+  if: runner.os != 'Windows'
+  run: echo "SCRIPT_PATH=./scripts/build.sh" >> $GITHUB_ENV
+  
+- name: Set paths (Windows)
+  if: runner.os == 'Windows'
+  run: echo "SCRIPT_PATH=.\scripts\build.bat" >> $GITHUB_ENV
+  
+- name: Run build script
+  run: ${{ env.SCRIPT_PATH }}
+```
+
+</details>
+
+<details>
+<summary>🛡️ Security Best Practices</summary>
+
+### Secrets Management
+
+**Hierarchical Secrets:**
+```yaml
+# Environment-specific secrets
+env:
+  # Global secrets
+  API_KEY: ${{ secrets.API_KEY }}
+  
+  # Environment-specific
+  DATABASE_URL: ${{ 
+    github.ref == 'refs/heads/main' && 
+    secrets.PROD_DATABASE_URL || 
+    secrets.STAGING_DATABASE_URL 
+  }}
+  
+  # Feature flag secrets
+  FEATURE_FLAGS: ${{ 
+    contains(github.event.head_commit.message, '[enable-beta]') && 
+    secrets.BETA_FEATURE_FLAGS || 
+    secrets.DEFAULT_FEATURE_FLAGS 
+  }}
+```
+
+**Secure Artifact Handling:**
+```yaml
+# Signed and encrypted artifacts
+- name: Encrypt sensitive artifacts
+  run: |
+    gpg --symmetric --cipher-algo AES256 sensitive-config.json
+    
+- name: Upload encrypted artifacts
+  uses: actions/upload-artifact@v3
+  with:
+    name: encrypted-config
+    path: sensitive-config.json.gpg
+    retention-days: 1
+```
+
+### RBAC and Permissions
+
+**Minimal Permissions:**
+```yaml
+# Explicit permission grants
+permissions:
+  contents: read
+  packages: write
+  security-events: write
+  actions: read
+  checks: write
+  statuses: write
+  pull-requests: write
+
+# Job-specific permissions
+jobs:
+  deploy:
+    permissions:
+      contents: read
+      id-token: write  # For OIDC
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-session-name: GitHubActions
+          aws-region: us-east-1
+```
+
+</details>
+
+## Multi-Agent CI/CD Coordination
+
+<details>
+<summary>🤖 Claude Multi-Agent Integration</summary>
+
+### AI-Driven Quality Checks
+
+```yaml
+# Claude-powered code review
+- name: AI Code Review
+  uses: ./.github/actions/claude-review
+  with:
+    files-changed: ${{ steps.changes.outputs.files }}
+    review-depth: thorough
+    focus-areas: |
+      - Security vulnerabilities
+      - Performance issues
+      - Code quality
+      - Test coverage gaps
+
+# Automated fix suggestions
+- name: Generate Fix Suggestions
+  if: failure()
+  run: |
+    claude analyze-failures \
+      --build-logs build.log \
+      --test-results test-results.xml \
+      --suggest-fixes
+```
+
+### Intelligent Pipeline Optimization
+
+```yaml
+# AI-driven pipeline optimization
+- name: Optimize Pipeline
+  uses: ./.github/actions/claude-optimize
+  with:
+    analyze-patterns: true
+    optimize-for: speed
+    historical-data-days: 30
+    
+# Dynamic test selection
+- name: Smart Test Selection
+  run: |
+    claude select-tests \
+      --changed-files "${{ steps.changes.outputs.files }}" \
+      --test-history .test-history.json \
+      --confidence-threshold 0.95
+```
+
+### Automated Documentation Updates
+
+```yaml
+# AI-generated documentation
+- name: Update Documentation
+  if: contains(github.event.head_commit.message, '[update-docs]')
+  run: |
+    claude generate-docs \
+      --source-code src/ \
+      --api-specs openapi.yaml \
+      --output docs/ \
+      --format markdown
+    
+    git add docs/
+    git commit -m "docs: AI-generated documentation update"
+    git push
+```
+
+</details>
+
+## Monitoring and Observability
+
+<details>
+<summary>📊 Comprehensive Pipeline Monitoring</summary>
+
+### Pipeline Metrics Collection
+
+```yaml
+# Detailed metrics collection
+- name: Collect Pipeline Metrics
+  run: |
+    echo "build_duration_seconds ${{ steps.timer.outputs.duration }}" >> metrics.txt
+    echo "test_count ${{ steps.test.outputs.test_count }}" >> metrics.txt
+    echo "coverage_percentage ${{ steps.coverage.outputs.percentage }}" >> metrics.txt
+    echo "artifact_size_mb ${{ steps.build.outputs.size_mb }}" >> metrics.txt
+
+- name: Send Metrics to Datadog
+  uses: masci/datadog@v1
+  with:
+    api-key: ${{ secrets.DATADOG_API_KEY }}
+    metrics-file: metrics.txt
+
+# Real-time notifications
+- name: Slack Notification
+  uses: 8398a7/action-slack@v3
+  with:
+    status: custom
+    custom_payload: |
+      {
+        attachments: [{
+          color: '${{ job.status }}' === 'success' ? 'good' : 'danger',
+          blocks: [{
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: `*${{ github.repository }}* - ${{ github.workflow }}\n*Status:* ${{ job.status }}\n*Duration:* ${{ steps.timer.outputs.duration }}s\n*Tests:* ${{ steps.test.outputs.test_count }} passed\n*Coverage:* ${{ steps.coverage.outputs.percentage }}%`
+            }
+          }]
+        }]
+      }
+```
+
+### Error Tracking and Analysis
+
+```yaml
+# Comprehensive error collection
+- name: Collect Error Details
+  if: failure()
+  run: |
+    # Capture system information
+    echo "## System Info" >> error-report.md
+    uname -a >> error-report.md
+    echo "\n## Environment" >> error-report.md
+    env | sort >> error-report.md
+    
+    # Capture build logs
+    echo "\n## Build Logs" >> error-report.md
+    tail -100 build.log >> error-report.md
+    
+    # Capture test failures
+    if [ -f test-results.xml ]; then
+      echo "\n## Test Failures" >> error-report.md
+      grep -A 5 -B 5 "failure" test-results.xml >> error-report.md
+    fi
+
+- name: Send Error Report
+  if: failure()
+  uses: JasonEtco/create-an-issue@v2
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  with:
+    filename: .github/ISSUE_TEMPLATE/ci-failure.md
+    update_existing: true
+```
+
+</details>
+
 ## Next Steps
 
 - Explore [migration guide](./migration-guide.md) for existing projects
 - Learn about [multi-language setups](./multi-language.md)
 - Review [JavaScript project examples](./javascript-project.md)
+- Check [Python project patterns](./python-project.md)
+- Study [React application workflows](./react-app.md)

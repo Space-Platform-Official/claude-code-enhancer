@@ -49,6 +49,100 @@ find_templates_dir() {
     return 1
 }
 
+# Function to check if script self-update is needed
+check_script_updates() {
+    local template_script="$TEMPLATES_DIR/../smart-merge-claude.sh"
+    local current_script="$0"
+    
+    # Skip self-update if template script doesn't exist or is the same file
+    if [[ ! -f "$template_script" ]]; then
+        return 0
+    fi
+    
+    # Get absolute paths for comparison
+    local template_abs=$(cd "$(dirname "$template_script")" && pwd)/$(basename "$template_script")
+    local current_abs=$(cd "$(dirname "$current_script")" && pwd)/$(basename "$current_script")
+    
+    if [[ "$template_abs" == "$current_abs" ]]; then
+        return 0  # Same file, no update needed
+    fi
+    
+    # Check if template script is newer
+    if [[ "$template_script" -nt "$current_script" ]]; then
+        print_status "Template script is newer than current script"
+        
+        # Check if auto-update is enabled
+        if [[ "${CLAUDE_MERGE_AUTO_UPDATE:-true}" == "true" ]]; then
+            print_status "Auto-updating merge script..."
+            
+            # Create backup of current script
+            local backup_script="${current_script}.backup.$(date +%s)"
+            cp "$current_script" "$backup_script"
+            print_status "Script backup created: $(basename "$backup_script")"
+            
+            # Update script
+            if cp "$template_script" "$current_script"; then
+                print_success "Merge script updated successfully"
+                print_status "Restarting with updated script..."
+                exec "$current_script" "$@"
+            else
+                print_error "Failed to update script, continuing with current version"
+                return 1
+            fi
+        else
+            print_warning "Script update available but auto-update is disabled"
+            print_status "Run: cp \"$template_script\" \"$current_script\" to update manually"
+        fi
+    fi
+    
+    return 0
+}
+
+# Function to update installed merge script in system paths
+update_system_script() {
+    local template_script="$TEMPLATES_DIR/../smart-merge-claude.sh"
+    local updated_any=false
+    
+    # Skip if no template script available
+    if [[ ! -f "$template_script" ]]; then
+        return 0
+    fi
+    
+    # Check common system installation paths
+    local system_paths=(
+        "$HOME/.local/bin/claude-merge"
+        "/usr/local/bin/claude-merge"
+    )
+    
+    for system_script in "${system_paths[@]}"; do
+        if [[ -f "$system_script" && "$template_script" -nt "$system_script" ]]; then
+            print_status "Updating system script: $system_script"
+            
+            # Create backup
+            local backup_path="${system_script}.backup.$(date +%s)"
+            cp "$system_script" "$backup_path" 2>/dev/null || continue
+            
+            # Update script
+            if cp "$template_script" "$system_script" 2>/dev/null; then
+                chmod +x "$system_script"
+                print_success "Updated: $(basename "$system_script")"
+                updated_any=true
+                
+                # Clean up backup
+                rm -f "$backup_path"
+            else
+                print_warning "Failed to update: $system_script"
+                # Restore backup if update failed
+                mv "$backup_path" "$system_script" 2>/dev/null || true
+            fi
+        fi
+    done
+    
+    if [[ "$updated_any" == "true" ]]; then
+        print_success "System scripts updated successfully"
+    fi
+}
+
 # Find templates directory
 if ! TEMPLATES_DIR="$(find_templates_dir)"; then
     echo -e "${RED}[ERROR]${NC} No valid templates directory found."
@@ -411,6 +505,120 @@ merge_claude_md() {
     print_success "CLAUDE.md files merged successfully"
 }
 
+# Function to setup Claude hooks with simple backup
+setup_claude_hooks() {
+    local target_dir="$1"
+    local claude_dir="$target_dir/.claude"
+    local hooks_dir="$claude_dir/hooks"
+    local git_hooks_dir="$target_dir/.git/hooks"
+    local backup_path=""
+
+    # Create .claude/hooks directory if it doesn't exist
+    if [[ ! -d "$hooks_dir" ]]; then
+        mkdir -p "$hooks_dir"
+    fi
+
+    # Simple backup of existing hooks
+    if [[ -d "$hooks_dir" ]]; then
+        backup_path=$(create_backup "$hooks_dir")
+        if [[ -n "$backup_path" ]]; then
+            print_status "Hooks backup created: $(basename "$backup_path")"
+        fi
+    fi
+
+    # Copy hooks from templates
+    if [[ -d "$TEMPLATES_DIR/hooks" ]]; then
+        print_status "Installing Claude hooks..."
+        
+        # Remove existing hooks and copy new ones (with size check)
+        local hooks_size=$(du -s "$TEMPLATES_DIR/hooks" 2>/dev/null | cut -f1)
+        if [[ $hooks_size -gt 5120 ]]; then  # 5MB limit for hooks
+            print_error "Hooks directory too large: ${hooks_size}KB"
+            return 1
+        fi
+        
+        rm -rf "$hooks_dir"
+        cp -r "$TEMPLATES_DIR/hooks" "$hooks_dir"
+        
+        # Make hook scripts executable
+        find "$hooks_dir" -name "*.sh" -type f -exec chmod +x {} \; 2>/dev/null || true
+        
+        # Verify copy succeeded
+        if [[ -d "$hooks_dir" ]]; then
+            local hook_count=$(find "$hooks_dir" -name "*.sh" 2>/dev/null | wc -l)
+            print_success "Hooks installed successfully ($hook_count scripts)"
+            
+            # Install git hooks if .git directory exists
+            if [[ -d "$git_hooks_dir" ]]; then
+                install_git_hooks "$target_dir"
+            fi
+            
+            # Clean up backup on success
+            if [[ -n "$backup_path" && -d "$backup_path" ]]; then
+                local grace_period="${CLAUDE_MERGE_BACKUP_GRACE:-0}"
+                if [[ "$grace_period" -eq 0 ]]; then
+                    rm -rf "$backup_path"
+                else
+                    print_status "Hooks backup preserved for ${grace_period}h grace period: $(basename "$backup_path")"
+                fi
+            fi
+        else
+            print_error "Failed to install hooks"
+            # Restore from backup if it exists
+            if [[ -n "$backup_path" && -d "$backup_path" ]]; then
+                cp -r "$backup_path" "$hooks_dir"
+                print_status "Restored hooks from backup"
+            fi
+            return 1
+        fi
+    else
+        print_status "No hooks templates found in $TEMPLATES_DIR/hooks - skipping hook installation"
+        return 0
+    fi
+}
+
+# Function to install git hooks integration
+install_git_hooks() {
+    local target_dir="$1"
+    local git_hooks_dir="$target_dir/.git/hooks"
+    local claude_hooks_dir="$target_dir/.claude/hooks"
+    
+    if [[ ! -d "$git_hooks_dir" ]]; then
+        print_status "No .git directory found - skipping git hooks integration"
+        return 0
+    fi
+    
+    print_status "Setting up git hooks integration..."
+    
+    # Common git hooks to integrate
+    local git_hook_types=("pre-commit" "post-commit" "pre-push" "post-merge")
+    
+    for hook_type in "${git_hook_types[@]}"; do
+        local git_hook_file="$git_hooks_dir/$hook_type"
+        local claude_hook_file="$claude_hooks_dir/$hook_type.sh"
+        
+        # Check if Claude hook exists
+        if [[ -f "$claude_hook_file" ]]; then
+            # Create or update git hook to call Claude hook
+            cat > "$git_hook_file" << EOF
+#!/bin/bash
+# Auto-generated git hook for Claude integration
+# Calls corresponding Claude hook if it exists
+
+CLAUDE_HOOK="\$(dirname "\$0")/../../.claude/hooks/$hook_type.sh"
+
+if [[ -f "\$CLAUDE_HOOK" && -x "\$CLAUDE_HOOK" ]]; then
+    exec "\$CLAUDE_HOOK" "\$@"
+fi
+EOF
+            chmod +x "$git_hook_file"
+            print_status "Git $hook_type hook installed"
+        fi
+    done
+    
+    print_success "Git hooks integration completed"
+}
+
 # Function to setup Claude commands with simple backup
 setup_claude_commands() {
     local target_dir="$1"
@@ -426,7 +634,9 @@ setup_claude_commands() {
     # Simple backup of existing commands
     if [[ -d "$commands_dir" ]]; then
         backup_path=$(create_backup "$commands_dir")
-        print_status "Backup created: $backup_path"
+        if [[ -n "$backup_path" ]]; then
+            print_status "Commands backup created: $(basename "$backup_path")"
+        fi
     fi
 
     # Copy templates to commands directory
@@ -476,17 +686,32 @@ setup_claude_commands() {
 main() {
     if [[ $# -gt 1 ]] || [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
         echo "Usage: $0 [target-directory]"
-        echo "Simple smart merge for CLAUDE.md and command templates"
+        echo "Smart merge for CLAUDE.md, command templates, and hooks with auto-update"
+        echo ""
+        echo "Features:"
+        echo "  - Merges CLAUDE.md files using marker-based approach"
+        echo "  - Installs command templates to .claude/commands"
+        echo "  - Installs and integrates git hooks from templates"
+        echo "  - Auto-updates script when template version is newer"
+        echo "  - Creates backups and handles cleanup automatically"
         echo ""
         echo "Environment Variables:"
         echo "  CLAUDE_MERGE_BACKUP=false         Disable backup creation"
         echo "  CLAUDE_MERGE_BACKUP_RETENTION=24  Backup retention hours (default: 24)"
         echo "  CLAUDE_MERGE_BACKUP_GRACE=0       Grace period for successful backups (default: 0)"
+        echo "  CLAUDE_MERGE_AUTO_UPDATE=false    Disable script auto-update (default: true)"
         echo ""
         echo "Examples:"
         echo "  $0                                 # Merge in current directory"
+        echo "  $0 /path/to/project               # Merge in specific directory"
         echo "  CLAUDE_MERGE_BACKUP=false $0      # Merge without backups"
-        echo "  CLAUDE_MERGE_BACKUP_RETENTION=48 $0  # Keep backups for 48 hours"
+        echo "  CLAUDE_MERGE_AUTO_UPDATE=false $0 # Disable auto-update"
+        echo ""
+        echo "Files installed/updated:"
+        echo "  - target-dir/CLAUDE.md            # Development guidelines"
+        echo "  - target-dir/.claude/commands/    # Command templates"
+        echo "  - target-dir/.claude/hooks/       # Hook scripts"
+        echo "  - target-dir/.git/hooks/          # Git hook integration"
         exit 1
     fi
 
@@ -533,16 +758,33 @@ main() {
         exit 1
     fi
 
+    # Check for script updates first (before doing any work)
+    check_script_updates "$@"
+    
+    # Update system scripts if needed
+    update_system_script
+
     # Perform the merge
     merge_claude_md "$source_claude" "$target_claude"
 
     # Setup Claude commands
     setup_claude_commands "$target_dir"
+    
+    # Setup Claude hooks
+    setup_claude_hooks "$target_dir"
 
     print_success "Smart merge completed successfully!"
     print_status "Target directory: $target_dir"
     print_status "CLAUDE.md: $target_claude"
     print_status "Commands: $target_dir/.claude/commands"
+    print_status "Hooks: $target_dir/.claude/hooks"
+    
+    # Show git integration status
+    if [[ -d "$target_dir/.git" ]]; then
+        print_status "Git hooks integration: Active"
+    else
+        print_status "Git hooks integration: Not available (no .git directory)"
+    fi
 }
 
 # Run main function with all arguments

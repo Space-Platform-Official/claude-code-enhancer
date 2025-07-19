@@ -1,0 +1,179 @@
+# Claude Code Hook Configuration Template
+# PHP Paradigm Coding Standards Integration
+#
+# This template enables automatic validation of php-paradigm coding standards
+# when Claude Code modifies your project files.
+
+hooks:
+  version: "1.0"
+  
+  # Global hook settings
+  global:
+    enabled: true
+    timeout: 60
+    parallel_execution: false
+    continue_on_error: false
+    
+  # Hook directories - Convention-based discovery
+  directories:
+    - path: "./templates/hooks/php-paradigm"
+      priority: 1
+      description: "PHP paradigm template hooks"
+    - path: ".claude/hooks"
+      priority: 2
+      description: "Claude Code project hooks"
+    - path: "~/.config/claude-code/hooks"
+      priority: 3
+      description: "User global hooks"
+      
+  # Hook types configuration
+  types:
+    # Validate before Claude Code makes any edits
+    pre_edit:
+      enabled: true
+      script: "./templates/hooks/php-paradigm/pre-edit.sh"
+      timeout: 10
+      parallel: true
+      description: "Validate php-paradigm standards before editing"
+      fallback_behavior: "warn"  # warn | block | ignore
+      
+    # Validate and auto-fix after Claude Code edits
+    post_edit:
+      enabled: true
+      script: "./templates/hooks/php-paradigm/post-edit.sh"
+      timeout: 20
+      parallel: false
+      description: "Apply php-paradigm standards after editing"
+      fallback_behavior: "warn"
+      
+    # Validate before running any Claude Code commands
+    pre_command:
+      enabled: true
+      script: "./templates/hooks/php-paradigm/pre-command.sh"
+      timeout: 5
+      parallel: true
+      description: "Pre-command php-paradigm validation"
+      fallback_behavior: "ignore"
+      
+    # Cleanup and final validation after commands
+    post_command:
+      enabled: true
+      script: "./templates/hooks/php-paradigm/post-command.sh"
+      timeout: 30
+      parallel: false
+      description: "Post-command php-paradigm validation"
+      fallback_behavior: "warn"
+      
+    # Error recovery and reporting
+    error_command:
+      enabled: true
+      script: "./templates/hooks/php-paradigm/error-handler.sh"
+      timeout: 15
+      parallel: false
+      description: "error recovery"
+      fallback_behavior: "ignore"
+
+# PHP Paradigm specific configuration
+php_paradigm:
+  # Path to php-paradigm standards (set via PHP_PARADIGM_PATH environment variable)
+  standards_path: "${PHP_PARADIGM_PATH:-/path/to/your/php-paradigm-standards}"
+  
+  # Standards to enforce
+  standards:
+    php_type_safety:
+      enabled: true
+      strict_types: true
+      typed_constants: true
+      generic_collections: true
+      value_objects: true
+      
+    testing_standards:
+      enabled: true
+      group_hierarchy: true
+      coverage_requirements: true
+      naming_conventions: true
+      
+    architecture_patterns:
+      enabled: true
+      config_provider: true
+      immutable_operations: true
+      monads: true
+      
+    documentation:
+      enabled: true
+      bidirectional_annotation: true
+      progressive_complexity: true
+      cross_component_integration: true
+      
+  # Quality gates (zero tolerance)
+  quality_gates:
+    block_on_missing_strict_types: true
+    block_on_untyped_constants: true
+    block_on_missing_test_groups: true
+    block_on_annotation_violations: true
+    
+  # Auto-fix capabilities
+  auto_fix:
+    enabled: true
+    add_strict_types: true
+    add_typed_constants: true
+    add_test_groups: true
+    format_annotations: true
+    
+# File type specific configurations
+file_types:
+  php:
+    hooks:
+      pre_edit: ["validate-php-standards", "check-strict-types", "validate-constants"]
+      post_edit: ["fix-php-standards", "add-missing-types", "format-code"]
+    extensions: [".php"]
+    
+  test:
+    hooks:
+      pre_edit: ["validate-test-groups", "check-test-structure"]
+      post_edit: ["add-missing-groups", "organize-test-structure"]
+    patterns: ["*Test.php", "*test.php", "test/**/*.php", "tests/**/*.php"]
+    
+  config:
+    hooks:
+      pre_edit: ["validate-config-provider"]
+      post_edit: ["update-config-provider"]
+    patterns: ["*ConfigProvider.php", "config/**/*.php"]
+
+# Environment-specific overrides
+environments:
+  development:
+    global:
+      continue_on_error: true
+    php_paradigm:
+      auto_fix:
+        enabled: true
+        
+  production:
+    global:
+      continue_on_error: false
+    php_paradigm:
+      quality_gates:
+        block_on_missing_strict_types: true
+        block_on_untyped_constants: true
+        
+  ci:
+    global:
+      timeout: 120
+      parallel_execution: true
+    php_paradigm:
+      auto_fix:
+        enabled: false  # No auto-fixing in CI
+
+# Logging and reporting
+logging:
+  enabled: true
+  level: "info"  # debug | info | warn | error
+  file: ".claude/logs/hooks.log"
+  format: "json"
+  
+reporting:
+  enabled: true
+  standards_compliance: true
+  performance_metrics: true
+  output_file: ".claude/reports/standards-compliance.json"

@@ -1,596 +1,895 @@
-# Common Workflows and Use Cases
+# Command Workflows and Development Patterns
 
-This guide demonstrates real-world workflows using Claude Flow across different project types and development scenarios.
+This comprehensive guide demonstrates real-world workflows using Claude Code Enhancer across different project types and development scenarios. Learn how to leverage the command system, quality tools, and multi-agent coordination for efficient development.
+
+## 📋 Table of Contents
+
+- [Quick Reference](#quick-reference)
+- [Core Workflow Patterns](#core-workflow-patterns)
+- [Quality Workflows](#quality-workflows)
+- [Git Integration Workflows](#git-integration-workflows)
+- [Testing Workflows](#testing-workflows)
+- [Milestone Management](#milestone-management)
+- [Multi-Agent Coordination](#multi-agent-coordination)
+- [Project Lifecycle Workflows](#project-lifecycle-workflows)
+- [Emergency Response Workflows](#emergency-response-workflows)
+- [Team Collaboration Patterns](#team-collaboration-patterns)
 
 ## Quick Reference
 
 | Scenario | Workflow | Key Commands |
 |----------|----------|--------------|
-| New Feature | Research → Architect → Implement | `/architect`, `/test-coverage` |
-| Bug Fix | Debug → Fix → Test | `/debug`, `/review` |
-| Performance | Profile → Optimize → Validate | `/optimize`, `/monitor` |
-| Refactoring | Analyze → Plan → Refactor | `/refactor`, `/review` |
-| API Development | Design → Implement → Document | `/api-design`, `/docs` |
+| **Code Quality** | Format → Cleanup → Verify | `claude format`, `claude cleanup`, `claude verify` |
+| **Git Workflow** | Status → Commit → Push → PR | `claude status`, `claude commit`, `claude pr` |
+| **Testing** | Unit → Integration → Coverage | `claude test unit`, `claude test integration`, `claude test coverage` |
+| **Feature Development** | Research → Architect → Implement → Test | `claude architect`, `claude test unit` |
+| **Bug Investigation** | Debug → Fix → Test → Verify | `claude debug`, `claude verify` |
+| **Performance** | Profile → Optimize → Monitor | `claude optimize`, `claude monitor` |
+| **Milestone Planning** | Plan → Execute → Status → Archive | `claude milestone plan`, `claude milestone execute` |
+| **Project Setup** | Install → Configure → Verify | `claude-install-flow`, `claude verify` |
 
-## New Project Workflows
+## Core Workflow Patterns
 
-### Starting a React Application
+### The Standard Development Cycle
+
+Every development task should follow this proven pattern:
 
 ```bash
+# 1. Quality Check (Start Clean)
+claude format && claude verify --quick
+
+# 2. Work on Feature/Fix
+# ... your development work ...
+
+# 3. Quality Assurance (Before Commit)
+claude format && claude cleanup && claude verify
+
+# 4. Commit and Push
+claude commit "feat: implement user authentication"
+claude push
+
+# 5. Create Pull Request (if needed)
+claude pr "Add user authentication system"
+```
+
+### The Research → Plan → Implement Pattern
+
+For complex features, always follow this three-phase approach:
+
+**Phase 1: Research** (Understanding)
+```bash
+# Understand current codebase
+claude architect --analyze-existing
+
+# Research best practices for your task
+# Use claude to explore patterns and approaches
+```
+
+**Phase 2: Plan** (Architecture)
+```bash
+# Create implementation plan
+claude architect --design-feature "user authentication"
+
+# Plan testing strategy
+claude test coverage --plan
+```
+
+**Phase 3: Implement** (Execution)
+```bash
+# Implement in iterations with quality checks
+claude format && claude verify  # Before starting
+# ... implement ...
+claude format && claude cleanup  # During development
+# ... test ...
+claude verify --comprehensive   # Before completion
+```
+
+## Quality Workflows
+
+### Daily Quality Maintenance
+
+**Morning Routine** (Start of day):
+```bash
+# Check project health
+claude verify --quick
+
+# Update and format any changes
+claude format
+
+# Check for any issues to address
+claude cleanup --dry-run
+```
+
+**Development Cycle** (During work):
+```bash
+# Before making changes
+claude format
+
+# After implementing a feature
+claude cleanup
+claude verify
+
+# Before committing
+claude format && claude cleanup && claude verify
+```
+
+**End of Day** (Before leaving):
+```bash
+# Comprehensive quality check
+claude verify --comprehensive
+
+# Check for any duplicates introduced
+claude dedupe --dry-run
+
+# Ensure everything is committed
+claude status
+```
+
+### Code Quality Deep Dive
+
+**Weekly Quality Audit**:
+```bash
+# Comprehensive quality assessment
+claude verify --comprehensive --report=detailed
+
+# Find and resolve duplicates
+claude dedupe --interactive --threshold=75
+
+# Deep cleanup of dead code
+claude cleanup --aggressive
+
+# Generate quality metrics
+claude verify --metrics --output=quality-report.json
+```
+
+**Pre-Release Quality Check**:
+```bash
+# Security-focused verification
+claude verify --security-focus
+
+# Comprehensive formatting with all tools
+claude format --comprehensive
+
+# Aggressive cleanup for production
+claude cleanup --aggressive
+
+# Final verification
+claude verify --comprehensive --fail-fast
+```
+
+### Quality Tool Configuration
+
+**Project-Specific Quality Setup**:
+```json
+// .claude-config.json
+{
+  "quality": {
+    "auto_format_on_save": true,
+    "verify_before_commit": true,
+    "cleanup_aggressiveness": "conservative",
+    "dedupe_threshold": 80,
+    "format_tools": {
+      "javascript": ["prettier", "eslint"],
+      "python": ["black", "isort", "flake8"],
+      "go": ["gofmt", "goimports"]
+    }
+  }
+}
+```
+
+## Git Integration Workflows
+
+### Standard Git Workflow with Quality
+
+**Feature Branch Workflow**:
+```bash
+# 1. Create feature branch
+git checkout -b feature/user-authentication
+
+# 2. Set up quality baseline
+claude format && claude verify
+
+# 3. Implement feature with quality checks
+# ... development work ...
+claude format && claude cleanup
+
+# 4. Comprehensive testing
+claude test unit && claude test integration
+
+# 5. Quality verification
+claude verify --comprehensive
+
+# 6. Commit with quality assurance
+claude commit "feat: implement user authentication system"
+
+# 7. Push and create PR
+claude push
+claude pr "Add user authentication with JWT and role-based access"
+```
+
+**Hotfix Workflow**:
+```bash
+# 1. Create hotfix branch
+git checkout -b hotfix/critical-auth-bug
+
+# 2. Quick quality check
+claude verify --quick
+
+# 3. Implement fix
+# ... fix the bug ...
+
+# 4. Quality verification
+claude format && claude verify
+
+# 5. Test the fix
+claude test unit --focus=auth
+
+# 6. Emergency commit and deploy
+claude commit "fix: resolve critical authentication vulnerability"
+claude push --verify
+```
+
+### Advanced Git Integration
+
+**Automated Quality Hooks**:
+```bash
+# Pre-commit hook (add to .git/hooks/pre-commit)
+#!/bin/bash
+if ! claude verify --quick --exit-code; then
+  echo "Quality checks failed. Run 'claude format && claude verify' to fix."
+  exit 1
+fi
+```
+
+**Pull Request Quality Reports**:
+```bash
+# Generate quality report for PR
+claude verify --format=markdown > QUALITY_REPORT.md
+
+# Add to PR description
+claude pr "Feature implementation" --include-quality-report
+```
+
+## Testing Workflows
+
+### Test-Driven Development (TDD)
+
+**TDD Cycle with Claude**:
+```bash
+# 1. Write failing tests first
+claude test unit --create-template UserAuthTest
+
+# 2. Run tests (should fail)
+claude test unit --watch
+
+# 3. Implement minimal code to pass
+# ... implement ...
+
+# 4. Run tests (should pass)
+claude test unit
+
+# 5. Refactor with confidence
+claude format && claude cleanup
+
+# 6. Verify all tests still pass
+claude test unit && claude test integration
+```
+
+### Comprehensive Testing Strategy
+
+**Multi-Level Testing**:
+```bash
+# Unit tests (fast feedback)
+claude test unit --parallel
+
+# Integration tests (module interaction)
+claude test integration --coverage
+
+# End-to-end tests (full workflow)
+claude test e2e --headless
+
+# Performance tests (load and speed)
+claude test performance --benchmark
+```
+
+**Coverage-Driven Testing**:
+```bash
+# Generate coverage report
+claude test coverage --report=html
+
+# Identify untested code
+claude test coverage --missing
+
+# Add tests for uncovered areas
+claude test unit --focus=uncovered
+
+# Verify improved coverage
+claude test coverage --verify-threshold=80
+```
+
+### Test Maintenance
+
+**Test Quality Assurance**:
+```bash
+# Find duplicate test logic
+claude dedupe --focus=tests
+
+# Clean up test imports and utilities
+claude cleanup --tests-only
+
+# Verify test code quality
+claude verify --tests-focus
+
+# Fix failing tests
+claude test fix --interactive
+```
+
+## Milestone Management
+
+### Project Planning with Milestones
+
+**Create New Milestone**:
+```bash
+# Plan milestone with requirements gathering
+claude milestone plan "Q4 User Management Features"
+
+# Define success criteria and deliverables
+claude milestone plan --interactive --add-requirements
+
+# Set timeline and dependencies
+claude milestone plan --timeline=8weeks --dependencies
+```
+
+**Execute Milestone**:
+```bash
+# Start milestone execution
+claude milestone execute
+
+# Track daily progress
+claude milestone status --daily
+
+# Handle blockers and issues
+claude milestone execute --resolve-blockers
+
+# Update milestone progress
+claude milestone update --progress=60 --notes="Auth completed, working on permissions"
+```
+
+**Milestone Monitoring**:
+```bash
+# Check milestone health
+claude milestone status --comprehensive
+
+# Generate progress reports
+claude milestone status --report=detailed --format=markdown
+
+# Review and adjust timeline
+claude milestone update --extend-deadline=1week --reason="Additional security requirements"
+```
+
+### Milestone Quality Gates
+
+**Quality Checkpoints**:
+```bash
+# Quality gate before milestone completion
+claude verify --comprehensive --milestone-gate
+
+# Performance verification
+claude test performance --milestone-baseline
+
+# Security audit
+claude verify --security-focus --milestone-critical
+
+# Documentation completeness
+claude docs --verify-completeness --milestone
+```
+
+## Multi-Agent Coordination
+
+### Spawning Agents for Parallel Work
+
+**Complex Feature Implementation**:
+```bash
+# Primary agent coordinates overall implementation
+# Agent 1: Backend API development
+# Agent 2: Frontend component implementation  
+# Agent 3: Testing and quality assurance
+# Agent 4: Documentation and examples
+
+# Example coordination:
+# "I'll spawn agents to tackle different aspects of the user authentication feature"
+# "Agent 1 will handle the JWT backend implementation"
+# "Agent 2 will create the React authentication components"
+# "Agent 3 will develop comprehensive test suites"
+# "Agent 4 will create usage documentation and examples"
+```
+
+**Parallel Quality Operations**:
+```bash
+# When safe, quality operations can run in parallel:
+# Agent 1: claude verify (read-only analysis)
+# Agent 2: claude dedupe --dry-run (read-only duplicate detection)
+# Main: Wait for analysis, then apply changes sequentially
+# Agent 3: claude format (after analysis complete)
+# Agent 4: claude cleanup (after formatting complete)
+```
+
+### Agent Coordination Patterns
+
+**Research and Implementation**:
+```
+Primary: "I need to implement a complex payment processing system"
+
+Coordination Strategy:
+- Agent 1: Research existing payment integrations in codebase
+- Agent 2: Research industry best practices and security requirements
+- Agent 3: Analyze current architecture for integration points
+- Primary: Synthesize findings and create implementation plan
+- Agent 4: Implement core payment logic
+- Agent 5: Implement security and error handling
+- Agent 6: Create comprehensive tests
+```
+
+**Large Codebase Analysis**:
+```
+Task: "Analyze this 500+ file codebase for security vulnerabilities"
+
+Agent Distribution:
+- Agent 1: Scan authentication and authorization code
+- Agent 2: Review data access and validation layers
+- Agent 3: Analyze external integrations and APIs
+- Agent 4: Check configuration and environment handling
+- Agent 5: Review error handling and logging
+- Primary: Consolidate findings and prioritize fixes
+```
+
+## Project Lifecycle Workflows
+
+### New Project Setup
+
+**Starting a React Application**:
+```bash
 # 1. Create and initialize project
-npx create-react-app my-app
+npx create-react-app my-app --template typescript
 cd my-app
 git init
 
-# 2. Install Claude Flow templates
+# 2. Install Claude Code Enhancer templates
 claude-install-flow
-# Select: JavaScript → React
+# Select: JavaScript → React → TypeScript → Testing
 
-# 3. Customize for your needs
+# 3. Set up quality baseline
+claude format && claude verify
+
+# 4. Create first milestone
+claude milestone plan "Initial Setup and Core Components"
+
+# 5. Verify everything works
+claude test unit && claude verify --comprehensive
 ```
 
-**Claude Conversation**:
-```
-You: Set up a new React app with TypeScript, testing, and our component library
-
-Claude: I'll help you set up a new React app with TypeScript and testing. Let me start by researching the current setup and creating a plan.
-
-[Uses /architect command to design the setup]
-[Creates comprehensive plan]
-[Implements with checkpoints]
-```
-
-### Building a Python API
-
+**Building a Python API**:
 ```bash
 # 1. Create project structure
 mkdir python-api && cd python-api
 python -m venv venv
 source venv/bin/activate
 
-# 2. Install Claude Flow
+# 2. Install Claude Code Enhancer templates
 claude-install-flow
-# Select: Python → None (or Django)
+# Select: Python → FastAPI/Django → Testing → Documentation
 
-# 3. Initialize project
-pip install fastapi uvicorn
+# 3. Set up project dependencies
+pip install fastapi uvicorn pytest
+
+# 4. Quality baseline
+claude format && claude verify
+
+# 5. Plan API architecture
+claude milestone plan "Core API Development"
+
+# 6. Implement with quality checks
+# ... development work ...
+claude format && claude cleanup && claude verify
 ```
 
-**Workflow Steps**:
-1. **Architecture Planning**
-   ```
-   You: /architect Design a REST API for user management with auth
-   ```
-
-2. **Implementation**
-   ```
-   You: Implement the user registration endpoint with validation
-   ```
-
-3. **Testing**
-   ```
-   You: /test-coverage Create comprehensive tests for the auth module
-   ```
-
-### Go Microservice Setup
-
+**Building a Go Microservice**:
 ```bash
 # 1. Initialize Go module
 mkdir user-service && cd user-service
 go mod init github.com/company/user-service
 
-# 2. Claude Flow setup
+# 2. Claude Code Enhancer setup
 claude-install-flow
-# Select: Go → None
+# Select: Go → Standard Library → gRPC → Testing
 
-# 3. Project structure
+# 3. Create project structure
 mkdir -p cmd/server pkg/handlers pkg/models
+
+# 4. Quality verification
+claude format && claude verify
+
+# 5. Plan service architecture
+claude milestone plan "User Service MVP"
 ```
 
-**Development Flow**:
+## Emergency Response Workflows
+
+### Production Incident Response
+
+**Critical Bug Fix Pipeline**:
+```bash
+# 1. Create emergency branch
+git checkout -b hotfix/critical-production-issue
+
+# 2. Quick triage
+claude verify --quick --focus=critical
+
+# 3. Implement minimal fix
+# ... emergency fix ...
+
+# 4. Fast quality check
+claude format && claude verify --critical-only
+
+# 5. Emergency testing
+claude test unit --focus=affected-module
+
+# 6. Deploy pipeline
+claude commit "fix: resolve critical production issue"
+claude push --emergency
 ```
-You: Create a gRPC service for user management following our microservice patterns
 
-Claude: I'll research the codebase and create a plan for implementing a gRPC user management service.
+**System Outage Response**:
+```bash
+# 1. Immediate assessment
+claude monitor --production --alert=critical
 
-[Researches existing patterns]
-[Creates architecture with /architect]
-[Implements with proper error handling]
+# 2. Rollback if needed
+claude rollback --to-last-stable
+
+# 3. Root cause analysis
+claude debug --production-logs --analyze
+
+# 4. Implement fix
+# ... fix implementation ...
+
+# 5. Gradual rollout
+claude deploy --canary --monitor
 ```
 
-## Feature Development Workflows
+### Data Recovery Procedures
+
+**Accidental Data Loss**:
+```bash
+# 1. Stop further damage
+claude monitor --stop-operations
+
+# 2. Assess backup situation
+claude backup --list --recent
+
+# 3. Plan recovery
+claude recovery --plan --assess-impact
+
+# 4. Execute recovery
+claude recovery --execute --verify-integrity
+
+# 5. Validate restoration
+claude verify --data-integrity --comprehensive
+```
+
+## Team Collaboration Patterns
+
+### Onboarding New Developers
+
+**New Team Member Setup**:
+```bash
+# 1. Environment setup
+claude-install-flow --team-config
+
+# 2. Codebase introduction
+claude docs --generate-overview --for-newcomer
+
+# 3. Practice workflows
+claude milestone plan "Onboarding: First Feature Implementation"
+
+# 4. Quality training
+claude verify --learning-mode --explain-issues
+```
+
+### Code Review Integration
+
+**PR Review Workflow**:
+```bash
+# 1. Generate quality report for PR
+claude verify --pr-report --comprehensive
+
+# 2. Check for common issues
+claude review --checklist --team-standards
+
+# 3. Verify testing coverage
+claude test coverage --pr-diff
+
+# 4. Security review
+claude verify --security-focus --pr-critical
+```
+
+### Knowledge Sharing
+
+**Documentation Generation**:
+```bash
+# 1. Generate project overview
+claude docs --generate-architecture-overview
+
+# 2. Create onboarding guides
+claude docs --onboarding-workflow
+
+# 3. Document team practices
+claude docs --team-workflows --best-practices
+
+# 4. Maintain decision records
+claude docs --adr --update-decisions
+```
+
+## Advanced Configuration and Customization
+
+### Team-Wide Standards
+
+**Shared Quality Configuration**:
+```json
+// .claude-team-config.json (shared across team)
+{
+  "team": {
+    "name": "Backend Team",
+    "standards": {
+      "quality_gate": "comprehensive",
+      "test_coverage_minimum": 80,
+      "security_scan_required": true,
+      "code_review_required": true
+    },
+    "workflows": {
+      "default_branch_workflow": "feature-branch-with-quality",
+      "hotfix_workflow": "emergency-fast-track",
+      "release_workflow": "comprehensive-quality-gate"
+    },
+    "tools": {
+      "formatters": {
+        "javascript": ["prettier", "eslint"],
+        "python": ["black", "isort", "flake8"],
+        "go": ["gofmt", "goimports", "golangci-lint"]
+      },
+      "required_tools": ["security-scanner", "dependency-checker"]
+    }
+  }
+}
+```
+
+### Environment-Specific Workflows
+
+**Development Environment**:
+```bash
+export CLAUDE_ENV=development
+export CLAUDE_QUALITY_MODE=interactive
+export CLAUDE_TEST_MODE=watch
+claude verify --quick --non-blocking
+```
+
+**CI/CD Environment**:
+```bash
+export CLAUDE_ENV=ci
+export CLAUDE_QUALITY_MODE=strict
+export CLAUDE_FAIL_FAST=true
+claude verify --comprehensive --fail-fast --format=junit
+```
+
+**Production Environment**:
+```bash
+export CLAUDE_ENV=production
+export CLAUDE_QUALITY_MODE=critical
+export CLAUDE_SECURITY_FOCUS=true
+claude verify --security-focus --comprehensive --audit-trail
+```
+
+## Performance and Scale Workflows
+
+### Large Codebase Optimization
+
+**Handling 1000+ File Projects**:
+```bash
+# 1. Parallel processing optimization
+export CLAUDE_MAX_PARALLEL=8
+export CLAUDE_CACHE_SIZE=1GB
+export CLAUDE_STREAMING_MODE=true
+
+# 2. Targeted operations
+claude verify --incremental --changed-files-only
+claude format --batch-size=100 --parallel
+claude cleanup --conservative --exclude-large-files
+
+# 3. Progress monitoring
+claude monitor --progress --eta --resource-usage
+```
+
+### CI/CD Performance Tuning
+
+**Fast Feedback Loops**:
+```bash
+# Quick quality gate (< 2 minutes)
+claude verify --quick --changed-files --fail-fast
+
+# Parallel test execution
+claude test unit --parallel --max-workers=4
+
+# Incremental verification
+claude verify --incremental --cache-previous-results
+```
 
 ### Complex Feature Implementation
 
-**Scenario**: Adding real-time collaboration to an editor
-
-**Phase 1 - Research**:
-```
-You: We need to add real-time collaboration to our editor. Research our current architecture.
-
-Claude: I'll analyze the current editor architecture and identify integration points for real-time collaboration.
-```
-
-**Phase 2 - Architecture**:
-```
-You: /architect Design real-time collaboration with WebSockets and CRDTs
-
-Claude: I'll create a comprehensive architecture for real-time collaboration...
-[Generates ADR]
-[Proposes multiple approaches]
-[Creates implementation roadmap]
-```
-
-**Phase 3 - Implementation**:
-```
-You: Implement Phase 1 of the collaboration feature
-
-Claude: I'll implement the WebSocket infrastructure and basic message passing...
-[Implements with validation checkpoints]
-```
-
-### API Endpoint Addition
-
-**Standard Workflow**:
-
-1. **Design First**:
-   ```
-   You: /api-design Create endpoint for bulk user import with CSV
-   ```
-
-2. **Implementation**:
-   ```
-   You: Implement the bulk import endpoint with proper validation
-   ```
-
-3. **Testing**:
-   ```
-   You: Add comprehensive tests including edge cases
-   ```
-
-4. **Documentation**:
-   ```
-   You: /docs Update API documentation for the new endpoint
-   ```
-
-### Frontend Component Development
-
-**React Component Workflow**:
-
-```
-You: Create a data table component with sorting, filtering, and pagination
-
-Claude: I'll research our component patterns and create a plan for the data table component.
-
-[Phase 1: Research existing components]
-[Phase 2: Design component API]
-[Phase 3: Implement with tests]
-[Phase 4: Create usage documentation]
-```
-
-## Debugging Workflows
-
-### Production Bug Investigation
-
-**Emergency Bug Fix Flow**:
-
+**Multi-Phase Feature Development**:
 ```bash
-# 1. Create hotfix branch
-git checkout -b hotfix/critical-user-auth-bug
+# Phase 1: Research and Planning
+claude architect --research-existing-patterns
+claude milestone plan "Real-time Collaboration Feature"
 
-# 2. Use Claude for debugging
+# Phase 2: Foundation Development
+claude format && claude verify  # Start clean
+# ... implement core infrastructure ...
+claude test unit --focus=core
+claude verify --comprehensive
+
+# Phase 3: Feature Implementation
+# ... implement feature logic ...
+claude format && claude cleanup
+claude test integration --new-feature
+claude verify --security-focus
+
+# Phase 4: Integration and Testing
+claude test e2e --collaboration-scenarios
+claude test performance --websocket-load
+claude verify --comprehensive
+
+# Phase 5: Documentation and Deployment
+claude docs --feature-documentation
+claude milestone execute --final-review
 ```
 
-```
-You: /debug Users can't log in, getting 500 errors. Here's the error log: [paste log]
+### API Development Workflow
 
-Claude: I'll analyze the error log and investigate the authentication issue.
-
-[Identifies root cause]
-[Proposes minimal fix]
-[Adds regression test]
-```
-
-### Performance Debugging
-
-**Slow Query Investigation**:
-
-```
-You: /debug The user dashboard is loading slowly, taking 5+ seconds
-
-Claude: I'll investigate the performance issue in the user dashboard.
-
-[Analyzes database queries]
-[Profiles code execution]
-[Identifies bottlenecks]
-```
-
-**Optimization Workflow**:
-
-```
-You: /optimize Improve the dashboard performance based on your findings
-
-Claude: I'll optimize the dashboard performance using the identified bottlenecks.
-
-[Implements query optimization]
-[Adds caching layer]
-[Validates improvements]
-```
-
-## Refactoring Workflows
-
-### Large-Scale Refactoring
-
-**Scenario**: Migrating from callbacks to async/await
-
-```
-You: /refactor Convert our callback-based API client to use async/await
-
-Claude: I'll analyze the API client and create a refactoring plan to migrate from callbacks to async/await.
-
-[Maps all callback usage]
-[Creates migration strategy]
-[Implements in phases]
-[Maintains backward compatibility]
-```
-
-### Architecture Migration
-
-**Monolith to Microservices**:
-
-```
-You: /architect Plan extraction of user service from monolith
-
-Claude: I'll analyze the monolith and design the user service extraction.
-
-[Identifies boundaries]
-[Plans data migration]
-[Creates transition strategy]
-[Defines service contracts]
-```
-
-## Code Review Workflows
-
-### Pre-Commit Review
-
+**RESTful API Implementation**:
 ```bash
-# Before committing
-git add .
+# 1. Design API contract
+claude architect --api-design "user management endpoints"
+
+# 2. Implement with TDD
+claude test unit --api-contract-tests
+# ... implement endpoints ...
+claude test integration --api-tests
+
+# 3. Security and validation
+claude verify --security-focus --api-endpoints
+claude test security --api-penetration
+
+# 4. Documentation
+claude docs --api-documentation --openapi
+claude test e2e --api-workflows
 ```
 
-```
-You: /review Check my changes before I commit
+## Best Practices Summary
 
-Claude: I'll review your staged changes for code quality and best practices.
+### Workflow Principles
 
-[Reviews code structure]
-[Checks for issues]
-[Suggests improvements]
-[Validates against standards]
-```
+1. **Quality First**: Always start and end with quality checks
+2. **Incremental Progress**: Use milestones to track and validate progress
+3. **Safety Nets**: Use git integration and backup systems
+4. **Parallel Efficiency**: Leverage multi-agent coordination for complex tasks
+5. **Continuous Feedback**: Use testing and verification at every step
 
-### PR Review Assistance
+### Common Patterns
 
-```
-You: /review Review this PR for security and performance: [PR link]
-
-Claude: I'll analyze the PR for security vulnerabilities and performance concerns.
-
-[Security analysis]
-[Performance review]
-[Best practices check]
-[Actionable feedback]
-```
-
-## Testing Workflows
-
-### Test-Driven Development
-
-**TDD Workflow**:
-
-```
-You: /test-coverage Design tests for a shopping cart class before implementation
-
-Claude: I'll create comprehensive test cases for the shopping cart class following TDD principles.
-
-[Defines test scenarios]
-[Writes failing tests]
-[Guides implementation]
-[Ensures coverage]
+**The Golden Workflow** (Most Used):
+```bash
+claude format && claude verify --quick    # Start clean
+# ... development work ...
+claude format && claude cleanup           # Clean as you go
+claude test unit                          # Verify functionality
+claude verify --comprehensive             # Final quality check
+claude commit "feat: description"         # Commit with quality
+claude push && claude pr "title"          # Share with team
 ```
 
-### Regression Test Creation
-
-```
-You: Create regression tests for the bug we just fixed
-
-Claude: I'll create comprehensive regression tests to prevent this bug from reoccurring.
-
-[Analyzes bug scenario]
-[Creates edge case tests]
-[Adds to test suite]
-[Documents test purpose]
+**The Emergency Workflow** (Production Issues):
+```bash
+claude verify --quick --critical-only     # Quick triage
+# ... minimal fix ...
+claude format && claude verify --critical # Fast validation
+claude test unit --affected-only          # Targeted testing
+claude commit "fix: critical issue"       # Emergency commit
+claude push --emergency                   # Fast deployment
 ```
 
-## Deployment Workflows
-
-### Continuous Deployment Setup
-
-```
-You: Set up GitHub Actions for our Node.js app with staging and production
-
-Claude: I'll create a comprehensive CI/CD pipeline using GitHub Actions.
-
-[Creates workflow file]
-[Sets up environments]
-[Adds quality gates]
-[Implements rollback]
+**The Research Workflow** (Complex Features):
+```bash
+claude architect --research-existing      # Understand current state
+claude milestone plan "feature-name"      # Plan implementation
+# ... iterative development with quality checks ...
+claude milestone status                   # Track progress
+claude milestone execute --final-review   # Complete milestone
 ```
 
-### Rollback Procedures
-
-```
-You: /rollback Production is broken after deploy, need immediate rollback
-
-Claude: I'll guide you through the rollback procedure.
-
-[Identifies rollback point]
-[Executes rollback steps]
-[Validates restoration]
-[Creates incident report]
-```
-
-## Documentation Workflows
-
-### API Documentation
-
-```
-You: /docs Generate OpenAPI documentation for our user service
-
-Claude: I'll analyze the user service and generate comprehensive OpenAPI documentation.
-
-[Scans endpoints]
-[Documents schemas]
-[Adds examples]
-[Includes auth details]
-```
-
-### Project Documentation
-
-```
-You: Create comprehensive README for new developers
-
-Claude: I'll create a detailed README that helps new developers get started quickly.
-
-[Project overview]
-[Setup instructions]
-[Architecture guide]
-[Contribution guidelines]
-```
-
-## Security Workflows
-
-### Security Audit
-
-```
-You: /security-audit Check our authentication system for vulnerabilities
-
-Claude: I'll perform a comprehensive security audit of the authentication system.
-
-[Reviews auth flow]
-[Checks for vulnerabilities]
-[Tests edge cases]
-[Provides remediation]
-```
-
-### Dependency Updates
-
-```
-You: /upgrade Review and update our dependencies for security patches
-
-Claude: I'll analyze dependencies and create an upgrade plan for security patches.
-
-[Scans vulnerabilities]
-[Plans updates]
-[Tests compatibility]
-[Updates safely]
-```
-
-## Multi-Language Workflows
-
-### Full-Stack Feature
-
-**Frontend (React) + Backend (Python)**:
-
-```
-You: Implement user profile feature with React frontend and Python API
-
-Claude: I'll implement the full-stack user profile feature. Let me plan this across both codebases.
-
-[Designs API contract]
-[Implements backend first]
-[Creates frontend components]
-[Integrates and tests]
-```
-
-### Microservice Communication
-
-**Go Service + Node.js Service**:
-
-```
-You: Set up gRPC communication between user service (Go) and notification service (Node.js)
-
-Claude: I'll implement gRPC communication between the two services.
-
-[Defines protobuf schemas]
-[Implements Go server]
-[Creates Node.js client]
-[Adds error handling]
-```
-
-## Migration Workflows
-
-### Framework Migration
-
-**Migrating from Express to Fastify**:
-
-```
-You: /migrate Plan migration from Express to Fastify
-
-Claude: I'll create a comprehensive migration plan from Express to Fastify.
-
-[Analyzes differences]
-[Creates migration strategy]
-[Implements adapter pattern]
-[Migrates incrementally]
-```
-
-### Database Migration
-
-```
-You: Migrate from MongoDB to PostgreSQL for our user data
-
-Claude: I'll plan and implement the database migration from MongoDB to PostgreSQL.
-
-[Maps data models]
-[Creates migration scripts]
-[Implements dual-write]
-[Validates data integrity]
-```
-
-## Optimization Workflows
-
-### Performance Optimization
-
-```
-You: /optimize Our API response time is slow, optimize the product search
-
-Claude: I'll analyze and optimize the product search performance.
-
-[Profiles current performance]
-[Identifies bottlenecks]
-[Implements optimizations]
-[Measures improvements]
-```
-
-### Bundle Size Optimization
-
-```
-You: /optimize Reduce our React app bundle size, currently at 2MB
-
-Claude: I'll analyze and optimize the React application bundle size.
-
-[Analyzes bundle composition]
-[Identifies large dependencies]
-[Implements code splitting]
-[Lazy loads components]
-```
-
-## Team Collaboration Workflows
-
-### Onboarding New Developer
-
-```
-You: Create onboarding tasks for a new backend developer joining next week
-
-Claude: I'll create a comprehensive onboarding plan for the new backend developer.
-
-[Environment setup guide]
-[Codebase tour tasks]
-[First PR assignment]
-[Learning resources]
-```
-
-### Knowledge Transfer
-
-```
-You: Document the payment processing module for team handoff
-
-Claude: I'll create detailed documentation for the payment processing module handoff.
-
-[Architecture overview]
-[Code walkthrough]
-[Integration points]
-[Maintenance guide]
-```
-
-## Emergency Workflows
-
-### Production Incident
-
-```
-You: /monitor Production CPU is spiking, help diagnose
-
-Claude: I'll help diagnose the CPU spike in production.
-
-[Analyzes symptoms]
-[Checks recent changes]
-[Identifies causes]
-[Provides fixes]
-```
-
-### Data Recovery
-
-```
-You: Accidentally deleted user data, need recovery plan
-
-Claude: I'll help create a data recovery plan.
-
-[Assesses damage]
-[Checks backups]
-[Plans recovery]
-[Prevents future issues]
-```
-
-## Best Practices for Workflows
-
-### 1. Always Start with Research
-- Let Claude understand context
-- Identify existing patterns
-- Avoid reinventing wheels
-
-### 2. Use Appropriate Commands
-- Match command to task type
-- Combine commands effectively
-- Don't force wrong commands
-
-### 3. Validate at Checkpoints
-- After each major step
-- Before moving to next phase
-- Especially before deployment
-
-### 4. Document Decisions
-- Why approaches were chosen
-- What alternatives were considered
-- How to maintain/extend
-
-### 5. Learn from Each Workflow
-- What worked well?
-- What could improve?
-- Update team practices
-
-## Workflow Templates
-
-Create reusable workflow templates:
-
-`.claude/workflows/feature-development.md`:
-```markdown
-# Feature Development Workflow
-
-1. Research existing code: 30 min
-2. Architecture design: 1 hour
-3. Implementation plan: 30 min
-4. Core implementation: 2-4 hours
-5. Testing: 1-2 hours
-6. Documentation: 30 min
-7. Code review: 30 min
-
-Total: 6-10 hours per feature
-```
+### Integration Tips
+
+**IDE Integration**:
+- Set up format-on-save with Claude
+- Use watch mode for continuous feedback
+- Integrate quality checks into editor workflow
+
+**CI/CD Integration**:
+- Add quality gates to build pipeline
+- Use parallel execution for speed
+- Generate quality reports for pull requests
+
+**Team Integration**:
+- Share quality configurations
+- Establish team workflow standards
+- Use milestone tracking for project coordination
 
 ## Next Steps
 
-- Review [Best Practices](best-practices.md) for optimization
-- Explore [Customization](customization.md) for your workflows
-- Check [Using Templates](using-templates.md) for setup
-- Learn [Smart Merge](smart-merge.md) for updates
+### Learning Path
+
+**Beginner** (First Week):
+1. Master the golden workflow pattern
+2. Set up project with `claude-install-flow`
+3. Practice quality commands daily
+4. Learn basic git integration
+
+**Intermediate** (First Month):
+1. Customize quality configurations
+2. Set up CI/CD integration
+3. Use milestone management
+4. Practice emergency workflows
+
+**Advanced** (Ongoing):
+1. Master multi-agent coordination
+2. Create custom workflow templates
+3. Optimize for large codebases
+4. Lead team adoption and training
+
+### Resources and References
+
+- **[Getting Started Guide](getting-started.md)** - Initial setup and basic usage
+- **[Template Guide](using-templates.md)** - Understanding and customizing templates
+- **[Quality System Documentation](../commands/quality-system-architecture.md)** - Deep dive into quality tools
+- **[Best Practices](best-practices.md)** - Professional tips and advanced techniques
+- **[Troubleshooting](../troubleshooting/)** - Common issues and solutions
+
+### Quick Commands Reference
+
+**Daily Commands**:
+```bash
+claude format                    # Format code
+claude verify                    # Check quality
+claude test unit                 # Run tests
+claude status                    # Git status
+claude commit "message"          # Quality commit
+```
+
+**Weekly Commands**:
+```bash
+claude cleanup --aggressive      # Deep cleanup
+claude dedupe --interactive      # Find duplicates
+claude verify --comprehensive    # Full audit
+claude milestone status          # Track progress
+```
+
+**Project Commands**:
+```bash
+claude-install-flow             # Set up new project
+claude milestone plan           # Plan project phase
+claude test coverage            # Check test coverage
+claude docs --generate          # Update documentation
+```
+
+---
+
+This comprehensive workflows guide provides the foundation for efficient development using Claude Code Enhancer. Each workflow is designed to maintain high quality while maximizing development velocity through intelligent automation and coordination.

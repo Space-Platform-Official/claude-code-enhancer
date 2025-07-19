@@ -4,7 +4,9 @@ This directory contains pre-defined command templates that provide structured wo
 
 ## Available Commands
 
-### check.md
+### Core Development Commands
+
+#### check.md
 **Purpose**: Comprehensive code quality verification and error fixing protocol
 **Usage**: Use when you need to verify code quality, run tests, and ensure production readiness
 **Key Features**:
@@ -14,7 +16,7 @@ This directory contains pre-defined command templates that provide structured wo
 - Comprehensive test verification
 - Build success validation
 
-### next.md
+#### next.md
 **Purpose**: Production-quality implementation workflow with strict standards
 **Usage**: Use when implementing new features or making code changes
 **Key Features**:
@@ -24,7 +26,7 @@ This directory contains pre-defined command templates that provide structured wo
 - Production-ready implementation standards
 - Comprehensive testing requirements
 
-### prompt.md
+#### prompt.md
 **Purpose**: Prompt synthesizer that combines templates with user arguments
 **Usage**: Use to create enhanced prompts for complex development tasks
 **Key Features**:
@@ -33,15 +35,15 @@ This directory contains pre-defined command templates that provide structured wo
 - Enhancement guidelines
 - Structured prompt formatting
 
+
 ## How to Use
 
 ### In Claude-Flow CLI
 ```bash
-# Apply a command template
+# Apply core development command templates
 claude-flow apply-template command/check.md
-
-# Use with specific parameters
 claude-flow apply-template command/next.md --project myapp
+claude-flow apply-template command/prompt.md --enhance
 ```
 
 ### Direct Usage
