@@ -417,4 +417,10 @@ Before creating ANY folder, you MUST:
 - **Django**: models/, views/, templates/, static/
 - **FastAPI/Flask**: routes/, models/, schemas/, utils/
 
+## 🚫 ENHANCED PACKAGE POLICY
+
+**STRICT PROHIBITION ON ENHANCED PACKAGE USAGE**
+
+Don't use any enhanced package. Either merge the original file with the enhanced file, or replace the original files with the enhanced files.
+
 ### 🚨 CRITICAL: Hook Failures Are BLOCKING
