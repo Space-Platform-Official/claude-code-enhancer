@@ -21,6 +21,12 @@ Learn how to use Claude Flow effectively
 - [Best Practices](user-guide/best-practices.md) - Professional tips
 - [Workflows](user-guide/workflows.md) - Common development patterns
 
+### [Milestone System](milestone/)
+Enhanced project management with intelligent scaling
+- [User Guide](milestone/USER_GUIDE.md) - Complete guide to using milestone commands
+- [Testing Guide](milestone/TESTING_GUIDE.md) - Validation and testing procedures
+- [Architecture Overview](milestone/README.md) - System capabilities and design
+
 ### [API & CLI Reference](api/)
 Technical reference documentation
 - [CLI Reference](api/cli-reference.md) - Command-line interface
