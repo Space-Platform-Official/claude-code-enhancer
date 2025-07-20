@@ -89,7 +89,6 @@ source "templates/commands/milestone/_shared/storage-adapter.md"
 source "templates/commands/milestone/_shared/scale-detector.md"
 source "templates/commands/milestone/_shared/migration.md"
 source "templates/commands/milestone/_shared/progressive-ui.md"
-source "templates/commands/milestone/_shared/hybrid-validation.md"
 
 # Initialize storage system based on scale
 initialize_storage_system
@@ -102,7 +101,7 @@ initialize_progressive_ui
 
 # Run hybrid architecture validation
 echo "🔍 Running hybrid architecture validation..."
-if run_hybrid_validation; then
+if run_milestone_validation "" "hybrid"; then
     echo "✅ Enhanced Hybrid Milestone System ready for scale: $(get_optimal_storage_backend)"
     echo "🎨 UI Level: $(get_optimal_ui_level)"
     echo "🎯 All systems validated and operational"
