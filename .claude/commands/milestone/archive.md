@@ -64,8 +64,8 @@ When you run `/milestone/archive`, you are REQUIRED to:
 ---
 
 🛑 **MANDATORY MILESTONE COMPLETION CHECK** 🛑
-1. Re-read _shared/context.md to understand milestone context
-2. Check _shared/state.md for current milestone state
+1. Re-read ../../shared/context.md to understand milestone context
+2. Check ../../shared/state.md for current milestone state
 3. Verify you understand ALL completion criteria before archiving
 
 Execute comprehensive milestone archival with ZERO tolerance for incomplete validation.

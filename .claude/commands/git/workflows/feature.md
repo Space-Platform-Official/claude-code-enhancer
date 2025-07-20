@@ -163,7 +163,7 @@ setup_dev_environment() {
     if [ ! -f .git/hooks/pre-commit ]; then
         cat > .git/hooks/pre-commit << 'EOF'
 #!/bin/bash
-source .claude/commands/git/_shared/utils.md
+source .claude/commands/git/../../shared/utils.md
 
 echo "🔍 Running pre-commit checks..."
 

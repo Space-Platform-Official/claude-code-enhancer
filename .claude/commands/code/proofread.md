@@ -75,8 +75,8 @@ Let me ultrathink about safe text correction strategy with comprehensive safety 
 
 # Source shared utilities
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/_shared/utils.md"
-source "$SCRIPT_DIR/_shared/safety.md"
+source "$SCRIPT_DIR/../../shared/utils.md"
+source "$SCRIPT_DIR/../../shared/safety.md"
 
 # Pre-correction safety validation
 establish_safety_framework() {

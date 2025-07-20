@@ -109,8 +109,8 @@ collect_test_failures() {
     echo ""
     
     # Source shared utilities
-    source "$(dirname "$0")/../_shared/utils.md"
-    source "$(dirname "$0")/../_shared/runners.md"
+    source "$(dirname "$0")/../../../shared/utils.md"
+    source "$(dirname "$0")/../../../shared/runners.md"
     
     # Detect framework if auto
     if [ "$framework" = "auto" ]; then

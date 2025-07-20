@@ -31,7 +31,7 @@ validate_pr_workflow() {
     echo "🔍 Phase 1: Validating PR workflow readiness..."
     
     # Load PR utilities
-    source templates/commands/git/_shared/pr-utils.md
+    source templates/commands/git/../../shared/pr-utils.md
     
     # Repository state validation
     if ! validate_pr_readiness; then

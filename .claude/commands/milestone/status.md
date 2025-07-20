@@ -44,6 +44,177 @@ When you run `/milestone/status`, you are REQUIRED to:
 - ✅ Actionable insights and recommendations clearly presented
 - ✅ Next steps and project health summary delivered
 
+## 🚨 ENHANCED ERROR HANDLING FOR STATUS COMMAND
+
+**Common Issues and Solutions:**
+
+```bash
+# Enhanced status check with error recovery
+milestone_status_with_recovery() {
+    local milestone_filter=$1
+    local verbose_mode=${2:-false}
+    
+    echo "🔍 MILESTONE STATUS CHECK"
+    echo "========================"
+    
+    # Pre-flight checks with helpful guidance
+    if [ ! -d ".milestones" ]; then
+        echo "❌ ERROR: Milestone system not initialized"
+        echo "📝 GUIDANCE: Initialize the milestone system first"
+        echo "   • Run: /milestone/init"
+        echo "   • Or: mkdir -p .milestones/{active,completed,logs,config}"
+        echo ""
+        echo "💡 SUGGESTION: Start with '/milestone/init' to set up the system"
+        return 1
+    fi
+    
+    # Check for available milestones
+    local active_count=$(find .milestones/active -name "*.yaml" -type f 2>/dev/null | wc -l || echo "0")
+    local completed_count=$(find .milestones/completed -name "*.yaml" -type f 2>/dev/null | wc -l || echo "0")
+    
+    if [ "$active_count" -eq 0 ] && [ "$completed_count" -eq 0 ]; then
+        echo "📋 INFO: No milestones found"
+        echo "📝 GUIDANCE: Create your first milestone to get started"
+        echo "   • Plan a milestone: /milestone/plan my-first-milestone"
+        echo "   • Or import existing: /milestone/import [file]"
+        echo ""
+        echo "💡 SUGGESTION: Try '/milestone/plan user-authentication' for a sample milestone"
+        show_contextual_help "first_time_user"
+        return 0
+    fi
+    
+    # Validate milestone files before processing
+    local validation_errors=0
+    echo "🔍 Validating milestone files..."
+    
+    for milestone_file in .milestones/active/*.yaml; do
+        [ -f "$milestone_file" ] || continue
+        local milestone_id=$(basename "$milestone_file" .yaml)
+        
+        if ! yq e '.' "$milestone_file" >/dev/null 2>&1; then
+            echo "❌ ERROR: Invalid YAML in $(basename "$milestone_file")"
+            echo "📝 GUIDANCE: File contains syntax errors"
+            echo "💡 SUGGESTION: Check with 'yq e . $milestone_file'"
+            ((validation_errors++))
+        fi
+    done
+    
+    if [ $validation_errors -gt 0 ]; then
+        echo ""
+        echo "⚠️  Found $validation_errors invalid milestone files"
+        echo "💡 SUGGESTION: Fix YAML syntax errors before viewing status"
+        echo "📚 HELP: Use '/milestone/validate' for detailed error analysis"
+        return $validation_errors
+    fi
+    
+    # Show discovery results with guidance
+    echo "📊 DISCOVERY RESULTS:"
+    echo "   • Active milestones: $active_count"
+    echo "   • Completed milestones: $completed_count"
+    echo ""
+    
+    # Continue with normal status display...
+    if [ "$verbose_mode" = true ]; then
+        suggest_next_commands "status" "$milestone_filter"
+    fi
+}
+
+# Error-aware milestone parsing
+parse_milestone_with_error_handling() {
+    local milestone_file=$1
+    local milestone_id=$(basename "$milestone_file" .yaml)
+    
+    # Validate file accessibility
+    if [ ! -r "$milestone_file" ]; then
+        format_error_message "permission_denied" \
+            "Cannot read milestone file: $milestone_file" \
+            "Check file permissions and ownership" \
+            "chmod 644 $milestone_file"
+        return 1
+    fi
+    
+    # Parse with error recovery
+    local milestone_data
+    if ! milestone_data=$(yq e '.' "$milestone_file" 2>&1); then
+        format_error_message "invalid_syntax" \
+            "YAML parsing failed for $milestone_id" \
+            "Fix syntax errors in the milestone file" \
+            "yq e . $milestone_file  # to see specific errors"
+        return 1
+    fi
+    
+    # Validate required fields with helpful messages
+    local required_fields=("id" "title" "status")
+    for field in "${required_fields[@]}"; do
+        local value=$(echo "$milestone_data" | yq e ".$field" -)
+        if [ "$value" = "null" ] || [ -z "$value" ]; then
+            echo "❌ ERROR: Missing required field '$field' in $milestone_id"
+            echo "📝 GUIDANCE: Add the missing field to your milestone file"
+            case "$field" in
+                "id") echo "   • Add: id: \"$milestone_id\"" ;;
+                "title") echo "   • Add: title: \"Descriptive Milestone Name\"" ;;
+                "status") echo "   • Add: status: \"planning\" (or in_progress, completed, etc.)" ;;
+            esac
+            echo ""
+            return 1
+        fi
+    done
+    
+    echo "$milestone_data"
+}
+
+# Enhanced visualization with error handling
+generate_status_dashboard_safe() {
+    local filter_pattern=$1
+    
+    echo "📊 GENERATING STATUS DASHBOARD"
+    echo "=============================="
+    
+    # Collect milestone data with error handling
+    local milestone_data=()
+    local parse_errors=0
+    
+    for milestone_file in .milestones/active/*.yaml; do
+        [ -f "$milestone_file" ] || continue
+        
+        local milestone_id=$(basename "$milestone_file" .yaml)
+        
+        # Skip if doesn't match filter
+        if [ -n "$filter_pattern" ] && [[ ! "$milestone_id" =~ $filter_pattern ]]; then
+            continue
+        fi
+        
+        local parsed_data
+        if parsed_data=$(parse_milestone_with_error_handling "$milestone_file"); then
+            milestone_data+=("$parsed_data")
+        else
+            ((parse_errors++))
+        fi
+    done
+    
+    # Show results or guidance
+    if [ ${#milestone_data[@]} -eq 0 ]; then
+        if [ $parse_errors -gt 0 ]; then
+            echo "❌ No valid milestones found due to parsing errors"
+            echo "📝 GUIDANCE: Fix milestone file errors and try again"
+            echo "💡 SUGGESTION: Use '/milestone/validate' to identify issues"
+        else
+            echo "📋 No milestones match your criteria"
+            echo "📝 GUIDANCE: Adjust your filter or create new milestones"
+            echo "💡 SUGGESTION: Use '/milestone/status' without filter to see all"
+        fi
+        return $parse_errors
+    fi
+    
+    # Generate dashboard with the valid data
+    echo "✅ Successfully parsed ${#milestone_data[@]} milestones"
+    echo ""
+    
+    # Continue with dashboard generation...
+    # (Dashboard visualization code would continue here)
+}
+```
+
 ---
 
 🛑 **MANDATORY MILESTONE STATUS CHECK** 🛑

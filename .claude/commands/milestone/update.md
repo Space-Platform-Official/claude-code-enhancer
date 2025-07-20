@@ -63,7 +63,7 @@ When you run `/milestone/update`, you are REQUIRED to:
 
 🛑 **MANDATORY STATUS MONITORING CHECK** 🛑
 1. Re-read ~/.claude/CLAUDE.md RIGHT NOW
-2. Load active milestone context from _shared/context.md and _shared/state.md
+2. Load active milestone context from ../../shared/context.md and ../../shared/state.md
 3. Verify you're implementing comprehensive monitoring, not basic status checks
 
 Execute comprehensive milestone status monitoring with ZERO tolerance for superficial reporting.

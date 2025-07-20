@@ -43,9 +43,9 @@ claude cleanup --auto-approve
 
 # Source shared utilities
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/_shared/utils.md"
-source "$SCRIPT_DIR/_shared/safety.md"
-source "$SCRIPT_DIR/_shared/orchestration.md"
+source "$SCRIPT_DIR/../../shared/utils.md"
+source "$SCRIPT_DIR/../../shared/safety.md"
+source "$SCRIPT_DIR/../../shared/orchestration.md"
 
 # Main cleanup function
 cleanup_codebase() {
@@ -924,8 +924,8 @@ main() {
     
     # Source shared utilities at runtime
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    source "$SCRIPT_DIR/_shared/utils.md" 2>/dev/null || true
-    source "$SCRIPT_DIR/_shared/safety.md" 2>/dev/null || true
+    source "$SCRIPT_DIR/../../shared/utils.md" 2>/dev/null || true
+    source "$SCRIPT_DIR/../../shared/safety.md" 2>/dev/null || true
     
     # Set up error handling
     trap 'cleanup_on_exit "$target"' EXIT

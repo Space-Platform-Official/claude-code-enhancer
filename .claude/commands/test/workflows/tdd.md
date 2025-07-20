@@ -108,8 +108,8 @@ execute_red_phase() {
     echo ""
     
     # Source shared utilities
-    source "$(dirname "$0")/../_shared/utils.md"
-    source "$(dirname "$0")/../_shared/runners.md"
+    source "$(dirname "$0")/../../../shared/utils.md"
+    source "$(dirname "$0")/../../../shared/runners.md"
     
     # Detect framework
     local framework=$(detect_test_framework "$project_dir")
@@ -526,8 +526,8 @@ execute_tdd_cycle() {
     echo ""
     
     # Source shared utilities
-    source "$(dirname "$0")/../_shared/utils.md"
-    source "$(dirname "$0")/../_shared/runners.md"
+    source "$(dirname "$0")/../../../shared/utils.md"
+    source "$(dirname "$0")/../../../shared/runners.md"
     
     # Detect framework
     local framework=$(detect_test_framework "$project_dir")

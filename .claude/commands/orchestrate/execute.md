@@ -126,8 +126,8 @@ setup_orchestration_environment() {
     local orchestration_id=$1
     
     # Source shared utilities
-    source ".claude/commands/orchestrate/_shared/context.md"
-    source ".claude/commands/orchestrate/_shared/git-integration.md"
+    source ".claude/commands/orchestrate/../../shared/context.md"
+    source ".claude/commands/orchestrate/../../shared/git-integration.md"
     
     # Create execution directories
     mkdir -p ".orchestration/sessions"

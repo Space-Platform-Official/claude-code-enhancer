@@ -162,7 +162,7 @@ git commit -c ORIG_HEAD
 
 For complete details and advanced features, see:
 - `/git/commit` - Full git commit command
-- `/git/_shared/` - Shared utilities and standards
+- `/git/../../shared/` - Shared utilities and standards
 
 ---
 

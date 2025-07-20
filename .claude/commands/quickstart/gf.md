@@ -267,7 +267,7 @@ Built-in handling for:
 For complete details and advanced features, see:
 - `/git/workflows/feature` - Full feature workflow
 - `/git/` - Complete git command suite
-- `/git/_shared/` - Shared utilities and standards
+- `/git/../../shared/` - Shared utilities and standards
 
 ---
 

@@ -126,9 +126,9 @@ setup_execution_environment() {
     local milestone_id=$1
     
     # Source shared utilities
-    source ".claude/commands/milestone/_shared/context.md"
-    source ".claude/commands/milestone/_shared/git-integration.md"
-    source ".claude/commands/milestone/_shared/state.md"
+    source ".claude/commands/milestone/../../shared/context.md"
+    source ".claude/commands/milestone/../../shared/git-integration.md"
+    source ".claude/commands/milestone/../../shared/state.md"
     
     # Create execution directories
     mkdir -p ".milestones/active"

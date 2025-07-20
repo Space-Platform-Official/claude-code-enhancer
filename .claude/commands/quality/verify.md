@@ -48,9 +48,9 @@ claude verify --format=html
 
 # Source shared utilities
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/_shared/utils.md"
-source "$SCRIPT_DIR/_shared/safety.md"
-source "$SCRIPT_DIR/_shared/orchestration.md"
+source "$SCRIPT_DIR/../../shared/utils.md"
+source "$SCRIPT_DIR/../../shared/safety.md"
+source "$SCRIPT_DIR/../../shared/orchestration.md"
 
 # Main verification function
 verify_codebase() {
@@ -1540,8 +1540,8 @@ main() {
     
     # Source shared utilities at runtime
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    source "$SCRIPT_DIR/_shared/utils.md" 2>/dev/null || true
-    source "$SCRIPT_DIR/_shared/safety.md" 2>/dev/null || true
+    source "$SCRIPT_DIR/../../shared/utils.md" 2>/dev/null || true
+    source "$SCRIPT_DIR/../../shared/safety.md" 2>/dev/null || true
     
     # Execute verification
     verify_codebase "$target" "$mode" "$report_level" "$output_format" "$fail_fast"

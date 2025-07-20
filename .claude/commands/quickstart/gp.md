@@ -213,7 +213,7 @@ git push origin +previous-sha:branch-name
 For complete details and advanced features, see:
 - `/git/push` - Full git push command
 - `/git/workflows/` - Complete workflow documentation
-- `/git/_shared/` - Shared utilities and security
+- `/git/../../shared/` - Shared utilities and security
 
 ---
 

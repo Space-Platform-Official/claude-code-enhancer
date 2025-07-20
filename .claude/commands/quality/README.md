@@ -81,7 +81,7 @@ templates/commands/quality/
 ├── cleanup.md         # Dead code removal and import optimization
 ├── dedupe.md          # Advanced duplicate detection and merging
 ├── verify.md          # Comprehensive validation and quality assessment
-├── _shared/           # Shared utilities framework (the foundation)
+├── ../../shared/           # Shared utilities framework (the foundation)
 │   ├── utils.md       # Common utility functions and tools
 │   ├── safety.md      # Safety mechanisms and rollback systems
 │   └── orchestration.md # Workflow coordination and parallel execution
@@ -96,7 +96,7 @@ Each command file (`format.md`, `cleanup.md`, `dedupe.md`, `verify.md`) contains
 - **Integration points** with the shared utilities framework
 
 ### Layer 2: Shared Utilities Framework
-The `_shared/` directory contains three critical components:
+The `../../shared/` directory contains three critical components:
 
 #### `utils.md` - Foundation Utilities
 - **File Detection**: Language identification, binary file detection, source file filtering
@@ -327,20 +327,20 @@ The quality commands share a comprehensive utilities framework that ensures cons
 
 ### Core Components
 
-#### Utils (`_shared/utils.md`)
+#### Utils (`../../shared/utils.md`)
 - **File Detection**: Language identification, binary detection, source file filtering
 - **Code Analysis**: Line counting, complexity calculation, duplicate block detection
 - **Tool Integration**: Formatter/linter detection, configuration file discovery
 - **Import Management**: Extraction, analysis, and organization
 - **Progress Tracking**: Metrics calculation, progress bars, reporting utilities
 
-#### Safety (`_shared/safety.md`)
+#### Safety (`../../shared/safety.md`)
 - **Pre-operation Checks**: Git status, file permissions, disk space, concurrent operations
 - **Risk Assessment**: Operation risk scoring, file importance analysis, safety validation
 - **Backup System**: Automatic snapshot creation, rollback capabilities, integrity verification
 - **Emergency Handling**: Signal handlers, emergency stop, cleanup on exit
 
-#### Orchestration (`_shared/orchestration.md`)
+#### Orchestration (`../../shared/orchestration.md`)
 - **Workflow Management**: Multi-command coordination, dependency resolution, parallel execution
 - **Error Handling**: Graceful degradation, recovery mechanisms, comprehensive logging
 - **Configuration**: Workflow customization, tool selection, user preferences
@@ -917,21 +917,21 @@ claude quality emergency-stop
 
 ### Adding Language Support
 
-1. Add language detection patterns to `_shared/utils.md`
+1. Add language detection patterns to `../../shared/utils.md`
 2. Implement language-specific functions in each command
 3. Add tool integration and configuration detection
 4. Include tests and documentation
 
 ### Creating Custom Workflows
 
-1. Define workflow in `_shared/orchestration.md`
+1. Define workflow in `../../shared/orchestration.md`
 2. Add configuration options to workflow management
 3. Implement error handling and recovery mechanisms
 4. Document usage and integration points
 
 ### Tool Integration
 
-1. Add tool detection to `_shared/utils.md`
+1. Add tool detection to `../../shared/utils.md`
 2. Implement tool-specific functions in relevant commands
 3. Add configuration file discovery
 4. Include error handling and fallback options

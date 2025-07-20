@@ -75,8 +75,8 @@ Let me ultrathink about comprehensive text quality transformation strategy with 
 
 # Source shared utilities
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/_shared/utils.md"
-source "$SCRIPT_DIR/_shared/safety.md"
+source "$SCRIPT_DIR/../../shared/utils.md"
+source "$SCRIPT_DIR/../../shared/safety.md"
 
 # Comprehensive transformation assessment
 establish_transformation_framework() {
