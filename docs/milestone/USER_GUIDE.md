@@ -29,6 +29,7 @@ The Enhanced Hybrid Milestone Architecture provides powerful project management 
 |---------|---------|-------------|
 | `/milestone/plan` | Strategic milestone planning | Start of projects, breaking down complex work |
 | `/milestone/execute` | Execute milestone tasks | Daily work, implementing planned milestones |
+| `/milestone/review` | Review and approve kiro deliverables | Approving design/spec phases in kiro workflow |
 | `/milestone/status` | Check progress and metrics | Regular check-ins, team updates |
 | `/milestone/update` | Modify milestone details | Changes in scope, timeline, or progress |
 | `/milestone/archive` | Archive completed work | End of milestones, project cleanup |
@@ -75,7 +76,52 @@ The Enhanced Hybrid Milestone Architecture provides powerful project management 
 - ✅ Manages approval gates between phases
 - ✅ Updates milestone progress automatically
 
-#### **3. Checking Status (`/milestone/status`)**
+#### **3. Reviewing Kiro Deliverables (`/milestone/review`)**
+
+**Purpose**: Review and approve deliverables from kiro workflow phases
+
+```bash
+# Check all pending reviews
+/milestone/review --pending
+
+# Review specific task deliverables
+/milestone/review milestone-001 task-001 --phase design
+
+# Approve deliverables
+/milestone/review milestone-001 task-001 --phase design --approve
+
+# Request changes with feedback
+/milestone/review milestone-001 task-001 --phase design --request-changes --feedback "Add security considerations"
+```
+
+**What it does**:
+- ✅ Displays deliverable content for review
+- ✅ Provides interactive approval/rejection interface  
+- ✅ Manages approval gates between kiro phases
+- ✅ Tracks feedback and revision history
+- ✅ Unblocks phase progression after approval
+
+**Interactive Review Process**:
+```
+=== KIRO WORKFLOW REVIEW: DESIGN PHASE ===
+Task: Implement authentication API
+
+📄 DELIVERABLES FOR REVIEW:
+1. Architecture Diagram (auth-architecture.md)
+2. API Specification (api-spec.yaml)
+
+🎯 REVIEW OPTIONS:
+a) Approve this phase
+r) Reject this phase  
+c) Request changes
+f) Add feedback only
+
+Your choice: a
+✅ APPROVED: Design phase approved
+Phase progression: design → spec unlocked
+```
+
+#### **4. Checking Status (`/milestone/status`)**
 
 **Purpose**: Monitor progress, metrics, and overall project health
 
@@ -98,7 +144,7 @@ The Enhanced Hybrid Milestone Architecture provides powerful project management 
 - ✅ Team utilization (for team projects)
 - ✅ Timeline adherence
 
-#### **4. Updating Milestones (`/milestone/update`)**
+#### **5. Updating Milestones (`/milestone/update`)**
 
 **Purpose**: Modify milestone properties, tasks, or progress
 
@@ -116,7 +162,7 @@ The Enhanced Hybrid Milestone Architecture provides powerful project management 
 /milestone/update milestone-001 --progress 75
 ```
 
-#### **5. Archiving Milestones (`/milestone/archive`)**
+#### **6. Archiving Milestones (`/milestone/archive`)**
 
 **Purpose**: Move completed milestones to archive for cleanup
 
@@ -166,6 +212,10 @@ The hybrid architecture provides intelligent capabilities without user intervent
 /milestone/plan "Build team collaboration tool"
 /milestone/status                    # Shows rich terminal UI
 /milestone/execute --kiro-enabled    # Structured workflow with approvals
+
+# Review workflow for team approvals
+/milestone/review --pending          # Check what needs review
+/milestone/review milestone-001 task-001 --phase design --approve
 /milestone/status --team-view        # Team utilization metrics
 ```
 
@@ -224,6 +274,61 @@ RISK ASSESSMENT:
 ├── 🔴 High Risk: 2 items
 ├── 🟡 Medium Risk: 5 items
 └── 🟢 Low Risk: 12 items
+```
+
+### 🔄 **Complete Kiro Review Workflow Example**
+
+Here's a complete example showing how the review process works with kiro workflows:
+
+```bash
+# 1. Developer creates milestone with kiro workflow
+/milestone/plan "User authentication system" --enable-kiro
+
+# 2. Developer starts execution
+/milestone/execute milestone-001
+# → System creates design deliverables
+# → Pauses at design approval gate
+# → Notifies required approvers
+
+# 3. Check pending reviews (as reviewer)
+/milestone/review --pending
+# → Shows: design phase pending approval for task-001
+
+# 4. Review design deliverables
+/milestone/review milestone-001 task-001 --phase design
+# → Displays architecture diagram and API specification
+# → Interactive review interface appears
+
+# 5. Approve or provide feedback
+/milestone/review milestone-001 task-001 --phase design --approve --comment "Architecture looks good"
+# → Design phase approved
+# → System automatically progresses to spec phase
+
+# 6. Continue execution
+/milestone/execute milestone-001
+# → Creates spec deliverables
+# → Pauses at spec approval gate
+
+# 7. Review spec phase
+/milestone/review milestone-001 task-001 --phase spec
+# → Review technical specifications and test plans
+
+# 8. Request changes if needed
+/milestone/review milestone-001 task-001 --phase spec --request-changes --feedback "Add security test cases"
+
+# 9. Developer updates and resubmits
+# → Updates deliverables based on feedback
+# → System automatically marks for re-review
+
+# 10. Re-review and approve
+/milestone/review milestone-001 task-001 --phase spec --approve
+# → Spec phase approved
+# → Progression to task and execute phases unlocked
+
+# 11. Complete execution
+/milestone/execute milestone-001
+# → Completes remaining phases
+# → Milestone marked as complete
 ```
 
 ### 🛠️ **Troubleshooting Common Issues**
