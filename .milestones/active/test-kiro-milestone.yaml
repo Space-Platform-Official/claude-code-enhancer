@@ -1,0 +1,142 @@
+id: "test-kiro-milestone"
+title: "Test Kiro Workflow Integration"
+description: "Validate kiro workflow phases within milestone execution"
+priority: "high"
+category: "testing"
+status: "planned"
+
+# Kiro workflow configuration
+kiro_configuration:
+  enabled: true
+  default_phases: ["design", "spec", "task", "execute"]
+  approval_gates:
+    design_to_spec:
+      required: true
+      approvers: ["tech_lead"]
+      criteria: ["architecture_approved", "api_design_validated"]
+    spec_to_task:
+      required: true
+      approvers: ["tech_lead"]
+      criteria: ["specification_complete", "test_plan_approved"]
+  phase_weights:
+    design: 15
+    spec: 25
+    task: 20
+    execute: 40
+
+timeline:
+  estimated_start: "2024-07-20"
+  estimated_end: "2024-07-22"
+  estimated_hours: 16
+  buffer_percentage: 20
+  phase_timing:
+    design_hours: 2
+    spec_hours: 3
+    task_hours: 2
+    execute_hours: 9
+
+success_criteria:
+  - "Kiro workflow phases execute successfully"
+  - "Approval gates function correctly"
+  - "Progress tracking reflects phase completion"
+  - "Deliverables are generated and tracked"
+
+deliverables:
+  - name: "Kiro Integration Test Results"
+    type: "test"
+    acceptance_criteria: ["All phases complete", "Approvals processed", "Git integration working"]
+
+dependencies:
+  requires: []
+  enables: []
+  external: []
+
+resources:
+  team_members: ["claude"]
+  skills_required: ["milestone-management", "kiro-workflows", "testing"]
+  tools_needed: ["git", "yq"]
+
+risks:
+  - description: "Integration complexity may cause execution failures"
+    probability: 0.2
+    impact: "medium"
+    mitigation: "Comprehensive testing and fallback to standard milestone execution"
+
+tasks:
+  - id: "task-001"
+    title: "Test authentication API implementation"
+    type: "kiro_workflow"
+    estimated_hours: 8
+    status: "pending"
+    assigned_to: "claude"
+    dependencies: []
+    
+    kiro_workflow:
+      enabled: true
+      current_phase: "design"
+      phases:
+        design:
+          status: "pending"
+          deliverables: ["architecture_diagram", "api_specification"]
+          approval_required: true
+        spec:
+          status: "pending"
+          deliverables: ["technical_spec", "test_plan"]
+          approval_required: true
+        task:
+          status: "pending"
+          deliverables: ["implementation_plan"]
+          approval_required: false
+        execute:
+          status: "pending"
+          deliverables: ["implementation", "test_results"]
+          approval_required: false
+          
+  - id: "task-002"
+    title: "Standard milestone task (no kiro)"
+    type: "standard"
+    estimated_hours: 4
+    status: "pending"
+    assigned_to: "claude"
+    dependencies: []
+    
+    kiro_workflow:
+      enabled: false
+
+  - id: "task-003"
+    title: "Test data validation service"
+    type: "kiro_workflow"
+    estimated_hours: 4
+    status: "pending"
+    assigned_to: "claude"
+    dependencies: ["task-001"]
+    
+    kiro_workflow:
+      enabled: true
+      current_phase: "design"
+      phases:
+        design:
+          status: "pending"
+          deliverables: ["validation_architecture", "service_design"]
+          approval_required: true
+        spec:
+          status: "pending"
+          deliverables: ["validation_spec", "integration_plan"]
+          approval_required: true
+        task:
+          status: "pending"
+          deliverables: ["development_tasks"]
+          approval_required: false
+        execute:
+          status: "pending"
+          deliverables: ["service_implementation", "validation_tests"]
+          approval_required: false
+
+progress:
+  percentage: 0
+  tasks_completed: 0
+  last_update: "2024-07-20T13:00:00Z"
+
+execution:
+  session_id: ""
+  started_at: ""
