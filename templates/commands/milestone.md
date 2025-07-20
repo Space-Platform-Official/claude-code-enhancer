@@ -85,11 +85,11 @@ Before milestone planning, initialize the Enhanced Hybrid Architecture:
 
 ```bash
 # Initialize hybrid storage system
-source ".claude/commands/milestone/_shared/storage-adapter.md"
-source ".claude/commands/milestone/_shared/scale-detector.md"
-source ".claude/commands/milestone/_shared/migration.md"
-source ".claude/commands/milestone/_shared/progressive-ui.md"
-source ".claude/commands/milestone/_shared/hybrid-validation.md"
+source "templates/commands/milestone/_shared/storage-adapter.md"
+source "templates/commands/milestone/_shared/scale-detector.md"
+source "templates/commands/milestone/_shared/migration.md"
+source "templates/commands/milestone/_shared/progressive-ui.md"
+source "templates/commands/milestone/_shared/hybrid-validation.md"
 
 # Initialize storage system based on scale
 initialize_storage_system

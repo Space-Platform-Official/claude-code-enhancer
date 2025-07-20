@@ -602,4 +602,406 @@ complete_milestone_task() {
 }
 ```
 
-This state management system provides robust, atomic operations for milestone state persistence with comprehensive event logging, recovery capabilities, and automatic reactive status updates.
+## Kiro Workflow Phase Management
+
+```bash
+# Update kiro phase status with approval gate support
+update_kiro_phase_status() {
+    local milestone_id=$1
+    local task_id=$2
+    local phase_name=$3
+    local new_status=$4
+    local approval_data=${5:-"{}"}
+    
+    local milestone_file=".milestones/active/$milestone_id.yaml"
+    
+    if [ ! -f "$milestone_file" ]; then
+        echo "ERROR: Milestone file not found: $milestone_file"
+        return 1
+    fi
+    
+    acquire_state_lock "$milestone_id"
+    
+    # Update phase status
+    yq e '(.tasks[] | select(.id == "'$task_id'") | .kiro_workflow.phases.'$phase_name'.status) = "'$new_status'"' -i "$milestone_file"
+    
+    # Set timestamp based on status
+    case "$new_status" in
+        "in_progress")
+            yq e '(.tasks[] | select(.id == "'$task_id'") | .kiro_workflow.phases.'$phase_name'.started_at) = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' -i "$milestone_file"
+            ;;
+        "completed")
+            yq e '(.tasks[] | select(.id == "'$task_id'") | .kiro_workflow.phases.'$phase_name'.completed_at) = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' -i "$milestone_file"
+            ;;
+        "approved")
+            yq e '(.tasks[] | select(.id == "'$task_id'") | .kiro_workflow.phases.'$phase_name'.approved_at) = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' -i "$milestone_file"
+            ;;
+        "blocked"|"waiting_approval")
+            yq e '(.tasks[] | select(.id == "'$task_id'") | .kiro_workflow.phases.'$phase_name'.blocked_at) = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' -i "$milestone_file"
+            ;;
+    esac
+    
+    release_state_lock "$milestone_id"
+    
+    # Log phase status change event
+    log_milestone_event_reactive "$milestone_id" "kiro_phase_updated" "{\"task_id\": \"$task_id\", \"phase\": \"$phase_name\", \"status\": \"$new_status\", \"approval_data\": $approval_data}"
+    
+    echo "✅ Kiro phase updated: $task_id.$phase_name → $new_status"
+}
+
+# Transition between kiro phases with approval gate checking
+transition_kiro_phase() {
+    local milestone_id=$1
+    local task_id=$2
+    local from_phase=$3
+    local to_phase=$4
+    
+    local milestone_file=".milestones/active/$milestone_id.yaml"
+    
+    # Check if task has kiro workflow enabled
+    local kiro_enabled=$(yq e '.tasks[] | select(.id == "'$task_id'") | .kiro_workflow.enabled' "$milestone_file" 2>/dev/null)
+    if [ "$kiro_enabled" != "true" ]; then
+        echo "Kiro workflow not enabled for task: $task_id"
+        return 1
+    fi
+    
+    # Check if approval is required for this transition
+    local approval_required=$(check_kiro_approval_required "$milestone_id" "$task_id" "$from_phase" "$to_phase")
+    
+    if [ "$approval_required" = "true" ]; then
+        echo "⏳ Approval required for transition: $from_phase → $to_phase"
+        request_kiro_phase_approval "$milestone_id" "$task_id" "$from_phase" "$to_phase"
+        return 0
+    fi
+    
+    # Update current phase
+    acquire_state_lock "$milestone_id"
+    yq e '(.tasks[] | select(.id == "'$task_id'") | .kiro_workflow.current_phase) = "'$to_phase'"' -i "$milestone_file"
+    release_state_lock "$milestone_id"
+    
+    # Start new phase
+    update_kiro_phase_status "$milestone_id" "$task_id" "$to_phase" "in_progress"
+    
+    log_milestone_event_reactive "$milestone_id" "kiro_phase_transition" "{\"task_id\": \"$task_id\", \"from_phase\": \"$from_phase\", \"to_phase\": \"$to_phase\", \"transition_type\": \"automatic\"}"
+    
+    echo "✅ Phase transition: $from_phase → $to_phase"
+}
+
+# Check if approval is required for phase transition
+check_kiro_approval_required() {
+    local milestone_id=$1
+    local task_id=$2
+    local from_phase=$3
+    local to_phase=$4
+    
+    local milestone_file=".milestones/active/$milestone_id.yaml"
+    
+    # Check task-specific approval requirements
+    local task_approval=$(yq e '.tasks[] | select(.id == "'$task_id'") | .kiro_workflow.phases.'$from_phase'.approval_required' "$milestone_file" 2>/dev/null)
+    
+    # Check milestone-level approval configuration
+    local milestone_approval=$(yq e '.kiro_configuration.approval_gates.'$from_phase'_to_'$to_phase'.required' "$milestone_file" 2>/dev/null)
+    
+    # Default approval requirements for standard transitions
+    case "$from_phase" in
+        "design")
+            echo "${task_approval:-${milestone_approval:-true}}"
+            ;;
+        "spec")
+            echo "${task_approval:-${milestone_approval:-true}}"
+            ;;
+        "task")
+            echo "${task_approval:-${milestone_approval:-false}}"
+            ;;
+        *)
+            echo "${task_approval:-${milestone_approval:-false}}"
+            ;;
+    esac
+}
+
+# Request approval for kiro phase transition
+request_kiro_phase_approval() {
+    local milestone_id=$1
+    local task_id=$2
+    local from_phase=$3
+    local to_phase=$4
+    
+    local milestone_file=".milestones/active/$milestone_id.yaml"
+    local approval_id="approval-$milestone_id-$task_id-$from_phase-$to_phase"
+    local approval_file=".milestones/approvals/$approval_id.yaml"
+    
+    mkdir -p ".milestones/approvals"
+    
+    # Extract approval requirements from milestone configuration
+    local approvers=$(yq e '.kiro_configuration.approval_gates.'$from_phase'_to_'$to_phase'.approvers[]' "$milestone_file" 2>/dev/null)
+    local criteria=$(yq e '.kiro_configuration.approval_gates.'$from_phase'_to_'$to_phase'.criteria[]' "$milestone_file" 2>/dev/null)
+    
+    # Get phase deliverables for review
+    local deliverables=$(yq e '.tasks[] | select(.id == "'$task_id'") | .kiro_workflow.phases.'$from_phase'.deliverables[]' "$milestone_file" 2>/dev/null)
+    
+    # Create approval request
+    cat > "$approval_file" << EOF
+approval_request:
+  id: "$approval_id"
+  milestone_id: "$milestone_id"
+  task_id: "$task_id"
+  transition: "$from_phase → $to_phase"
+  requested_at: "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  status: "pending"
+  
+approvers:
+$(echo "$approvers" | sed 's/^/  - role: /' | sed 's/$/ 
+    status: pending
+    contacted: false/')
+
+approval_criteria:
+$(echo "$criteria" | sed 's/^/  - /')
+
+phase_deliverables:
+$(echo "$deliverables" | sed 's/^/  - /')
+
+phase_summary:
+  phase: "$from_phase"
+  started_at: "$(yq e '.tasks[] | select(.id == "'$task_id'") | .kiro_workflow.phases.'$from_phase'.started_at' "$milestone_file")"
+  completed_at: "$(yq e '.tasks[] | select(.id == "'$task_id'") | .kiro_workflow.phases.'$from_phase'.completed_at' "$milestone_file")"
+  deliverables_path: ".milestones/deliverables/$task_id/$from_phase/"
+EOF
+    
+    # Update task status to waiting for approval
+    update_kiro_phase_status "$milestone_id" "$task_id" "$from_phase" "waiting_approval"
+    
+    log_milestone_event_reactive "$milestone_id" "kiro_approval_requested" "{\"task_id\": \"$task_id\", \"transition\": \"$from_phase → $to_phase\", \"approval_file\": \"$approval_file\"}"
+    
+    echo "📋 Approval requested: $from_phase → $to_phase"
+    echo "Approval file: $approval_file"
+    echo "Deliverables for review: .milestones/deliverables/$task_id/$from_phase/"
+}
+
+# Process approval response for kiro phase transition
+process_kiro_phase_approval() {
+    local approval_file=$1
+    local approver_role=$2
+    local decision=$3  # "approved" or "rejected"
+    local comments=${4:-""}
+    
+    if [ ! -f "$approval_file" ]; then
+        echo "ERROR: Approval file not found: $approval_file"
+        return 1
+    fi
+    
+    local milestone_id=$(yq e '.approval_request.milestone_id' "$approval_file")
+    local task_id=$(yq e '.approval_request.task_id' "$approval_file")
+    local transition=$(yq e '.approval_request.transition' "$approval_file")
+    
+    # Update approver status
+    acquire_state_lock "$milestone_id"
+    yq e '(.approvers[] | select(.role == "'$approver_role'") | .status) = "'$decision'"' -i "$approval_file"
+    yq e '(.approvers[] | select(.role == "'$approver_role'") | .decided_at) = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' -i "$approval_file"
+    yq e '(.approvers[] | select(.role == "'$approver_role'") | .contacted) = true' -i "$approval_file"
+    
+    if [ -n "$comments" ]; then
+        yq e '(.approvers[] | select(.role == "'$approver_role'") | .comments) = "'$comments'"' -i "$approval_file"
+    fi
+    release_state_lock "$milestone_id"
+    
+    # Check if all approvers have decided
+    local pending_approvers=$(yq e '.approvers[] | select(.status == "pending") | .role' "$approval_file" | wc -l)
+    
+    if [ "$pending_approvers" -eq 0 ]; then
+        # All approvers have decided
+        local rejected_count=$(yq e '.approvers[] | select(.status == "rejected") | .role' "$approval_file" | wc -l)
+        
+        if [ "$rejected_count" -gt 0 ]; then
+            # Approval rejected
+            yq e '.approval_request.status = "rejected"' -i "$approval_file"
+            yq e '.approval_request.decided_at = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' -i "$approval_file"
+            
+            local from_phase=$(echo "$transition" | cut -d' ' -f1)
+            update_kiro_phase_status "$milestone_id" "$task_id" "$from_phase" "blocked" "{\"reason\": \"approval_rejected\"}"
+            
+            log_milestone_event_reactive "$milestone_id" "kiro_approval_rejected" "{\"task_id\": \"$task_id\", \"transition\": \"$transition\", \"rejected_by\": \"$approver_role\"}"
+            echo "❌ Approval rejected: $transition"
+        else
+            # Approval granted
+            yq e '.approval_request.status = "approved"' -i "$approval_file"
+            yq e '.approval_request.decided_at = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' -i "$approval_file"
+            
+            local from_phase=$(echo "$transition" | cut -d' ' -f1)
+            local to_phase=$(echo "$transition" | cut -d' ' -f3)
+            
+            update_kiro_phase_status "$milestone_id" "$task_id" "$from_phase" "approved"
+            transition_kiro_phase "$milestone_id" "$task_id" "$from_phase" "$to_phase"
+            
+            log_milestone_event_reactive "$milestone_id" "kiro_approval_granted" "{\"task_id\": \"$task_id\", \"transition\": \"$transition\"}"
+            echo "✅ Approval granted: $transition"
+        fi
+    else
+        echo "⏳ Waiting for $pending_approvers more approver(s)"
+    fi
+}
+
+# Calculate task progress based on kiro phase completion
+calculate_kiro_task_progress() {
+    local milestone_id=$1
+    local task_id=$2
+    local milestone_file=".milestones/active/$milestone_id.yaml"
+    
+    # Check if task has kiro workflow enabled
+    local kiro_enabled=$(yq e '.tasks[] | select(.id == "'$task_id'") | .kiro_workflow.enabled' "$milestone_file" 2>/dev/null)
+    if [ "$kiro_enabled" != "true" ]; then
+        # Fall back to standard task progress calculation
+        local task_status=$(yq e '.tasks[] | select(.id == "'$task_id'") | .status' "$milestone_file")
+        case "$task_status" in
+            "completed") echo "100" ;;
+            "in_progress") echo "50" ;;
+            *) echo "0" ;;
+        esac
+        return
+    fi
+    
+    # Get phase weights from milestone configuration
+    local design_weight=$(yq e '.kiro_configuration.phase_weights.design' "$milestone_file" 2>/dev/null || echo "15")
+    local spec_weight=$(yq e '.kiro_configuration.phase_weights.spec' "$milestone_file" 2>/dev/null || echo "25")
+    local task_weight=$(yq e '.kiro_configuration.phase_weights.task' "$milestone_file" 2>/dev/null || echo "20")
+    local execute_weight=$(yq e '.kiro_configuration.phase_weights.execute' "$milestone_file" 2>/dev/null || echo "40")
+    
+    local total_progress=0
+    
+    # Calculate progress for each phase
+    for phase in design spec task execute; do
+        local phase_status=$(yq e '.tasks[] | select(.id == "'$task_id'") | .kiro_workflow.phases.'$phase'.status' "$milestone_file")
+        local phase_progress=0
+        
+        case "$phase_status" in
+            "completed"|"approved")
+                phase_progress=100
+                ;;
+            "in_progress")
+                phase_progress=60
+                ;;
+            "waiting_approval")
+                phase_progress=90
+                ;;
+            "blocked")
+                phase_progress=30
+                ;;
+            *)
+                phase_progress=0
+                ;;
+        esac
+        
+        # Apply weight to phase progress
+        case "$phase" in
+            "design")
+                total_progress=$((total_progress + (phase_progress * design_weight / 100)))
+                ;;
+            "spec")
+                total_progress=$((total_progress + (phase_progress * spec_weight / 100)))
+                ;;
+            "task")
+                total_progress=$((total_progress + (phase_progress * task_weight / 100)))
+                ;;
+            "execute")
+                total_progress=$((total_progress + (phase_progress * execute_weight / 100)))
+                ;;
+        esac
+    done
+    
+    echo "$total_progress"
+}
+
+# Enhanced milestone progress calculation with kiro phase support
+calculate_milestone_progress_with_kiro() {
+    local milestone_id=$1
+    local milestone_file=".milestones/active/$milestone_id.yaml"
+    
+    local task_ids=$(yq e '.tasks[].id' "$milestone_file")
+    local total_tasks=$(echo "$task_ids" | wc -l)
+    local total_progress=0
+    
+    for task_id in $task_ids; do
+        local task_progress=$(calculate_kiro_task_progress "$milestone_id" "$task_id")
+        total_progress=$((total_progress + task_progress))
+    done
+    
+    local milestone_progress=$((total_progress / total_tasks))
+    echo "$milestone_progress"
+}
+
+# Get next kiro phase in progression
+get_next_kiro_phase() {
+    local current_phase=$1
+    
+    case "$current_phase" in
+        "design") echo "spec" ;;
+        "spec") echo "task" ;;
+        "task") echo "execute" ;;
+        "execute") echo "" ;;  # No next phase
+        *) echo "" ;;
+    esac
+}
+
+# Check if kiro phase is complete and ready for transition
+check_kiro_phase_ready_for_transition() {
+    local milestone_id=$1
+    local task_id=$2
+    local phase_name=$3
+    
+    local milestone_file=".milestones/active/$milestone_id.yaml"
+    local phase_status=$(yq e '.tasks[] | select(.id == "'$task_id'") | .kiro_workflow.phases.'$phase_name'.status' "$milestone_file")
+    
+    case "$phase_status" in
+        "approved"|"completed")
+            local next_phase=$(get_next_kiro_phase "$phase_name")
+            if [ -n "$next_phase" ]; then
+                echo "ready"
+            else
+                echo "task_complete"
+            fi
+            ;;
+        *)
+            echo "not_ready"
+            ;;
+    esac
+}
+
+# Auto-transition kiro phases when ready
+auto_transition_kiro_phases() {
+    local milestone_id=$1
+    local task_id=$2
+    
+    local milestone_file=".milestones/active/$milestone_id.yaml"
+    local current_phase=$(yq e '.tasks[] | select(.id == "'$task_id'") | .kiro_workflow.current_phase' "$milestone_file")
+    
+    local transition_ready=$(check_kiro_phase_ready_for_transition "$milestone_id" "$task_id" "$current_phase")
+    
+    case "$transition_ready" in
+        "ready")
+            local next_phase=$(get_next_kiro_phase "$current_phase")
+            echo "🔄 Auto-transitioning: $current_phase → $next_phase"
+            transition_kiro_phase "$milestone_id" "$task_id" "$current_phase" "$next_phase"
+            ;;
+        "task_complete")
+            echo "✅ All kiro phases completed for task: $task_id"
+            complete_milestone_task "$milestone_id" "$task_id"
+            ;;
+        *)
+            echo "⏳ Phase $current_phase not ready for transition"
+            ;;
+    esac
+}
+
+# Monitor kiro phase progressions and handle auto-transitions
+monitor_kiro_phase_progressions() {
+    local milestone_id=$1
+    
+    local milestone_file=".milestones/active/$milestone_id.yaml"
+    local kiro_tasks=$(yq e '.tasks[] | select(.kiro_workflow.enabled == true) | .id' "$milestone_file" 2>/dev/null)
+    
+    for task_id in $kiro_tasks; do
+        auto_transition_kiro_phases "$milestone_id" "$task_id"
+    done
+}
+```
+
+This state management system provides robust, atomic operations for milestone state persistence with comprehensive event logging, recovery capabilities, automatic reactive status updates, and full kiro workflow phase management with approval gates.
