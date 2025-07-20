@@ -22,6 +22,12 @@ validate_milestone_integrity() {
     local milestone_file=".milestones/active/$milestone_id.yaml"
     if [ ! -f "$milestone_file" ]; then
         echo "❌ ERROR: Milestone file not found: $milestone_file"
+        echo "📝 GUIDANCE: The milestone '$milestone_id' doesn't exist or isn't active"
+        echo "   • Check if the milestone ID is correct"
+        echo "   • Look for it in .milestones/completed/ if it's finished"
+        echo "   • Use '/milestone/status' to see all available milestones"
+        echo ""
+        echo "💡 SUGGESTION: Create the milestone first with '/milestone/plan $milestone_id'"
         ((errors++))
         return $errors
     fi
@@ -29,6 +35,13 @@ validate_milestone_integrity() {
     # Validate YAML syntax
     if ! yq e '.' "$milestone_file" >/dev/null 2>&1; then
         echo "❌ ERROR: Invalid YAML syntax in milestone file"
+        echo "📝 GUIDANCE: The milestone file contains syntax errors"
+        echo "   • Check for proper indentation (use spaces, not tabs)"
+        echo "   • Ensure quotes are properly closed"
+        echo "   • Verify colons are followed by spaces"
+        echo ""
+        echo "💡 SUGGESTION: Use 'yq e . $milestone_file' to see specific syntax errors"
+        echo "   Or restore from backup: cp .milestones/backups/latest/$milestone_id.yaml $milestone_file"
         ((errors++))
         return $errors
     fi
@@ -39,6 +52,15 @@ validate_milestone_integrity() {
         local value=$(yq e ".$field" "$milestone_file" 2>/dev/null)
         if [ "$value" = "null" ] || [ -z "$value" ]; then
             echo "❌ ERROR: Missing required field: $field"
+            echo "📝 GUIDANCE: Every milestone must have this field defined"
+            case "$field" in
+                "id") echo "   • Add: id: \"$milestone_id\"" ;;
+                "title") echo "   • Add: title: \"Your Milestone Title\"" ;;
+                "description") echo "   • Add: description: \"Brief description of what this milestone accomplishes\"" ;;
+                "status") echo "   • Add: status: \"planning\" (or in_progress, completed, etc.)" ;;
+                "created_at") echo "   • Add: created_at: \"$(date -I 2>/dev/null || date +%Y-%m-%d)T$(date +%H:%M:%S)Z\"" ;;
+            esac
+            echo ""
             ((errors++))
         fi
     done
@@ -47,6 +69,11 @@ validate_milestone_integrity() {
     local file_milestone_id=$(yq e '.id' "$milestone_file")
     if [ "$file_milestone_id" != "$milestone_id" ]; then
         echo "❌ ERROR: Milestone ID mismatch. File: $file_milestone_id, Expected: $milestone_id"
+        echo "📝 GUIDANCE: The ID in the file must match the filename"
+        echo "   • File name: $milestone_id.yaml"
+        echo "   • ID in file: $file_milestone_id"
+        echo ""
+        echo "💡 SUGGESTION: Fix with: yq e '.id = \"$milestone_id\"' -i $milestone_file"
         ((errors++))
     fi
     
@@ -494,7 +521,14 @@ sanitize_milestone_id() {
     
     # Ensure it's not empty and starts with alphanumeric
     if [ -z "$sanitized" ] || ! [[ "$sanitized" =~ ^[a-zA-Z0-9] ]]; then
-        echo "ERROR: Invalid milestone ID format"
+        echo "❌ ERROR: Invalid milestone ID format"
+        echo "📝 GUIDANCE: Milestone IDs must:"
+        echo "   • Start with a letter or number"
+        echo "   • Contain only letters, numbers, hyphens, and underscores"
+        echo "   • Be between 1-50 characters long"
+        echo "   • Examples: 'user-auth', 'api_v2', 'milestone001'"
+        echo ""
+        echo "💡 SUGGESTION: Try using a format like 'feature-name' or 'milestone-001'"
         return 1
     fi
     
@@ -520,7 +554,13 @@ validate_input_parameters() {
             # Remove potentially dangerous characters, limit length
             local sanitized=$(echo "$param_value" | sed 's/[<>&"'\''`]//g' | head -c "$max_length")
             if [ -z "$sanitized" ]; then
-                echo "ERROR: Title cannot be empty"
+                echo "❌ ERROR: Milestone title cannot be empty"
+                echo "📝 GUIDANCE: Provide a clear, descriptive title for your milestone"
+                echo "   • Use 3-100 characters"
+                echo "   • Describe the main goal or deliverable"
+                echo "   • Examples: 'User Authentication System', 'API Documentation', 'Database Migration'"
+                echo ""
+                echo "💡 SUGGESTION: Try a title like 'Implement [Feature Name]' or 'Setup [Component]'"
                 return 1
             fi
             echo "$sanitized"
@@ -539,7 +579,15 @@ validate_input_parameters() {
                     return 0
                 fi
             done
-            echo "ERROR: Invalid status value"
+            echo "❌ ERROR: Invalid milestone status '$param_value'"
+            echo "📝 GUIDANCE: Status must be one of the following:"
+            echo "   • 'planning' - Initial planning phase"
+            echo "   • 'in_progress' - Currently being worked on"
+            echo "   • 'blocked' - Waiting for dependencies or resolution"
+            echo "   • 'completed' - Successfully finished"
+            echo "   • 'cancelled' - No longer needed or abandoned"
+            echo ""
+            echo "💡 SUGGESTION: Use 'planning' for new milestones or 'in_progress' for active work"
             return 1
             ;;
         "percentage")
@@ -547,7 +595,12 @@ validate_input_parameters() {
             if [[ "$param_value" =~ ^[0-9]+$ ]] && [ "$param_value" -ge 0 ] && [ "$param_value" -le 100 ]; then
                 echo "$param_value"
             else
-                echo "ERROR: Invalid percentage value"
+                echo "❌ ERROR: Invalid percentage value '$param_value'"
+                echo "📝 GUIDANCE: Progress percentage must be:"
+                echo "   • A whole number between 0 and 100"
+                echo "   • Examples: 0, 25, 50, 75, 100"
+                echo ""
+                echo "💡 SUGGESTION: Use 0 for just started, 50 for halfway, 100 for completed"
                 return 1
             fi
             ;;
@@ -556,12 +609,27 @@ validate_input_parameters() {
             if date -d "$param_value" >/dev/null 2>&1 || date -j -f "%Y-%m-%dT%H:%M:%SZ" "$param_value" >/dev/null 2>&1; then
                 echo "$param_value"
             else
-                echo "ERROR: Invalid date format"
+                echo "❌ ERROR: Invalid date format '$param_value'"
+                echo "📝 GUIDANCE: Date must be in ISO 8601 format:"
+                echo "   • YYYY-MM-DD (e.g., 2024-07-20)"
+                echo "   • YYYY-MM-DDTHH:MM:SSZ (e.g., 2024-07-20T14:30:00Z)"
+                echo ""
+                echo "💡 SUGGESTION: Use 'date -I' command to get today's date in correct format"
+                echo "   Current date: $(date -I 2>/dev/null || date +%Y-%m-%d)"
                 return 1
             fi
             ;;
         *)
-            echo "ERROR: Unknown parameter type: $param_type"
+            echo "❌ ERROR: Unknown parameter type '$param_type'"
+            echo "📝 GUIDANCE: Supported parameter types are:"
+            echo "   • milestone_id - Unique identifier for milestone"
+            echo "   • title - Descriptive name for milestone"
+            echo "   • description - Detailed explanation"
+            echo "   • status - Current milestone state"
+            echo "   • percentage - Progress completion (0-100)"
+            echo "   • date - ISO 8601 formatted date"
+            echo ""
+            echo "💡 SUGGESTION: Check your parameter name spelling and try again"
             return 1
             ;;
     esac
@@ -878,4 +946,207 @@ run_milestone_validation() {
 }
 ```
 
-This comprehensive validation framework provides milestone integrity, dependencies, context, hybrid architecture validation, and secure input handling to ensure reliable milestone execution across all scales.
+## Enhanced Error Messaging and User Guidance
+
+```bash
+# Enhanced error message formatter with actionable guidance
+format_error_message() {
+    local error_type=$1
+    local error_context=$2
+    local suggested_fix=$3
+    local additional_help=$4
+    
+    echo "❌ ERROR: $error_context"
+    echo "📝 GUIDANCE: $suggested_fix"
+    
+    if [ -n "$additional_help" ]; then
+        echo "💡 QUICK FIX: $additional_help"
+    fi
+    
+    # Add contextual help based on error type
+    case "$error_type" in
+        "file_not_found")
+            echo ""
+            echo "🔍 TROUBLESHOOTING:"
+            echo "   1. Check if you're in the right directory: pwd"
+            echo "   2. List available milestones: ls .milestones/active/"
+            echo "   3. Create the milestone: /milestone/plan [milestone-id]"
+            ;;
+        "invalid_syntax")
+            echo ""
+            echo "🔍 TROUBLESHOOTING:"
+            echo "   1. Validate YAML syntax: yq e . [file]"
+            echo "   2. Check indentation (spaces only, no tabs)"
+            echo "   3. Restore from backup if needed"
+            ;;
+        "missing_dependency")
+            echo ""
+            echo "🔍 TROUBLESHOOTING:"
+            echo "   1. Check dependency status: /milestone/status [dependency-id]"
+            echo "   2. Complete prerequisite milestones first"
+            echo "   3. Update dependency mapping if changed"
+            ;;
+        "git_issues")
+            echo ""
+            echo "🔍 TROUBLESHOOTING:"
+            echo "   1. Check git status: git status"
+            echo "   2. Commit changes: git add -A && git commit -m 'milestone update'"
+            echo "   3. Switch to milestone branch: git checkout -b milestone/[id]"
+            ;;
+        "permission_denied")
+            echo ""
+            echo "🔍 TROUBLESHOOTING:"
+            echo "   1. Check file permissions: ls -la .milestones/"
+            echo "   2. Fix permissions: chmod u+w .milestones/active/[file]"
+            echo "   3. Check directory ownership"
+            ;;
+    esac
+    
+    echo ""
+    echo "📚 HELP: Use '/milestone/help' for detailed command guidance"
+    echo ""
+}
+
+# Progressive help system based on user context
+show_contextual_help() {
+    local command_context=$1
+    local error_count=${2:-0}
+    
+    echo "🎯 CONTEXTUAL HELP: $command_context"
+    echo "================================"
+    
+    case "$command_context" in
+        "first_time_user")
+            echo "Welcome to the milestone system! Here's how to get started:"
+            echo ""
+            echo "📋 BASIC WORKFLOW:"
+            echo "   1. Plan a milestone: /milestone/plan my-first-milestone"
+            echo "   2. Check status: /milestone/status"
+            echo "   3. Work on tasks: /milestone/execute my-first-milestone"
+            echo "   4. Update progress: /milestone/update my-first-milestone"
+            echo ""
+            echo "💡 TIP: Start simple with a small milestone to learn the system"
+            ;;
+        "milestone_planning")
+            echo "Planning a new milestone effectively:"
+            echo ""
+            echo "📋 PLANNING CHECKLIST:"
+            echo "   • Choose a clear, descriptive ID (e.g., 'user-auth', 'api-docs')"
+            echo "   • Define specific, measurable goals"
+            echo "   • Break down into 1-2 day tasks"
+            echo "   • Identify dependencies early"
+            echo ""
+            echo "⏱️  TIMING GUIDELINES:"
+            echo "   • Keep milestones to 2-4 weeks maximum"
+            echo "   • Add 20-30% buffer for unexpected issues"
+            echo "   • Consider team availability and skill levels"
+            ;;
+        "error_recovery")
+            if [ $error_count -gt 3 ]; then
+                echo "Multiple errors detected. Let's troubleshoot systematically:"
+                echo ""
+                echo "🔧 RECOVERY STEPS:"
+                echo "   1. Validate your environment: /milestone/validate"
+                echo "   2. Check system requirements: which yq git"
+                echo "   3. Verify permissions: ls -la .milestones/"
+                echo "   4. Reset if needed: rm -rf .milestones && /milestone/init"
+                echo ""
+                echo "📞 SUPPORT: If issues persist, check the troubleshooting guide"
+            else
+                echo "Having trouble? Here are common solutions:"
+                echo ""
+                echo "🔧 QUICK FIXES:"
+                echo "   • File not found: Check spelling and use /milestone/status to list all"
+                echo "   • YAML errors: Validate with 'yq e . [file]' command"
+                echo "   • Permission issues: Check directory write permissions"
+                echo "   • Git problems: Ensure you're in a git repository"
+            fi
+            ;;
+    esac
+    
+    echo ""
+}
+
+# Command discovery assistance
+suggest_next_commands() {
+    local current_command=$1
+    local milestone_state=$2
+    
+    echo "🎯 SUGGESTED NEXT STEPS:"
+    echo "========================"
+    
+    case "$current_command" in
+        "plan")
+            echo "After planning, you typically want to:"
+            echo "   • Check the plan: /milestone/status $milestone_state"
+            echo "   • Start working: /milestone/execute $milestone_state"
+            echo "   • Review dependencies: /milestone/review $milestone_state"
+            ;;
+        "execute")
+            echo "While executing, you can:"
+            echo "   • Update progress: /milestone/update $milestone_state --progress [percentage]"
+            echo "   • Check status: /milestone/status $milestone_state"
+            echo "   • Handle blockers: /milestone/update $milestone_state --status blocked"
+            ;;
+        "update")
+            echo "After updating, consider:"
+            echo "   • Review progress: /milestone/status $milestone_state"
+            echo "   • Continue execution: /milestone/execute $milestone_state"
+            echo "   • Archive if complete: /milestone/archive $milestone_state"
+            ;;
+        "status")
+            echo "From status view, you can:"
+            echo "   • Execute active milestone: /milestone/execute [milestone-id]"
+            echo "   • Update progress: /milestone/update [milestone-id]"
+            echo "   • Plan new milestone: /milestone/plan [new-milestone-id]"
+            ;;
+    esac
+    
+    echo ""
+    echo "💡 TIP: Use tab completion for milestone IDs and commands"
+    echo ""
+}
+
+# Real-time validation with suggestions
+validate_with_suggestions() {
+    local milestone_id=$1
+    local operation=$2
+    
+    echo "🔍 VALIDATING: $operation for milestone '$milestone_id'"
+    echo "=================================================="
+    
+    # Pre-validation checks with helpful suggestions
+    if [ ! -d ".milestones" ]; then
+        format_error_message "missing_setup" \
+            "Milestone system not initialized" \
+            "Initialize the milestone system first" \
+            "/milestone/init"
+        return 1
+    fi
+    
+    if [ -z "$milestone_id" ]; then
+        format_error_message "missing_parameter" \
+            "Milestone ID is required" \
+            "Provide a milestone ID as an argument" \
+            "Example: /milestone/$operation my-milestone-id"
+        return 1
+    fi
+    
+    # Run the comprehensive validation
+    local validation_result
+    validation_result=$(run_comprehensive_validation "$milestone_id" "standard")
+    local validation_exit_code=$?
+    
+    if [ $validation_exit_code -eq 0 ]; then
+        echo "✅ Validation passed - proceeding with $operation"
+        suggest_next_commands "$operation" "$milestone_id"
+    else
+        echo "❌ Validation failed - see errors above"
+        show_contextual_help "error_recovery" $validation_exit_code
+    fi
+    
+    return $validation_exit_code
+}
+```
+
+This comprehensive validation framework provides milestone integrity, dependencies, context, hybrid architecture validation, secure input handling, and enhanced user guidance to ensure reliable milestone execution across all scales.

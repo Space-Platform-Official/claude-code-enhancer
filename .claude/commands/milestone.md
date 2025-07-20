@@ -77,6 +77,23 @@ Execute comprehensive milestone planning with ZERO tolerance for oversimplificat
 
 You are planning milestones for: $ARGUMENTS
 
+## 🚀 **QUICK-START ALTERNATIVE AVAILABLE**
+
+**New to milestones? Looking for something simpler?** 
+
+If this seems overwhelming, try our quick-start templates instead:
+- `/milestone/quickstart personal "Your project"`
+- `/milestone/quickstart team "Your team project"`
+- `/milestone/quickstart api "Your API project"`
+- `/milestone/quickstart frontend "Your UI project"`
+- `/milestone/quickstart bugfix "Your bug description"`
+
+**Quick-start benefits:** Ready in 2 minutes, focused templates, easy upgrade path.
+
+**Continue with full system:** The comprehensive planning below is powerful but complex.
+
+---
+
 Let me ultrathink about the comprehensive milestone architecture and tracking system.
 
 🚨 **REMEMBER: Good milestones are SMART (Specific, Measurable, Achievable, Relevant, Time-bound)!** 🚨

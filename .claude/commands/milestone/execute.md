@@ -214,13 +214,9 @@ deploy_execution_agents() {
     register_agent "task-executor-$session_id" "task_executor" "$milestone_id"
     spawn_task_execution_agent "$milestone_id" &
     
-    # Progress Monitoring Agent (Enhanced with Kiro support)
+    # Progress Monitoring Agent
     register_agent "progress-monitor-$session_id" "progress_monitor" "$milestone_id"
     spawn_progress_monitoring_agent "$milestone_id" &
-    
-    # NEW: Kiro Workflow Coordination Agent
-    register_agent "kiro-coordinator-$session_id" "kiro_coordinator" "$milestone_id"
-    spawn_kiro_coordination_agent "$milestone_id" &
     
     # Git Integration Agent
     register_agent "git-integration-$session_id" "git_integration" "$milestone_id"
@@ -234,7 +230,7 @@ deploy_execution_agents() {
     register_agent "blocker-detector-$session_id" "blocker_detector" "$milestone_id"
     spawn_blocker_detection_agent "$milestone_id" &
     
-    echo "✅ All execution agents deployed (including kiro workflow support)"
+    echo "✅ All execution agents deployed"
 }
 ```
 
@@ -249,339 +245,30 @@ spawn_task_execution_agent() {
     local tasks=$(yq e '.tasks[] | select(.status == "pending") | .id' ".milestones/active/$milestone_id.yaml")
     
     for task_id in $tasks; do
-        echo "📋 Processing task: $task_id"
+        echo "📋 Executing task: $task_id"
         
-        # Check if task has kiro workflow enabled
-        local kiro_enabled=$(yq e '.tasks[] | select(.id == "'$task_id'") | .kiro_workflow.enabled' ".milestones/active/$milestone_id.yaml" 2>/dev/null)
+        # Update task status
+        yq e '(.tasks[] | select(.id == "'$task_id'") | .status) = "in_progress"' -i ".milestones/active/$milestone_id.yaml"
+        yq e '(.tasks[] | select(.id == "'$task_id'") | .started_at) = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' -i ".milestones/active/$milestone_id.yaml"
         
-        if [ "$kiro_enabled" = "true" ]; then
-            echo "🔄 Task $task_id uses kiro workflow - delegating to kiro coordination agent"
-            # Kiro workflow tasks are handled by the kiro coordination agent
-            # Just mark task as kiro-managed and let the coordination agent handle phases
-            yq e '(.tasks[] | select(.id == "'$task_id'") | .status) = "kiro_managed"' -i ".milestones/active/$milestone_id.yaml"
-            yq e '(.tasks[] | select(.id == "'$task_id'") | .started_at) = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' -i ".milestones/active/$milestone_id.yaml"
-            
-            # Initialize kiro workflow phases
-            initialize_kiro_workflow "$milestone_id" "$task_id"
-            
-            log_milestone_event_reactive "$milestone_id" "kiro_workflow_started" "{\"task_id\": \"$task_id\"}"
-        else
-            echo "📋 Executing standard task: $task_id"
-            
-            # Standard task execution
-            yq e '(.tasks[] | select(.id == "'$task_id'") | .status) = "in_progress"' -i ".milestones/active/$milestone_id.yaml"
-            yq e '(.tasks[] | select(.id == "'$task_id'") | .started_at) = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' -i ".milestones/active/$milestone_id.yaml"
-            
-            # Log task start with reactive status update
-            log_milestone_event_reactive "$milestone_id" "task_started" "{\"task_id\": \"$task_id\"}"
-            
-            # Execute task (placeholder for actual task execution)
-            execute_milestone_task "$milestone_id" "$task_id"
-            
-            # Update task completion
-            yq e '(.tasks[] | select(.id == "'$task_id'") | .status) = "completed"' -i ".milestones/active/$milestone_id.yaml"
-            yq e '(.tasks[] | select(.id == "'$task_id'") | .completed_at) = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' -i ".milestones/active/$milestone_id.yaml"
-            
-            # Log task completion with reactive status update
-            log_milestone_event_reactive "$milestone_id" "task_completed" "{\"task_id\": \"$task_id\"}"
-            
-            # Create milestone commit
-            create_milestone_commit "$milestone_id" "$task_id" "Complete task: $(yq e '.tasks[] | select(.id == "'$task_id'") | .title' ".milestones/active/$milestone_id.yaml")"
-        fi
+        # Log task start with reactive status update
+        log_milestone_event_reactive "$milestone_id" "task_started" "{\"task_id\": \"$task_id\"}"
+        
+        # Execute task (placeholder for actual task execution)
+        execute_milestone_task "$milestone_id" "$task_id"
+        
+        # Update task completion
+        yq e '(.tasks[] | select(.id == "'$task_id'") | .status) = "completed"' -i ".milestones/active/$milestone_id.yaml"
+        yq e '(.tasks[] | select(.id == "'$task_id'") | .completed_at) = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' -i ".milestones/active/$milestone_id.yaml"
+        
+        # Log task completion with reactive status update
+        log_milestone_event_reactive "$milestone_id" "task_completed" "{\"task_id\": \"$task_id\"}"
+        
+        # Create milestone commit
+        create_milestone_commit "$milestone_id" "$task_id" "Complete task: $(yq e '.tasks[] | select(.id == "'$task_id'") | .title' ".milestones/active/$milestone_id.yaml")"
     done
     
     echo "✅ Task Execution Agent: All tasks processed"
-}
-
-# Initialize kiro workflow for a task
-initialize_kiro_workflow() {
-    local milestone_id=$1
-    local task_id=$2
-    
-    echo "🔄 Initializing kiro workflow for task: $task_id"
-    
-    # Create deliverables directory structure
-    mkdir -p ".milestones/deliverables/$task_id"/{design,spec,task,execute}
-    
-    # Set initial phase status
-    update_kiro_phase_status "$milestone_id" "$task_id" "design" "in_progress"
-    
-    # Update task's current phase
-    yq e '(.tasks[] | select(.id == "'$task_id'") | .kiro_workflow.current_phase) = "design"' -i ".milestones/active/$milestone_id.yaml"
-    
-    echo "✅ Kiro workflow initialized for $task_id - starting with design phase"
-}
-
-# NEW: Kiro Workflow Coordination Agent
-spawn_kiro_coordination_agent() {
-    local milestone_id=$1
-    
-    echo "🎨 Kiro Coordination Agent: Managing workflow phases for $milestone_id"
-    
-    while true; do
-        # Find tasks with kiro workflow enabled
-        local kiro_tasks=$(yq e '.tasks[] | select(.kiro_workflow.enabled == true) | .id' ".milestones/active/$milestone_id.yaml" 2>/dev/null)
-        
-        for task_id in $kiro_tasks; do
-            local current_phase=$(yq e '.tasks[] | select(.id == "'$task_id'") | .kiro_workflow.current_phase' ".milestones/active/$milestone_id.yaml")
-            local phase_status=$(yq e '.tasks[] | select(.id == "'$task_id'") | .kiro_workflow.phases.'$current_phase'.status' ".milestones/active/$milestone_id.yaml")
-            
-            case "$current_phase" in
-                "design")
-                    if [ "$phase_status" = "in_progress" ]; then
-                        execute_design_phase "$milestone_id" "$task_id"
-                    fi
-                    ;;
-                "spec")
-                    if [ "$phase_status" = "in_progress" ]; then
-                        execute_spec_phase "$milestone_id" "$task_id"
-                    fi
-                    ;;
-                "task")
-                    if [ "$phase_status" = "in_progress" ]; then
-                        execute_task_phase "$milestone_id" "$task_id"
-                    fi
-                    ;;
-                "execute")
-                    if [ "$phase_status" = "in_progress" ]; then
-                        execute_implementation_phase "$milestone_id" "$task_id"
-                    fi
-                    ;;
-            esac
-            
-            # Monitor for phase transitions
-            monitor_kiro_phase_progressions "$milestone_id"
-        done
-        
-        sleep 30
-    done
-}
-
-# Execute design phase for kiro workflow
-execute_design_phase() {
-    local milestone_id=$1
-    local task_id=$2
-    
-    echo "🎨 Executing design phase for task: $task_id"
-    
-    local task_title=$(yq e '.tasks[] | select(.id == "'$task_id'") | .title' ".milestones/active/$milestone_id.yaml")
-    local deliverable_dir=".milestones/deliverables/$task_id/design"
-    
-    # Create architecture design document
-    cat > "$deliverable_dir/architecture.md" << EOF
-# Architecture Design: $task_title
-
-## Overview
-$(yq e '.tasks[] | select(.id == "'$task_id'") | .title' ".milestones/active/$milestone_id.yaml")
-
-## Architecture Decisions
-- [Design decision 1]
-- [Design decision 2]
-- [Design decision 3]
-
-## API Design
-- Endpoints and interfaces
-- Data flow patterns
-- Integration points
-
-## Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)
-EOF
-    
-    # Create API specification
-    cat > "$deliverable_dir/api-spec.yaml" << EOF
-# API Specification: $task_title
-openapi: 3.0.0
-info:
-  title: $task_title API
-  version: 1.0.0
-  description: Auto-generated API specification
-paths:
-  # API endpoints will be defined here
-components:
-  schemas:
-    # Data models will be defined here
-# Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)
-EOF
-    
-    echo "✅ Design phase deliverables created for $task_id"
-    
-    # Complete design phase
-    update_kiro_phase_status "$milestone_id" "$task_id" "design" "completed"
-    
-    # Trigger transition to spec phase (with approval if required)
-    transition_kiro_phase "$milestone_id" "$task_id" "design" "spec"
-}
-
-# Execute specification phase for kiro workflow
-execute_spec_phase() {
-    local milestone_id=$1
-    local task_id=$2
-    
-    echo "📋 Executing specification phase for task: $task_id"
-    
-    local task_title=$(yq e '.tasks[] | select(.id == "'$task_id'") | .title' ".milestones/active/$milestone_id.yaml")
-    local deliverable_dir=".milestones/deliverables/$task_id/spec"
-    
-    # Create technical specification
-    cat > "$deliverable_dir/technical-spec.md" << EOF
-# Technical Specification: $task_title
-
-## Implementation Requirements
-- [Requirement 1]
-- [Requirement 2]
-- [Requirement 3]
-
-## Interface Definitions
-- Input/output specifications
-- Data validation rules
-- Error handling patterns
-
-## Test Requirements
-- Unit test coverage requirements
-- Integration test scenarios
-- Performance benchmarks
-
-## Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)
-EOF
-    
-    # Create test plan
-    cat > "$deliverable_dir/test-plan.md" << EOF
-# Test Plan: $task_title
-
-## Test Strategy
-- Unit testing approach
-- Integration testing approach
-- End-to-end testing requirements
-
-## Test Cases
-1. [Test case 1]
-2. [Test case 2]
-3. [Test case 3]
-
-## Acceptance Criteria
-- [Criteria 1]
-- [Criteria 2]
-- [Criteria 3]
-
-## Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)
-EOF
-    
-    echo "✅ Specification phase deliverables created for $task_id"
-    
-    # Complete spec phase
-    update_kiro_phase_status "$milestone_id" "$task_id" "spec" "completed"
-    
-    # Trigger transition to task phase
-    transition_kiro_phase "$milestone_id" "$task_id" "spec" "task"
-}
-
-# Execute task planning phase for kiro workflow
-execute_task_phase() {
-    local milestone_id=$1
-    local task_id=$2
-    
-    echo "📝 Executing task planning phase for task: $task_id"
-    
-    local task_title=$(yq e '.tasks[] | select(.id == "'$task_id'") | .title' ".milestones/active/$milestone_id.yaml")
-    local deliverable_dir=".milestones/deliverables/$task_id/task"
-    
-    # Create implementation plan
-    cat > "$deliverable_dir/implementation-plan.md" << EOF
-# Implementation Plan: $task_title
-
-## Development Tasks
-1. [ ] Set up project structure
-2. [ ] Implement core functionality
-3. [ ] Add error handling
-4. [ ] Write unit tests
-5. [ ] Integration testing
-6. [ ] Documentation updates
-
-## Development Timeline
-- Task 1: 2 hours
-- Task 2: 4 hours  
-- Task 3: 1 hour
-- Task 4: 3 hours
-- Task 5: 2 hours
-- Task 6: 1 hour
-
-## Dependencies
-- [Dependency 1]
-- [Dependency 2]
-
-## Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)
-EOF
-    
-    echo "✅ Task planning phase deliverables created for $task_id"
-    
-    # Complete task phase
-    update_kiro_phase_status "$milestone_id" "$task_id" "task" "completed"
-    
-    # Trigger transition to execute phase
-    transition_kiro_phase "$milestone_id" "$task_id" "task" "execute"
-}
-
-# Execute implementation phase for kiro workflow
-execute_implementation_phase() {
-    local milestone_id=$1
-    local task_id=$2
-    
-    echo "⚡ Executing implementation phase for task: $task_id"
-    
-    local task_title=$(yq e '.tasks[] | select(.id == "'$task_id'") | .title' ".milestones/active/$milestone_id.yaml")
-    local deliverable_dir=".milestones/deliverables/$task_id/execute"
-    
-    # Create implementation summary
-    cat > "$deliverable_dir/implementation-summary.md" << EOF
-# Implementation Summary: $task_title
-
-## Completed Work
-- [Implementation item 1]
-- [Implementation item 2]
-- [Implementation item 3]
-
-## Code Changes
-- Files modified: [list]
-- Tests added: [list]
-- Documentation updated: [list]
-
-## Validation Results
-- Unit tests: PASSED
-- Integration tests: PASSED
-- Code quality checks: PASSED
-
-## Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)
-EOF
-    
-    # Create test results
-    cat > "$deliverable_dir/test-results.md" << EOF
-# Test Results: $task_title
-
-## Test Summary
-- Total tests: 10
-- Passed: 10
-- Failed: 0
-- Coverage: 95%
-
-## Test Details
-All tests passed successfully.
-
-## Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)
-EOF
-    
-    echo "✅ Implementation phase deliverables created for $task_id"
-    
-    # Complete execute phase and overall task
-    update_kiro_phase_status "$milestone_id" "$task_id" "execute" "completed"
-    
-    # Mark the overall task as completed
-    yq e '(.tasks[] | select(.id == "'$task_id'") | .status) = "completed"' -i ".milestones/active/$milestone_id.yaml"
-    yq e '(.tasks[] | select(.id == "'$task_id'") | .completed_at) = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' -i ".milestones/active/$milestone_id.yaml"
-    
-    log_milestone_event_reactive "$milestone_id" "kiro_workflow_completed" "{\"task_id\": \"$task_id\"}"
-    log_milestone_event_reactive "$milestone_id" "task_completed" "{\"task_id\": \"$task_id\"}"
-    
-    echo "🎉 Kiro workflow completed for task: $task_id"
 }
 ```
 
@@ -592,29 +279,24 @@ EOF
 spawn_progress_monitoring_agent() {
     local milestone_id=$1
     
-    echo "📊 Progress Monitoring Agent: Starting real-time tracking with kiro support for $milestone_id"
+    echo "📊 Progress Monitoring Agent: Starting real-time tracking for $milestone_id"
     
     while true; do
-        # Enhanced progress calculation with kiro workflow support
+        # Calculate current progress
         local total_tasks=$(yq e '.tasks | length' ".milestones/active/$milestone_id.yaml")
-        local milestone_progress=$(calculate_milestone_progress_with_kiro "$milestone_id")
-        
-        # Calculate standard completed tasks for backward compatibility
         local completed_tasks=$(yq e '.tasks[] | select(.status == "completed") | .id' ".milestones/active/$milestone_id.yaml" | wc -l)
+        local progress_percentage=$((completed_tasks * 100 / total_tasks))
         
         # Update progress in milestone file
-        yq e '.progress.percentage = '$milestone_progress -i ".milestones/active/$milestone_id.yaml"
+        yq e '.progress.percentage = '$progress_percentage -i ".milestones/active/$milestone_id.yaml"
         yq e '.progress.tasks_completed = '$completed_tasks -i ".milestones/active/$milestone_id.yaml"
         yq e '.progress.last_update = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' -i ".milestones/active/$milestone_id.yaml"
         
-        # Calculate and store kiro-specific progress data
-        calculate_and_store_kiro_progress "$milestone_id"
-        
         # Log progress update with reactive status update
-        log_milestone_event_reactive "$milestone_id" "progress_updated" "{\"percentage\": $milestone_progress, \"completed_tasks\": $completed_tasks, \"total_tasks\": $total_tasks, \"calculation_type\": \"kiro_enhanced\"}"
+        log_milestone_event_reactive "$milestone_id" "progress_updated" "{\"percentage\": $progress_percentage, \"completed_tasks\": $completed_tasks, \"total_tasks\": $total_tasks}"
         
-        # Display enhanced progress dashboard
-        display_kiro_enhanced_progress_dashboard "$milestone_id"
+        # Display progress
+        display_progress_dashboard "$milestone_id"
         
         # Check if milestone is complete
         if [ "$completed_tasks" -eq "$total_tasks" ]; then
@@ -652,144 +334,6 @@ display_progress_dashboard() {
     tail -5 ".milestones/logs/execution-$milestone_id.jsonl" | jq -r '.timestamp + " " + .event + ": " + (.details // "")'
     
     echo "================================="
-}
-
-# Calculate and store kiro-specific progress data
-calculate_and_store_kiro_progress() {
-    local milestone_id=$1
-    local milestone_file=".milestones/active/$milestone_id.yaml"
-    
-    # Initialize kiro progress section if it doesn't exist
-    if ! yq e '.kiro_progress' "$milestone_file" >/dev/null 2>&1; then
-        yq e '.kiro_progress = {}' -i "$milestone_file"
-    fi
-    
-    # Calculate phase-wise progress across all kiro tasks
-    local total_design_progress=0
-    local total_spec_progress=0
-    local total_task_progress=0
-    local total_execute_progress=0
-    local kiro_task_count=0
-    
-    local kiro_tasks=$(yq e '.tasks[] | select(.kiro_workflow.enabled == true) | .id' "$milestone_file" 2>/dev/null)
-    
-    for task_id in $kiro_tasks; do
-        ((kiro_task_count++))
-        
-        for phase in design spec task execute; do
-            local phase_status=$(yq e '.tasks[] | select(.id == "'$task_id'") | .kiro_workflow.phases.'$phase'.status' "$milestone_file")
-            local phase_progress=0
-            
-            case "$phase_status" in
-                "completed"|"approved") phase_progress=100 ;;
-                "in_progress") phase_progress=60 ;;
-                "waiting_approval") phase_progress=90 ;;
-                "blocked") phase_progress=30 ;;
-                *) phase_progress=0 ;;
-            esac
-            
-            case "$phase" in
-                "design") total_design_progress=$((total_design_progress + phase_progress)) ;;
-                "spec") total_spec_progress=$((total_spec_progress + phase_progress)) ;;
-                "task") total_task_progress=$((total_task_progress + phase_progress)) ;;
-                "execute") total_execute_progress=$((total_execute_progress + phase_progress)) ;;
-            esac
-        done
-    done
-    
-    # Calculate averages
-    if [ "$kiro_task_count" -gt 0 ]; then
-        local avg_design=$((total_design_progress / kiro_task_count))
-        local avg_spec=$((total_spec_progress / kiro_task_count))
-        local avg_task=$((total_task_progress / kiro_task_count))
-        local avg_execute=$((total_execute_progress / kiro_task_count))
-        
-        # Store kiro progress data
-        yq e '.kiro_progress.phase_averages.design = '$avg_design -i "$milestone_file"
-        yq e '.kiro_progress.phase_averages.spec = '$avg_spec -i "$milestone_file"
-        yq e '.kiro_progress.phase_averages.task = '$avg_task -i "$milestone_file"
-        yq e '.kiro_progress.phase_averages.execute = '$avg_execute -i "$milestone_file"
-        yq e '.kiro_progress.kiro_task_count = '$kiro_task_count -i "$milestone_file"
-        yq e '.kiro_progress.last_calculated = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' -i "$milestone_file"
-    fi
-}
-
-# Enhanced progress dashboard with kiro workflow phase visibility
-display_kiro_enhanced_progress_dashboard() {
-    local milestone_id=$1
-    local milestone_file=".milestones/active/$milestone_id.yaml"
-    
-    echo "=== ENHANCED MILESTONE EXECUTION DASHBOARD (WITH KIRO WORKFLOWS) ==="
-    echo "Milestone: $(yq e '.title' "$milestone_file")"
-    echo "Status: $(yq e '.status' "$milestone_file")"
-    echo "Overall Progress: $(yq e '.progress.percentage' "$milestone_file")%"
-    echo ""
-    
-    # Display kiro phase progress if available
-    local kiro_task_count=$(yq e '.kiro_progress.kiro_task_count' "$milestone_file" 2>/dev/null || echo "0")
-    if [ "$kiro_task_count" -gt 0 ]; then
-        echo "KIRO WORKFLOW PROGRESS SUMMARY:"
-        echo "├── Design Phase:    [$(create_progress_bar $(yq e '.kiro_progress.phase_averages.design' "$milestone_file" 2>/dev/null || echo "0"))] $(yq e '.kiro_progress.phase_averages.design' "$milestone_file" 2>/dev/null || echo "0")%"
-        echo "├── Spec Phase:      [$(create_progress_bar $(yq e '.kiro_progress.phase_averages.spec' "$milestone_file" 2>/dev/null || echo "0"))] $(yq e '.kiro_progress.phase_averages.spec' "$milestone_file" 2>/dev/null || echo "0")%"
-        echo "├── Task Phase:      [$(create_progress_bar $(yq e '.kiro_progress.phase_averages.task' "$milestone_file" 2>/dev/null || echo "0"))] $(yq e '.kiro_progress.phase_averages.task' "$milestone_file" 2>/dev/null || echo "0")%"
-        echo "└── Execute Phase:   [$(create_progress_bar $(yq e '.kiro_progress.phase_averages.execute' "$milestone_file" 2>/dev/null || echo "0"))] $(yq e '.kiro_progress.phase_averages.execute' "$milestone_file" 2>/dev/null || echo "0")%"
-        echo ""
-    fi
-    
-    echo "DETAILED TASK STATUS:"
-    local task_ids=$(yq e '.tasks[].id' "$milestone_file")
-    for task_id in $task_ids; do
-        local task_title=$(yq e '.tasks[] | select(.id == "'$task_id'") | .title' "$milestone_file")
-        local task_status=$(yq e '.tasks[] | select(.id == "'$task_id'") | .status' "$milestone_file")
-        local kiro_enabled=$(yq e '.tasks[] | select(.id == "'$task_id'") | .kiro_workflow.enabled' "$milestone_file" 2>/dev/null)
-        
-        if [ "$kiro_enabled" = "true" ]; then
-            local current_phase=$(yq e '.tasks[] | select(.id == "'$task_id'") | .kiro_workflow.current_phase' "$milestone_file")
-            local phase_status=$(yq e '.tasks[] | select(.id == "'$task_id'") | .kiro_workflow.phases.'$current_phase'.status' "$milestone_file")
-            local task_progress=$(calculate_kiro_task_progress "$milestone_id" "$task_id")
-            
-            echo "├── $task_id: [$(create_progress_bar $task_progress)] $task_progress% (kiro: $current_phase/$phase_status)"
-            echo "│   └── $task_title"
-        else
-            local task_progress=0
-            case "$task_status" in
-                "completed") task_progress=100 ;;
-                "in_progress") task_progress=50 ;;
-                *) task_progress=0 ;;
-            esac
-            echo "├── $task_id: [$(create_progress_bar $task_progress)] $task_progress% (standard: $task_status)"
-            echo "│   └── $task_title"
-        fi
-    done
-    
-    echo ""
-    echo "ACTIVE AGENTS:"
-    list_active_agents "$milestone_id"
-    
-    # Show pending approvals if any
-    local pending_approvals=$(find ".milestones/approvals" -name "*$milestone_id*" -type f 2>/dev/null | wc -l)
-    if [ "$pending_approvals" -gt 0 ]; then
-        echo ""
-        echo "PENDING APPROVALS: $pending_approvals"
-        find ".milestones/approvals" -name "*$milestone_id*" -type f -exec basename {} \; 2>/dev/null | sed 's/^/├── /'
-    fi
-    
-    echo ""
-    echo "RECENT EVENTS:"
-    tail -5 ".milestones/logs/execution-$milestone_id.jsonl" | jq -r '.timestamp + " " + .event + ": " + (.details // "")' 2>/dev/null || echo "No recent events"
-    
-    echo "================================="
-}
-
-# Create progress bar visualization
-create_progress_bar() {
-    local percentage=$1
-    local bar_length=10
-    local filled=$((percentage * bar_length / 100))
-    local empty=$((bar_length - filled))
-    
-    printf '█%.0s' $(seq 1 $filled)
-    printf '░%.0s' $(seq 1 $empty)
 }
 ```
 

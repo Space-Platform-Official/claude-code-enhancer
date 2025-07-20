@@ -43,12 +43,8 @@ switch_to_milestone_branch() {
     elif git show-ref --verify --quiet "refs/remotes/origin/$branch_name"; then
         git checkout -b "$branch_name" "origin/$branch_name"
     else
-        echo "❌ ERROR: Milestone branch not found: $branch_name"
-        echo "📝 GUIDANCE: The milestone branch doesn't exist locally or remotely"
-        echo "   • Create the branch: create_milestone_branch $milestone_id"
-        echo "   • Or use existing branch: git checkout -b $branch_name"
-        echo ""
-        echo "💡 SUGGESTION: Run 'create_milestone_branch $milestone_id' to set up properly"
+        echo "ERROR: Milestone branch not found: $branch_name"
+        echo "Create it first with: create_milestone_branch $milestone_id"
         return 1
     fi
     
@@ -66,22 +62,16 @@ validate_milestone_branch() {
     
     # Check if on correct branch
     if [ "$current_branch" != "$expected_branch" ]; then
-        echo "⚠️  WARNING: Not on milestone branch"
-        echo "📝 GUIDANCE: You should be on the milestone-specific branch"
-        echo "   • Expected: $expected_branch"
-        echo "   • Current:  $current_branch"
-        echo ""
-        echo "💡 SUGGESTION: Switch with 'switch_to_milestone_branch $milestone_id'"
+        echo "WARNING: Not on milestone branch"
+        echo "  Expected: $expected_branch"
+        echo "  Current:  $current_branch"
         ((errors++))
     fi
     
     # Check for uncommitted changes
     if [ -n "$(git status --porcelain)" ]; then
-        echo "⚠️  WARNING: Uncommitted changes detected"
-        echo "📝 GUIDANCE: You have uncommitted changes that should be handled"
+        echo "WARNING: Uncommitted changes detected"
         git status --short
-        echo ""
-        echo "💡 SUGGESTION: Commit changes with 'git add -A && git commit -m \"Milestone progress\"'"
     fi
     
     # Check if branch is up to date with remote
@@ -89,19 +79,10 @@ validate_milestone_branch() {
     local remote_commit=$(git rev-parse "origin/$expected_branch" 2>/dev/null)
     
     if [ -n "$remote_commit" ] && [ "$local_commit" != "$remote_commit" ]; then
-        echo "⚠️  WARNING: Branch is not synchronized with remote"
+        echo "WARNING: Branch is not synchronized with remote"
         local ahead=$(git rev-list --count "origin/$expected_branch..HEAD" 2>/dev/null || echo "0")
         local behind=$(git rev-list --count "HEAD..origin/$expected_branch" 2>/dev/null || echo "0")
-        echo "📝 GUIDANCE: Your local branch differs from remote"
-        echo "   • Ahead: $ahead commits, Behind: $behind commits"
-        echo ""
-        if [ "$ahead" -gt 0 ] && [ "$behind" -gt 0 ]; then
-            echo "💡 SUGGESTION: Resolve with 'git pull --rebase' or 'git merge origin/$expected_branch'"
-        elif [ "$ahead" -gt 0 ]; then
-            echo "💡 SUGGESTION: Push your changes with 'git push'"
-        elif [ "$behind" -gt 0 ]; then
-            echo "💡 SUGGESTION: Pull remote changes with 'git pull'"
-        fi
+        echo "  Ahead: $ahead commits, Behind: $behind commits"
     fi
     
     if [ $errors -eq 0 ]; then
