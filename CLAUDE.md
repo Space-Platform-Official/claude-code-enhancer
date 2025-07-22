@@ -425,8 +425,11 @@ Before creating ANY folder, you MUST:
 
 
 
+
+
+
 # ========== CLAUDE FLOW TEMPLATE ==========
-# Auto-updated: 2025-07-17 23:09:59
+# Auto-updated: 2025-07-21 00:29:01
 
 # Development Partnership
 
@@ -846,5 +849,11 @@ Before creating ANY folder, you MUST:
 - **Express/Node.js**: routes/, middleware/, controllers/, models/
 - **Django**: models/, views/, templates/, static/
 - **FastAPI/Flask**: routes/, models/, schemas/, utils/
+
+## 🚫 ENHANCED PACKAGE POLICY
+
+**STRICT PROHIBITION ON ENHANCED PACKAGE USAGE**
+
+Don't use any enhanced package. Either merge the original file with the enhanced file, or replace the original files with the enhanced files.
 
 ### 🚨 CRITICAL: Hook Failures Are BLOCKING

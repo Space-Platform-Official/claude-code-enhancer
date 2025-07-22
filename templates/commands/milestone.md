@@ -77,6 +77,45 @@ Execute comprehensive milestone planning with ZERO tolerance for oversimplificat
 
 You are planning milestones for: $ARGUMENTS
 
+🚀 **ENHANCED HYBRID MILESTONE SYSTEM ACTIVATED** 🚀
+
+## 🏗️ **HYBRID ARCHITECTURE INITIALIZATION**
+
+Before milestone planning, initialize the Enhanced Hybrid Architecture:
+
+```bash
+# Initialize hybrid storage system
+source "templates/commands/milestone/_shared/storage-adapter.md"
+source "templates/commands/milestone/_shared/scale-detector.md"
+source "templates/commands/milestone/_shared/migration.md"
+source "templates/commands/milestone/_shared/progressive-ui.md"
+
+# Initialize storage system based on scale
+initialize_storage_system
+
+# Initialize scale detection
+initialize_scale_detection
+
+# Initialize progressive UI
+initialize_progressive_ui
+
+# Run hybrid architecture validation
+echo "🔍 Running hybrid architecture validation..."
+if run_milestone_validation "" "hybrid"; then
+    echo "✅ Enhanced Hybrid Milestone System ready for scale: $(get_optimal_storage_backend)"
+    echo "🎨 UI Level: $(get_optimal_ui_level)"
+    echo "🎯 All systems validated and operational"
+else
+    echo "⚠️ Validation issues detected - system may not operate optimally"
+fi
+```
+
+**Scale-Aware Architecture Features:**
+- **Auto-scaling storage**: File (1-25 milestones) → Hybrid (25-100) → Database (100+)
+- **Progressive UI**: Simple → Rich → Dashboard based on project complexity
+- **Zero-downtime migrations**: Automatic backend optimization with rollback
+- **Enterprise dashboards**: Web interface activation for large-scale projects
+
 Let me ultrathink about the comprehensive milestone architecture and tracking system.
 
 🚨 **REMEMBER: Good milestones are SMART (Specific, Measurable, Achievable, Relevant, Time-bound)!** 🚨
@@ -97,14 +136,16 @@ Let me ultrathink about the comprehensive milestone architecture and tracking sy
 - Map skills and resources required for each milestone
 - Ensure each milestone provides tangible value
 
-**Step 2: Hybrid Tracking System Implementation**
+**Step 2: Enhanced Hybrid Storage System Implementation**
 
-**File-Based Persistence Structure:**
+**Scale-Adaptive Storage Architecture:**
 ```
 .milestones/
 ├── config/
-│   ├── milestone-config.yaml    # Global settings and templates
-│   └── progress-schema.json     # Data structure definitions
+│   ├── storage-backend.txt      # Current backend: file|hybrid|database
+│   ├── storage-config.yaml      # Thresholds and migration settings
+│   ├── ui-config.yaml          # Progressive UI configuration
+│   └── milestone-config.yaml    # Global settings and templates
 ├── active/
 │   ├── milestone-001.yaml       # Current milestone details
 │   ├── milestone-002.yaml       # Next milestone planning
@@ -112,10 +153,63 @@ Let me ultrathink about the comprehensive milestone architecture and tracking sy
 ├── completed/
 │   ├── milestone-000.yaml       # Archived completed milestones
 │   └── lessons-learned.md       # Post-completion analysis
-└── logs/
-    ├── progress-events.jsonl    # Event-driven progress logging
-    ├── milestone-updates.jsonl  # State changes and modifications
-    └── session-resume.json      # Resume points for interrupted work
+├── logs/
+│   ├── storage-events.jsonl     # Storage operation event logging
+│   ├── scale-events.jsonl       # Scale detection and migration events
+│   ├── performance-metrics.jsonl # Performance monitoring data
+│   ├── progress-events.jsonl    # Event-driven progress logging
+│   ├── milestone-updates.jsonl  # State changes and modifications
+│   └── session-resume.json      # Resume points for interrupted work
+├── backups/                     # Migration backups with rollback capability
+│   └── migration-YYYYMMDD-HHMMSS-*/ # Timestamped backup directories
+├── deliverables/                # Kiro workflow deliverables by task/phase
+│   └── task-*/
+│       ├── design/
+│       ├── spec/
+│       ├── task/
+│       └── execute/
+├── web-dashboard/               # Progressive web dashboard (auto-activated)
+│   └── index.html
+└── database files/              # Scale-based storage backends
+    ├── index.db                 # Hybrid mode: SQLite index
+    └── enterprise.db            # Database mode: SQLite storage
+```
+
+**Hybrid Storage Operations:**
+```bash
+# Create milestone using storage abstraction
+create_milestone_enhanced() {
+    local milestone_id=$1
+    local milestone_data=$2
+    
+    # Use storage abstraction for scale-appropriate backend
+    create_milestone_record "$milestone_id" "$milestone_data"
+    
+    # Update scale metrics
+    collect_performance_metrics
+    
+    # Check if migration is needed
+    trigger_scale_migration
+    
+    # Update UI based on new scale
+    update_ui_configuration
+}
+
+# Read milestone with backend transparency
+read_milestone_enhanced() {
+    local milestone_id=$1
+    
+    # Storage abstraction handles backend detection
+    read_milestone_record "$milestone_id"
+}
+
+# Generate scale-appropriate status display
+show_milestone_status() {
+    local milestone_id=$1
+    
+    # Progressive UI based on project scale
+    generate_milestone_status "$milestone_id"
+}
 ```
 
 **Event Log System:**
@@ -277,6 +371,172 @@ tasks:
     status: "pending|in_progress|completed"
     assigned_to: "team-member"
     dependencies: ["task-002"]
+    # NEW: Kiro workflow phases for enhanced task execution
+    kiro_workflow:
+      enabled: false  # Set to true to enable kiro phases for this task
+      current_phase: "design"
+      phases:
+        design:
+          status: "pending"
+          deliverables: ["architecture_decisions", "api_design"]
+          approval_required: true
+        spec:
+          status: "pending"
+          deliverables: ["technical_specification", "test_plan"]
+          approval_required: true
+        task:
+          status: "pending"
+          deliverables: ["implementation_plan", "task_breakdown"]
+          approval_required: false
+        execute:
+          status: "pending"
+          deliverables: ["working_implementation", "test_results"]
+          approval_required: false
+```
+
+## 🔄 **KIRO WORKFLOW PHASE INTEGRATION**
+
+**When kiro workflow is enabled for a task, the task follows structured phases:**
+
+### **Phase Progression: design → spec → task → execute**
+
+#### **Design Phase:**
+- **Purpose**: Architecture planning and API design
+- **Deliverables**: Architecture decisions, API specifications, design patterns
+- **Approval Required**: Yes (ensures architectural alignment)
+- **Duration**: 15-30 minutes typically
+
+#### **Specification Phase:**
+- **Purpose**: Detailed implementation planning
+- **Deliverables**: Technical specifications, test plans, interface definitions
+- **Approval Required**: Yes (validates implementation approach)
+- **Duration**: 10-20 minutes typically
+
+#### **Task Phase:**
+- **Purpose**: Granular task decomposition
+- **Deliverables**: Implementation plan, detailed task breakdown
+- **Approval Required**: No (auto-progression after spec approval)
+- **Duration**: 5-15 minutes typically
+
+#### **Execute Phase:**
+- **Purpose**: Implementation and validation
+- **Deliverables**: Working code, test results, documentation
+- **Approval Required**: No (completion validates milestone task)
+- **Duration**: Varies by complexity
+
+### **Enhanced Milestone Schema with Kiro Integration:**
+
+```yaml
+# Enhanced milestone structure with kiro workflow support
+id: "milestone-XXX"
+title: "Descriptive Milestone Name with Kiro Integration"
+description: "Milestone with structured task execution phases"
+priority: "high|medium|low"
+category: "feature|infrastructure|testing|documentation"
+
+# Kiro workflow configuration
+kiro_configuration:
+  enabled: true
+  default_phases: ["design", "spec", "task", "execute"]
+  approval_gates:
+    design_to_spec:
+      approvers: ["architect", "tech_lead"]
+      criteria: ["architecture_approved", "api_design_validated"]
+    spec_to_task:
+      approvers: ["tech_lead"]
+      criteria: ["specification_complete", "test_plan_approved"]
+  phase_weights:
+    design: 15
+    spec: 25
+    task: 20
+    execute: 40
+
+timeline:
+  estimated_start: "YYYY-MM-DD"
+  estimated_end: "YYYY-MM-DD"
+  estimated_hours: 0
+  buffer_percentage: 20
+  # Enhanced with kiro phase timing
+  phase_timing:
+    design_hours: 2
+    spec_hours: 3
+    task_hours: 2
+    execute_hours: 40
+
+# Progress tracking enhanced with kiro phases
+progress:
+  current_phase: "spec"
+  overall_percentage: 45
+  phase_progress:
+    design: 100
+    spec: 67
+    task: 0
+    execute: 0
+  phase_history:
+    - phase: "design"
+      started_at: "2024-07-20T10:00:00Z"
+      completed_at: "2024-07-20T11:30:00Z"
+      approved_at: "2024-07-20T11:45:00Z"
+      duration_hours: 1.5
+
+tasks:
+  - id: "task-001"
+    title: "Implement authentication API"
+    type: "kiro_workflow"
+    estimated_hours: 45
+    status: "in_progress"
+    current_phase: "spec"
+    assigned_to: "developer-1"
+    dependencies: []
+    
+    kiro_workflow:
+      enabled: true
+      phases:
+        design:
+          status: "completed"
+          started_at: "2024-07-20T10:00:00Z"
+          completed_at: "2024-07-20T11:30:00Z"
+          approved_at: "2024-07-20T11:45:00Z"
+          deliverables:
+            - type: "architecture_diagram"
+              path: ".milestones/deliverables/task-001/design/auth-architecture.md"
+            - type: "api_specification"
+              path: ".milestones/deliverables/task-001/design/api-spec.yaml"
+          approval:
+            required: true
+            approvers: ["architect", "tech_lead"]
+            status: "approved"
+            
+        spec:
+          status: "in_progress"
+          started_at: "2024-07-20T11:45:00Z"
+          deliverables:
+            - type: "technical_spec"
+              path: ".milestones/deliverables/task-001/spec/tech-spec.md"
+            - type: "test_plan"
+              path: ".milestones/deliverables/task-001/spec/test-plan.md"
+          approval:
+            required: true
+            approvers: ["tech_lead"]
+            status: "pending"
+            
+        task:
+          status: "pending"
+          deliverables:
+            - type: "implementation_plan"
+              path: ".milestones/deliverables/task-001/task/impl-plan.md"
+          approval:
+            required: false
+            
+        execute:
+          status: "pending"
+          deliverables:
+            - type: "implementation"
+              path: "src/auth/"
+            - type: "test_results"
+              path: ".milestones/deliverables/task-001/execute/test-results.md"
+          approval:
+            required: false
 ```
 
 **Step 7: Resume and Session Management**

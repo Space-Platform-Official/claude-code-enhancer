@@ -619,11 +619,12 @@ EOF
     print_success "Git hooks integration completed"
 }
 
-# Function to setup Claude commands with simple backup
+# Function to setup Claude commands with simple backup and _shared relocation
 setup_claude_commands() {
     local target_dir="$1"
     local claude_dir="$target_dir/.claude"
     local commands_dir="$claude_dir/commands"
+    local shared_dir="$claude_dir/shared"
     local backup_path=""
 
     # Create .claude directory if it doesn't exist
@@ -651,12 +652,53 @@ setup_claude_commands() {
         fi
         
         rm -rf "$commands_dir"
+        rm -rf "$shared_dir"
         cp -r "$TEMPLATES_DIR/commands" "$commands_dir"
+        
+        # Create shared directory structure and move _shared directories
+        print_status "Relocating _shared directories to .claude/shared/"
+        mkdir -p "$shared_dir"
+        
+        # Find and move all _shared directories
+        local moved_count=0
+        find "$commands_dir" -type d -name "_shared" | while read -r shared_path; do
+            if [[ -d "$shared_path" ]]; then
+                # Get the parent directory name (git, test, quality, etc.)
+                local parent_dir=$(basename "$(dirname "$shared_path")")
+                local target_shared_dir="$shared_dir/$parent_dir"
+                
+                # Create parent directory in shared
+                mkdir -p "$target_shared_dir"
+                
+                # Move _shared contents to shared/parent/
+                if mv "$shared_path"/* "$target_shared_dir/" 2>/dev/null; then
+                    # Remove empty _shared directory
+                    rmdir "$shared_path" 2>/dev/null || true
+                    print_status "Moved _shared from $parent_dir/ to shared/$parent_dir/"
+                    ((moved_count++))
+                fi
+            fi
+        done
+        
+        # Update references in command files to point to new shared location
+        print_status "Updating references to shared utilities..."
+        local updated_refs=0
+        find "$commands_dir" -name "*.md" -type f | while read -r cmd_file; do
+            if [[ -f "$cmd_file" ]]; then
+                # Update relative paths from _shared/ to ../../shared/
+                if sed -i.tmp 's|_shared/|../../shared/|g' "$cmd_file" 2>/dev/null; then
+                    rm -f "$cmd_file.tmp"
+                    ((updated_refs++))
+                fi
+            fi
+        done
         
         # Verify copy succeeded (with limited find)
         if [[ -d "$commands_dir" ]]; then
             local final_count=$(find "$commands_dir" -maxdepth 3 -name "*.md" 2>/dev/null | head -1000 | wc -l)
+            local shared_count=$(find "$shared_dir" -name "*.md" 2>/dev/null | wc -l)
             print_success "Commands copied successfully ($final_count files)"
+            print_success "Shared utilities relocated ($shared_count files in shared/)"
             
             # Clean up backup on success (allow grace period for verification)
             if [[ -n "$backup_path" && -d "$backup_path" ]]; then
@@ -709,7 +751,8 @@ main() {
         echo ""
         echo "Files installed/updated:"
         echo "  - target-dir/CLAUDE.md            # Development guidelines"
-        echo "  - target-dir/.claude/commands/    # Command templates"
+        echo "  - target-dir/.claude/commands/    # Command templates (user commands only)"
+        echo "  - target-dir/.claude/shared/      # Shared utilities (moved from _shared)"
         echo "  - target-dir/.claude/hooks/       # Hook scripts"
         echo "  - target-dir/.git/hooks/          # Git hook integration"
         exit 1
@@ -776,7 +819,8 @@ main() {
     print_success "Smart merge completed successfully!"
     print_status "Target directory: $target_dir"
     print_status "CLAUDE.md: $target_claude"
-    print_status "Commands: $target_dir/.claude/commands"
+    print_status "Commands: $target_dir/.claude/commands (user commands only)"
+    print_status "Shared: $target_dir/.claude/shared (utilities moved from _shared)"
     print_status "Hooks: $target_dir/.claude/hooks"
     
     # Show git integration status
