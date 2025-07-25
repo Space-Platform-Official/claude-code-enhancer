@@ -505,6 +505,121 @@ merge_claude_md() {
     print_success "CLAUDE.md files merged successfully"
 }
 
+# Function to merge settings JSON files intelligently
+merge_settings_json() {
+    local template_file="$1"
+    local target_file="$2"
+    
+    if [[ ! -f "$template_file" ]]; then
+        print_error "Settings template not found: $template_file"
+        return 1
+    fi
+    
+    # Create target directory if it doesn't exist
+    local target_dir=$(dirname "$target_file")
+    if [[ ! -d "$target_dir" ]]; then
+        mkdir -p "$target_dir"
+        print_status "Created directory: $target_dir"
+    fi
+    
+    # If target doesn't exist, copy template
+    if [[ ! -f "$target_file" ]]; then
+        print_status "No existing settings file, copying template"
+        cp "$template_file" "$target_file"
+        print_success "Settings template copied to: $(basename "$target_file")"
+        return 0
+    fi
+    
+    # Create backup
+    local backup_file="${target_file}.backup.$(date +%s)"
+    cp "$target_file" "$backup_file"
+    print_status "Settings backup created: $(basename "$backup_file")"
+    
+    # Use jq for intelligent JSON merging (fallback to manual if jq not available)
+    if command -v jq >/dev/null 2>&1; then
+        print_status "Merging settings using jq..."
+        local temp_merged="${target_file}.merged.$$"
+        
+        # Merge permissions.allow arrays (remove duplicates) and merge hooks completely
+        if jq -s '
+            .[0] as $target | .[1] as $template |
+            {
+                "permissions": {
+                    "allow": (($target.permissions.allow // []) + ($template.permissions.allow // []) | unique),
+                    "deny": ($target.permissions.deny // [])
+                },
+                "hooks": ($template.hooks // {})
+            }
+        ' "$target_file" "$template_file" > "$temp_merged" 2>/dev/null; then
+            
+            # Validate merged JSON
+            if jq empty "$temp_merged" 2>/dev/null; then
+                mv "$temp_merged" "$target_file"
+                print_success "Settings merged successfully using jq"
+                rm -f "$backup_file"
+                return 0
+            else
+                print_error "Invalid JSON generated, restoring from backup"
+                rm -f "$temp_merged"
+                cp "$backup_file" "$target_file"
+                return 1
+            fi
+        else
+            print_status "jq merge failed, falling back to manual merge"
+            rm -f "$temp_merged"
+        fi
+    fi
+    
+    # Manual merge fallback - simple approach
+    print_status "Performing manual JSON merge..."
+    local temp_merged="${target_file}.merged.$$"
+    
+    # Extract permissions from both files and merge hooks from template
+    python3 -c "
+import json
+import sys
+
+try:
+    with open('$target_file', 'r') as f:
+        target = json.load(f)
+    with open('$template_file', 'r') as f:
+        template = json.load(f)
+    
+    # Merge permissions.allow arrays (remove duplicates)
+    target_allows = target.get('permissions', {}).get('allow', [])
+    template_allows = template.get('permissions', {}).get('allow', [])
+    merged_allows = list(set(target_allows + template_allows))
+    
+    # Create merged structure
+    merged = {
+        'permissions': {
+            'allow': sorted(merged_allows),
+            'deny': target.get('permissions', {}).get('deny', [])
+        },
+        'hooks': template.get('hooks', {})
+    }
+    
+    with open('$temp_merged', 'w') as f:
+        json.dump(merged, f, indent=2)
+    
+    print('SUCCESS')
+except Exception as e:
+    print(f'ERROR: {e}')
+    sys.exit(1)
+" 2>/dev/null
+    
+    if [[ $? -eq 0 && -f "$temp_merged" ]]; then
+        mv "$temp_merged" "$target_file"
+        print_success "Settings merged successfully (Python fallback)"
+        rm -f "$backup_file"
+    else
+        print_error "All merge methods failed, restoring from backup"
+        rm -f "$temp_merged"
+        cp "$backup_file" "$target_file"
+        return 1
+    fi
+}
+
 # Function to setup Claude hooks with simple backup
 setup_claude_hooks() {
     local target_dir="$1"
@@ -734,6 +849,7 @@ main() {
         echo "  - Merges CLAUDE.md files using marker-based approach"
         echo "  - Installs command templates to .claude/commands"
         echo "  - Installs and integrates git hooks from templates"
+        echo "  - Merges settings.json intelligently (permissions + hooks)"
         echo "  - Auto-updates script when template version is newer"
         echo "  - Creates backups and handles cleanup automatically"
         echo ""
@@ -815,6 +931,16 @@ main() {
     
     # Setup Claude hooks
     setup_claude_hooks "$target_dir"
+    
+    # Merge Claude settings
+    local template_settings="$TEMPLATES_DIR/hooks/settings-template.json"
+    local target_settings="$target_dir/.claude/settings.local.json"
+    if [[ -f "$template_settings" ]]; then
+        print_status "Merging Claude settings..."
+        merge_settings_json "$template_settings" "$target_settings"
+    else
+        print_status "No settings template found - skipping settings merge"
+    fi
 
     print_success "Smart merge completed successfully!"
     print_status "Target directory: $target_dir"
@@ -822,6 +948,7 @@ main() {
     print_status "Commands: $target_dir/.claude/commands (user commands only)"
     print_status "Shared: $target_dir/.claude/shared (utilities moved from _shared)"
     print_status "Hooks: $target_dir/.claude/hooks"
+    print_status "Settings: $target_dir/.claude/settings.local.json"
     
     # Show git integration status
     if [[ -d "$target_dir/.git" ]]; then
