@@ -1,8 +1,37 @@
-# Claude Code Git Hooks
+# Claude Code Hooks System
 
-This directory contains git hook scripts that integrate with Claude Code's development workflow to ensure code quality, security, and consistency.
+This directory contains both git hooks and **automatic standards integration hooks** that work with Claude Code's native hook system to ensure code quality, security, and consistency.
 
-## Available Hooks
+## 🚀 Automatic Standards Integration (CORRECTED)
+
+### **Setup Instructions**
+
+1. **Copy adapter scripts to your project:**
+   ```bash
+   cp claude-pre-edit-adapter.sh your-project/.claude/hooks/
+   cp claude-post-edit-adapter.sh your-project/.claude/hooks/
+   chmod +x your-project/.claude/hooks/claude-*-adapter.sh
+   ```
+
+2. **Add hooks configuration to `settings.local.json`:**
+   ```bash
+   # Copy the template configuration
+   cp settings-template.json your-project/.claude/settings.local.json
+   
+   # Or merge with existing settings.local.json
+   ```
+
+3. **Customize for your distributed standards:**
+   - Edit the adapter scripts to call your specific validation/auto-fix hooks
+   - Update the PHP paradigm scripts for your standards
+
+### **How It Works**
+- **PreToolUse Hook**: Validates standards before Edit/Write operations
+- **PostToolUse Hook**: Auto-applies standards after Edit/Write operations  
+- **Configured in**: `settings.local.json` (NOT hooks.json)
+- **Permissions**: Required for hook scripts to execute
+
+## Git Hooks
 
 ### pre-commit.sh
 **Triggered**: Before each commit is finalized  
