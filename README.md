@@ -58,7 +58,7 @@ Choose your preferred installation method:
 ./install.sh --system
 ```
 
-After installation, the tools will be available as `claude-install-flow` and `claude-merge` commands for enhancing your Claude Code setup.
+After installation, the tools will be available for enhancing your Claude Code setup.
 
 ### Basic Usage
 
@@ -187,54 +187,13 @@ Installs Claude Code Enhancer tools system-wide or for the current user.
 - **User Install:** `~/.local/bin/` and `~/.local/share/claude-code-enhancer/`
 - **System Install:** `/usr/local/bin/` and `/usr/local/share/claude-code-enhancer/`
 
-### `claude-install-flow` - Template Installation
+### Smart Configuration Management
 
-Sets up Claude Code templates for development projects with language and framework-specific configurations.
-
-**Usage:**
-```bash
-claude-install-flow [target-directory]
-```
-
-**Features:**
-- Interactive selection of programming languages and frameworks
-- Smart detection of existing project structure
-- Installs appropriate CLAUDE.md configuration
-- Sets up `.claude/` directory with commands
-- Supports idempotent operations (safe to run multiple times)
-
-**Example:**
-```bash
-# Set up templates in current directory
-claude-install-flow
-
-# Set up templates in a Node.js project
-claude-install-flow /path/to/my-node-app
-```
-
-### `claude-merge` - Smart Configuration Merger
-
-Intelligently merges CLAUDE.md files and sets up Claude commands without overwriting existing configurations.
-
-**Usage:**
-```bash
-claude-merge [target-directory]
-```
-
-**Features:**
-- Smart merging of existing and template CLAUDE.md files
+The system includes intelligent configuration management that:
 - Preserves existing project-specific configurations
-- Copies command templates to `.claude/commands/`
-- Creates merged configuration with clear sections
+- Sets up `.claude/` directory with commands
 - Handles both new and existing installations
-- **NEW**: Intelligent settings merge for hook configurations
-
-**Merge Logic:**
-1. Uses CLAUDE.md from current directory if available
-2. Falls back to template CLAUDE.md
-3. Intelligently merges with target directory's existing CLAUDE.md
-4. Avoids duplication of template content
-5. Merges settings.json configurations preserving user customizations
+- Merges settings.json configurations preserving user customizations
 
 ### `claude-pre-edit-adapter.sh` - Pre-Edit Hook Adapter
 
@@ -444,7 +403,6 @@ The `.claude/commands/` directory includes **86 comprehensive development comman
 ```bash
 # Use custom templates
 export CLAUDE_TEMPLATES_DIR="/path/to/my/templates"
-claude-install-flow
 ```
 
 ### Settings Configuration
@@ -495,8 +453,6 @@ The settings template configures Claude Code's permissions and tool access:
 ```
 claude-code-enhancer/
 ├── install.sh                 # System installation script
-├── install-claude-flow.sh     # Template installation script
-├── smart-merge-claude.sh      # Smart merger script
 ├── templates/                 # Template library
 │   ├── CLAUDE.md             # Base configuration
 │   ├── commands/             # Command templates
@@ -515,15 +471,7 @@ cd test
 
 ### Backup and Recovery
 
-Installation automatically creates backups:
-- `smart-merge-claude.sh.backup`
-- `install-claude-flow.sh.backup`
-
-**To revert changes:**
-```bash
-cp smart-merge-claude.sh.backup smart-merge-claude.sh
-cp install-claude-flow.sh.backup install-claude-flow.sh
-```
+Installation automatically creates backups of modified files for easy recovery if needed.
 
 ## Troubleshooting
 
@@ -559,8 +507,8 @@ sudo ./install.sh --system
 ./install.sh --uninstall
 
 # Or manually remove
-rm -f ~/.local/bin/claude-{install-flow,merge}
 rm -rf ~/.local/share/claude-code-enhancer
+rm -rf /usr/local/share/claude-code-enhancer
 ```
 
 ## Community & Support
