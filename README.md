@@ -38,6 +38,8 @@ Claude Code Enhancer is a production-ready development intelligence platform tha
 - **Agent Specialization**: Domain-specific AI agents for optimal results
 - **State-Driven Recovery**: Full interruption recovery with session persistence
 - **Zero File Proliferation**: Intelligent consolidation prevents project bloat
+- **Claude Code Integration**: Native hook system for seamless tool integration
+- **86 Specialized Commands**: Comprehensive command library for all development phases
 
 ## Quick Start
 
@@ -225,12 +227,73 @@ claude-merge [target-directory]
 - Copies command templates to `.claude/commands/`
 - Creates merged configuration with clear sections
 - Handles both new and existing installations
+- **NEW**: Intelligent settings merge for hook configurations
 
 **Merge Logic:**
 1. Uses CLAUDE.md from current directory if available
 2. Falls back to template CLAUDE.md
 3. Intelligently merges with target directory's existing CLAUDE.md
 4. Avoids duplication of template content
+5. Merges settings.json configurations preserving user customizations
+
+### `claude-pre-edit-adapter.sh` - Pre-Edit Hook Adapter
+
+Validates and prepares files before Claude Code makes edits.
+
+**Usage:**
+```bash
+.claude/hooks/claude-pre-edit-adapter.sh <file-path>
+```
+
+**Features:**
+- Pre-validation of file changes
+- Language-specific checks (PHP PSR standards)
+- Error prevention before modifications
+- Integration with Claude Code's edit tools
+
+### `claude-post-edit-adapter.sh` - Post-Edit Hook Adapter
+
+Processes and validates files after Claude Code makes edits.
+
+**Usage:**
+```bash
+.claude/hooks/claude-post-edit-adapter.sh <file-path>
+```
+
+**Features:**
+- Automatic code formatting
+- Post-edit validation
+- Language-specific processing (PHP paradigm enforcement)
+- Quality gate enforcement
+
+## 🔗 Claude Code Integration
+
+Claude Code Enhancer seamlessly integrates with Claude Code's advanced development tools through intelligent hook adapters:
+
+### **Hook System Architecture**
+- **🔄 Pre-Edit Validation**: Automatic validation before file modifications
+- **✅ Post-Edit Processing**: Smart formatting and quality enforcement after edits
+- **🔧 PHP Paradigm Integration**: Automatic PSR standards enforcement for PHP files
+- **⚙️ Settings Template**: Configurable permissions and tool access control
+
+### **Hook Adapters**
+```bash
+# Pre-edit adapter - Validates changes before applying
+.claude/hooks/claude-pre-edit-adapter.sh
+
+# Post-edit adapter - Formats and validates after changes
+.claude/hooks/claude-post-edit-adapter.sh
+
+# PHP-specific paradigm enforcement
+.claude/hooks/php-paradigm/pre-edit.sh
+.claude/hooks/php-paradigm/post-edit.sh
+```
+
+### **Automatic Quality Enforcement**
+- **Zero-tolerance validation**: All edits must pass quality gates
+- **Language-specific formatting**: Automatic code style enforcement
+- **Error prevention**: Pre-validation catches issues before they occur
+- **Seamless integration**: Works transparently with Claude Code tools
 
 ## 🤖 Multi-Agent Coordination
 
@@ -288,6 +351,7 @@ Claude Code Enhancer's breakthrough innovation is its sophisticated multi-agent 
 - **🧹 Intelligent Cleanup**: Dead code removal, import optimization, dependency analysis
 - **🔍 Advanced Deduplication**: Smart duplicate detection with context-aware merging
 - **✅ Comprehensive Verification**: Multi-layer quality validation with detailed reporting
+- **🔗 Claude Code Integration**: Seamless hook system for edit validation and processing
 
 ### **Testing Framework**
 - **⚡ Parallel Test Execution**: Multi-agent test coordination for optimal performance
@@ -330,8 +394,9 @@ Claude Code Enhancer's breakthrough innovation is its sophisticated multi-agent 
 
 ### 📋 Claude Commands
 
-The `.claude/commands/` directory includes powerful development commands:
+The `.claude/commands/` directory includes **86 comprehensive development commands** organized by category:
 
+**Core Development Commands:**
 | Command | Purpose | Use Case |
 |---------|---------|----------|
 | `architect.md` | System architecture planning | Design new features or systems |
@@ -339,11 +404,24 @@ The `.claude/commands/` directory includes powerful development commands:
 | `optimize.md` | Performance optimization | Improve code efficiency |
 | `refactor.md` | Code refactoring guidance | Clean up technical debt |
 | `review.md` | Code review assistance | Ensure code quality |
-| `test-coverage.md` | Testing strategies | Improve test coverage |
+
+**Testing & Quality Commands:**
+| Command | Purpose | Use Case |
+|---------|---------|----------|
+| `test/*.md` | Comprehensive testing suite | Unit, integration, coverage testing |
+| `quality/*.md` | Code quality enforcement | Formatting, linting, validation |
 | `security-audit.md` | Security analysis | Find vulnerabilities |
+
+**Workflow & Integration Commands:**
+| Command | Purpose | Use Case |
+|---------|---------|----------|
+| `git/*.md` | Git workflow automation | Commits, PRs, branch management |
+| `milestone/*.md` | Project planning | Sprint planning, task tracking |
+| `api-design.md` | API design assistance | Create consistent APIs |
 | `migrate.md` | Migration planning | Update dependencies or frameworks |
 | `monitor.md` | Monitoring setup | Add observability |
-| `api-design.md` | API design assistance | Create consistent APIs |
+
+**Complete command library includes 86 specialized commands across all development phases**
 
 ### 🔧 Workflow Templates
 
@@ -368,6 +446,47 @@ The `.claude/commands/` directory includes powerful development commands:
 export CLAUDE_TEMPLATES_DIR="/path/to/my/templates"
 claude-install-flow
 ```
+
+### Settings Configuration
+
+**Hook System Settings** (`.claude/hooks/settings-template.json`):
+
+The settings template configures Claude Code's permissions and tool access:
+
+```json
+{
+  "permissions": {
+    "bash": {
+      "allowed_patterns": [
+        "chmod:*",
+        "git add:*",
+        "git commit:*",
+        "./test:*",
+        "npm run:*"
+      ]
+    },
+    "edit": {
+      "pre_hook": ".claude/hooks/claude-pre-edit-adapter.sh",
+      "post_hook": ".claude/hooks/claude-post-edit-adapter.sh"
+    }
+  },
+  "hooks": {
+    "enabled": true,
+    "language_specific": {
+      "php": {
+        "pre_edit": ".claude/hooks/php-paradigm/pre-edit.sh",
+        "post_edit": ".claude/hooks/php-paradigm/post-edit.sh"
+      }
+    }
+  }
+}
+```
+
+**Configuration Features:**
+- **Permission Control**: Define allowed bash command patterns
+- **Hook Integration**: Configure pre/post edit hooks
+- **Language-Specific Rules**: Apply paradigm-specific processing
+- **Tool Access Management**: Control Claude Code's tool permissions
 
 ## Development
 
