@@ -117,39 +117,6 @@ cat CLAUDE.md           # View merged configuration
 # Your project now has access to all commands and automated quality gates
 ```
 
-### Basic Usage
-
-```bash
-# Initialize a new project with intelligent setup
-claude init my-project --type=javascript --framework=react
-
-# Set up quality automation
-claude quality setup --comprehensive
-
-# Configure git workflow with smart automation
-claude git setup --workflow=feature-branch
-
-# Start development with multi-agent coordination
-claude develop --feature="user authentication"
-```
-
-### Daily Workflow
-```bash
-# 🚀 Start feature development
-claude branch feature/user-auth
-
-# 🔧 Make changes, then comprehensive quality check
-claude quality check --all    # Multi-agent quality validation
-
-# 🧪 Run comprehensive testing suite
-claude test --comprehensive   # Parallel test execution
-
-# ✅ Commit with intelligent validation
-claude commit "feat: add user authentication"
-
-# 🔀 Create PR with automated quality gates
-claude pr create --auto-review
-```
 
 ## 📖 Documentation
 
