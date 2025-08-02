@@ -60,6 +60,63 @@ Choose your preferred installation method:
 
 After installation, the tools will be available for enhancing your Claude Code setup.
 
+## Post-Installation Usage
+
+### What Gets Installed
+
+When you run `./install.sh`, the following components are installed:
+
+**Commands Created:**
+- `claude-merge` - Smart configuration merger and command installer
+- Additional tools for project enhancement
+
+**Installation Locations:**
+- **User Install (`--user`)**: Commands in `~/.local/bin/`, templates in `~/.local/share/claude-code-enhancer/`
+- **System Install (`--system`)**: Commands in `/usr/local/bin/`, templates in `/usr/local/share/claude-code-enhancer/`
+
+### Using claude-merge
+
+The `claude-merge` command is your primary tool for setting up and maintaining Claude Code configurations in any project.
+
+**Basic Usage:**
+```bash
+# Navigate to your project directory
+cd /path/to/your/project
+
+# Run claude-merge to install/update Claude Code configuration
+claude-merge
+
+# Or specify a target directory
+claude-merge /path/to/target/project
+```
+
+**What claude-merge Does:**
+1. **Merges CLAUDE.md**: Intelligently merges template configuration with existing project settings
+2. **Installs Commands**: Deploys 86+ development commands to `.claude/commands/`
+3. **Sets Up Hooks**: Configures pre/post edit hooks for quality enforcement
+4. **Updates Settings**: Merges settings.json for tool permissions and configurations
+5. **Creates Backups**: Automatically backs up existing configurations before changes
+
+### Example Workflow
+
+```bash
+# 1. Install the Claude Code Enhancer system
+./install.sh --user
+
+# 2. Navigate to your existing project
+cd ~/projects/my-app
+
+# 3. Run claude-merge to enhance your project
+claude-merge
+
+# 4. Verify installation
+ls -la .claude/          # Check commands and hooks
+cat CLAUDE.md           # View merged configuration
+
+# 5. Start using enhanced Claude Code features
+# Your project now has access to all commands and automated quality gates
+```
+
 ### Basic Usage
 
 ```bash
@@ -187,13 +244,52 @@ Installs Claude Code Enhancer tools system-wide or for the current user.
 - **User Install:** `~/.local/bin/` and `~/.local/share/claude-code-enhancer/`
 - **System Install:** `/usr/local/bin/` and `/usr/local/share/claude-code-enhancer/`
 
-### Smart Configuration Management
+### `claude-merge` - Smart Configuration Merger
 
-The system includes intelligent configuration management that:
-- Preserves existing project-specific configurations
-- Sets up `.claude/` directory with commands
-- Handles both new and existing installations
-- Merges settings.json configurations preserving user customizations
+Intelligently merges Claude Code configurations and installs development commands in your project.
+
+**Usage:**
+```bash
+claude-merge [target-directory]
+```
+
+**Features:**
+- **Smart CLAUDE.md Merging**: Preserves your custom content while updating template sections
+- **Command Installation**: Deploys 86+ specialized commands to `.claude/commands/`
+- **Hook Integration**: Sets up pre/post edit hooks for quality enforcement
+- **Settings Management**: Intelligently merges JSON configurations
+- **Automatic Backups**: Creates timestamped backups before any changes
+- **Self-Updating**: Automatically updates itself when newer versions are available
+
+**Smart Merge Process:**
+1. **Preserves Custom Content**: Your project-specific configurations remain untouched
+2. **Updates Template Section**: Marked template content is updated to latest version
+3. **Installs Commands**: Copies all command templates to `.claude/commands/`
+4. **Relocates Shared Utilities**: Organizes shared code to `.claude/shared/`
+5. **Configures Hooks**: Sets up quality enforcement hooks
+
+**Example:**
+```bash
+# Enhance current project
+claude-merge
+
+# Enhance specific project
+claude-merge ~/projects/my-app
+
+# What happens:
+# ✓ CLAUDE.md merged with preservation of custom content
+# ✓ 86+ commands installed to .claude/commands/
+# ✓ Hooks configured in .claude/hooks/
+# ✓ Settings merged in .claude/settings.local.json
+# ✓ Backups created as *.backup.[timestamp]
+```
+
+**Safety Features:**
+- **Atomic Operations**: All changes are atomic with rollback capability
+- **Content Fingerprinting**: Skips unnecessary updates via SHA256 validation
+- **Marker Integrity**: Validates merge markers to prevent corruption
+- **Automatic Cleanup**: Removes old backups (configurable retention)
+- **Lock Files**: Prevents concurrent merge operations
 
 ### `claude-pre-edit-adapter.sh` - Pre-Edit Hook Adapter
 
@@ -387,6 +483,75 @@ The `.claude/commands/` directory includes **86 comprehensive development comman
 - **CI/CD**: GitHub Actions, GitLab CI, Jenkins configurations
 - **Testing**: Automated testing setups for various frameworks
 - **Documentation**: Auto-documentation generation tools
+
+## Smart Merge Features
+
+### Intelligent CLAUDE.md Merging
+
+The `claude-merge` command uses a sophisticated marker-based system to separate and preserve your custom content:
+
+```markdown
+# Your custom project rules and guidelines
+# This content is ALWAYS preserved
+
+# ========== CLAUDE FLOW TEMPLATE ==========
+# Auto-updated: 2025-08-02 20:04:37
+# Template content (automatically updated)
+```
+
+**Key Benefits:**
+- **Never Loses Custom Content**: Your project-specific rules are always preserved
+- **Automatic Updates**: Template sections update to latest best practices
+- **Conflict-Free**: Marker system prevents merge conflicts
+- **Version Tracking**: Timestamps show when templates were last updated
+
+### Command Installation System
+
+When `claude-merge` runs, it installs a comprehensive command library:
+
+**Command Structure:**
+```
+.claude/
+├── commands/          # 86+ specialized development commands
+│   ├── git/          # Git workflow automation
+│   ├── test/         # Testing strategies
+│   ├── quality/      # Code quality tools
+│   ├── milestone/    # Project planning
+│   └── ...           # Many more categories
+├── shared/           # Centralized shared utilities
+│   ├── git/          # Git-specific utilities
+│   ├── test/         # Testing utilities
+│   └── quality/      # Quality check utilities
+└── hooks/            # Quality enforcement hooks
+```
+
+**Shared Utility Organization:**
+- Eliminates duplication across commands
+- Centralizes common functionality
+- Automatically updates references
+- Maintains clean separation of concerns
+
+### Safety and Validation
+
+**Backup System:**
+- Creates timestamped backups: `filename.backup.1234567890`
+- Configurable retention (default: 24 hours)
+- Automatic cleanup of old backups
+- Preserves last 5 backups minimum
+
+**Validation Layers:**
+1. **Pre-Merge Validation**: Checks file integrity and markers
+2. **Content Fingerprinting**: SHA256 validation prevents unnecessary updates
+3. **Atomic Operations**: All-or-nothing changes with rollback capability
+4. **Post-Merge Verification**: Validates successful installation
+
+**Environment Controls:**
+```bash
+# Customize merge behavior
+export CLAUDE_MERGE_BACKUP=false              # Disable backups (not recommended)
+export CLAUDE_MERGE_BACKUP_RETENTION=48       # Keep backups for 48 hours
+export CLAUDE_MERGE_AUTO_UPDATE=false         # Disable auto-update of claude-merge
+```
 
 ## Configuration
 
