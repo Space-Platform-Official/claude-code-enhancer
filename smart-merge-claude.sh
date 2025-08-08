@@ -194,6 +194,93 @@ create_backup() {
     fi
 }
 
+# Function to detect and clean duplicate files between directories
+detect_and_clean_duplicates() {
+    local target_dir="$1"
+    local templates_dir="$2"
+    local claude_dir="$target_dir/.claude"
+    local cleaned_count=0
+    
+    if [[ ! -d "$claude_dir" || ! -d "$templates_dir" ]]; then
+        return 0
+    fi
+    
+    print_status "Detecting duplicate files between templates/ and .claude/..."
+    
+    # Find duplicate files by comparing relative paths and content
+    find "$claude_dir" -name "*.md" -type f | while read -r claude_file; do
+        # Get relative path from .claude directory
+        local rel_path="${claude_file#$claude_dir/}"
+        local template_file="$templates_dir/$rel_path"
+        
+        if [[ -f "$template_file" ]]; then
+            # Compare file content fingerprints
+            local claude_hash=$(sha256sum "$claude_file" 2>/dev/null | cut -d' ' -f1)
+            local template_hash=$(sha256sum "$template_file" 2>/dev/null | cut -d' ' -f1)
+            
+            if [[ "$claude_hash" == "$template_hash" ]]; then
+                # Files are identical - remove from .claude (keep in templates)
+                rm -f "$claude_file"
+                ((cleaned_count++))
+                print_status "Removed duplicate: .claude/$rel_path"
+            else
+                print_status "Content differs: .claude/$rel_path (preserved)"
+            fi
+        fi
+    done
+    
+    if [[ $cleaned_count -gt 0 ]]; then
+        print_success "Cleaned $cleaned_count duplicate files from .claude/"
+    fi
+}
+
+# Function to eliminate enhanced package violations
+eliminate_enhanced_packages() {
+    local target_dir="$1"
+    local eliminated_count=0
+    
+    print_status "Eliminating enhanced package violations..."
+    
+    # Find and merge CLAUDE_ENHANCED.md files
+    find "$target_dir" -name "*CLAUDE_ENHANCED.md" -type f | while read -r enhanced_file; do
+        # Get the base filename (remove _ENHANCED suffix)
+        local base_file="${enhanced_file%_ENHANCED.md}.md"
+        local base_claude="${enhanced_file%_ENHANCED.md}/CLAUDE.md"
+        
+        # Try different merge targets
+        local target_file=""
+        if [[ -f "$base_claude" ]]; then
+            target_file="$base_claude"
+        elif [[ -f "$base_file" ]]; then
+            target_file="$base_file"
+        else
+            # Create base CLAUDE.md if it doesn't exist
+            target_file="$base_claude"
+            touch "$target_file"
+        fi
+        
+        if [[ -n "$target_file" ]]; then
+            print_status "Merging $(basename "$enhanced_file") into $(basename "$target_file")"
+            
+            # Append enhanced content to base file
+            {
+                echo ""
+                echo "# Enhanced Features (Consolidated)"
+                cat "$enhanced_file"
+            } >> "$target_file"
+            
+            # Remove the enhanced file
+            rm -f "$enhanced_file"
+            ((eliminated_count++))
+            print_status "Eliminated: $(basename "$enhanced_file")"
+        fi
+    done
+    
+    if [[ $eliminated_count -gt 0 ]]; then
+        print_success "Eliminated $eliminated_count enhanced package violations"
+    fi
+}
+
 # Function to clean up old backup files
 cleanup_old_backups() {
     local target_dir="$1"
@@ -843,10 +930,12 @@ setup_claude_commands() {
 main() {
     if [[ $# -gt 1 ]] || [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
         echo "Usage: $0 [target-directory]"
-        echo "Smart merge for CLAUDE.md, command templates, and hooks with auto-update"
+        echo "Smart merge with automated cleanup for CLAUDE.md, command templates, and hooks"
         echo ""
         echo "Features:"
         echo "  - Merges CLAUDE.md files using marker-based approach"
+        echo "  - Automatically detects and removes duplicate files"
+        echo "  - Eliminates enhanced package violations per CLAUDE.md policy"
         echo "  - Installs command templates to .claude/commands"
         echo "  - Installs and integrates git hooks from templates"
         echo "  - Merges settings.json intelligently (permissions + hooks)"
@@ -888,9 +977,13 @@ main() {
     # Convert to absolute path
     target_dir="$(cd "$target_dir" && pwd)"
 
-    print_status "Starting smart merge for: $target_dir"
+    print_status "Starting smart merge with cleanup for: $target_dir"
 
-    # Clean up old backup files first
+    # Clean up duplicates and enhanced packages first
+    detect_and_clean_duplicates "$target_dir" "$TEMPLATES_DIR"
+    eliminate_enhanced_packages "$target_dir"
+    
+    # Clean up old backup files
     cleanup_old_backups "$target_dir"
 
     # Find source CLAUDE.md

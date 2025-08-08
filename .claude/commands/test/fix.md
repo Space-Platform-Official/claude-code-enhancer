@@ -1,25 +1,28 @@
 ---
 allowed-tools: all
-description: Debug and fix failing tests with comprehensive root cause analysis and automated resolution
+description: **EXECUTE and fix all failing tests** with comprehensive root cause analysis and verification
 intensity: ⚡⚡⚡⚡
 pattern: 🔧🔧🔧🔧
 ---
 
-# 🔧🔧🔧🔧 CRITICAL TEST DEBUGGING AND FIXING: COMPREHENSIVE TEST RESOLUTION! 🔧🔧🔧🔧
+# 🔧🔧🔧🔧 CRITICAL TEST EXECUTION AND FIXING: COMPREHENSIVE TEST RESOLUTION! 🔧🔧🔧🔧
 
-**THIS IS NOT A SIMPLE TEST FIX - THIS IS A COMPREHENSIVE TEST DEBUGGING AND RESOLUTION SYSTEM!**
+**THIS IS NOT A SIMPLE TEST FIX - THIS IS A COMPREHENSIVE TEST EXECUTION AND RESOLUTION SYSTEM!**
+
+**🚨 ACTUAL TEST EXECUTION REQUIRED - TESTS MUST BE RUN AND VERIFIED! 🚨**
 
 When you run `/test fix`, you are REQUIRED to:
 
-1. **ANALYZE** failing tests and perform comprehensive root cause analysis
-2. **DIAGNOSE** test failures with systematic debugging approaches
+1. **EXECUTE** failing tests to reproduce and validate failures  
+2. **ANALYZE** test failures and perform comprehensive root cause analysis
 3. **IMPLEMENT** fixes that address root causes, not just symptoms
-4. **USE MULTIPLE AGENTS** for parallel test debugging:
+4. **VERIFY** all tests pass through actual execution
+5. **USE MULTIPLE AGENTS** for parallel test debugging:
    - Spawn one agent per failing test or failure category
    - Spawn agents for different debugging approaches (stack trace, environment, dependencies)
    - Say: "I'll spawn multiple agents to debug and fix all failing tests in parallel"
-5. **VERIFY** fixes work correctly and don't introduce regressions
-6. **PREVENT** similar failures through improved test design and practices
+6. **VERIFY** fixes work correctly and don't introduce regressions
+7. **PREVENT** similar failures through improved test design and practices
 
 ## 🎯 USE MULTIPLE AGENTS
 
@@ -47,19 +50,22 @@ When you run `/test fix`, you are REQUIRED to:
 
 **MANDATORY WORKFLOW:**
 ```
-1. Failure analysis → Categorize and prioritize failing tests
-2. IMMEDIATELY spawn agents for parallel debugging
-3. Root cause identification → Deep analysis of underlying issues
-4. Fix implementation → Address root causes comprehensively
-5. Regression testing → Verify fixes don't introduce new issues
-6. VERIFY test reliability and implement prevention measures
+1. TEST EXECUTION → Run tests to identify and reproduce failures
+2. Failure analysis → Categorize and prioritize failing tests  
+3. IMMEDIATELY spawn agents for parallel debugging
+4. Root cause identification → Deep analysis of underlying issues
+5. Fix implementation → Address root causes comprehensively
+6. TEST VERIFICATION → Re-run tests to confirm fixes work
+7. Regression testing → Verify fixes don't introduce new issues
+8. FINAL VERIFICATION → Ensure 100% test pass rate
 ```
 
 **YOU ARE NOT DONE UNTIL:**
-- ✅ ALL failing tests are fixed and passing
+- ✅ ALL tests have been EXECUTED and failures identified
+- ✅ ALL failing tests are fixed and passing through ACTUAL EXECUTION
 - ✅ Root causes are identified and addressed
-- ✅ Fixes are verified to not introduce regressions
-- ✅ Test reliability is improved
+- ✅ Fixes are verified through TEST EXECUTION to not introduce regressions
+- ✅ Test reliability is improved and verified through execution
 - ✅ Prevention measures are implemented
 - ✅ Test debugging knowledge is documented
 

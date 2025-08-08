@@ -1,17 +1,19 @@
 ---
 allowed-tools: all
-description: Analyze test coverage, identify gaps, and implement comprehensive testing for critical code paths
+description: **EXECUTE test coverage analysis** and implement comprehensive testing for critical code paths
 intensity: ⚡⚡⚡
 pattern: 📊📊📊
 ---
 
-# 📊📊📊 CRITICAL TEST COVERAGE ANALYSIS: COMPREHENSIVE COVERAGE IMPROVEMENT! 📊📊📊
+# 📊📊📊 CRITICAL TEST COVERAGE EXECUTION: COMPREHENSIVE COVERAGE IMPROVEMENT! 📊📊📊
 
-**THIS IS NOT A SIMPLE COVERAGE REPORT - THIS IS A COMPREHENSIVE COVERAGE IMPROVEMENT SYSTEM!**
+**THIS IS NOT A SIMPLE COVERAGE REPORT - THIS IS A COMPREHENSIVE COVERAGE EXECUTION SYSTEM!**
+
+**🚨 ACTUAL TEST EXECUTION AND COVERAGE MEASUREMENT REQUIRED! 🚨**
 
 When you run `/test coverage`, you are REQUIRED to:
 
-1. **ANALYZE** current test coverage and identify critical gaps
+1. **EXECUTE** tests to measure current coverage and identify critical gaps
 2. **IMPLEMENT** comprehensive tests for all uncovered critical paths
 3. **PRIORITIZE** coverage by business impact and code complexity
 4. **USE MULTIPLE AGENTS** for parallel coverage improvement:
@@ -46,12 +48,13 @@ When you run `/test coverage`, you are REQUIRED to:
 
 **MANDATORY WORKFLOW:**
 ```
-1. Coverage analysis → Identify gaps and priorities
-2. IMMEDIATELY spawn agents for parallel test implementation
-3. Critical path testing → Focus on high-impact code paths
-4. Edge case implementation → Test boundary conditions
-5. Report generation → Create actionable coverage reports
-6. VERIFY test quality and coverage improvement
+1. TEST EXECUTION → Run tests to generate coverage data
+2. Coverage analysis → Identify gaps and priorities from actual execution
+3. IMMEDIATELY spawn agents for parallel test implementation
+4. Critical path testing → Focus on high-impact code paths
+5. Edge case implementation → Test boundary conditions
+6. VERIFICATION EXECUTION → Re-run tests to verify coverage improvement
+7. Report generation → Create actionable coverage reports
 ```
 
 **YOU ARE NOT DONE UNTIL:**

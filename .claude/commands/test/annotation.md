@@ -1,13 +1,15 @@
 ---
 allowed-tools: all
-description: PHP annotation validation with comprehensive bidirectional linkage analysis and automated fixing
+description: **ANALYZE PHP annotation coverage** with comprehensive bidirectional linkage validation (analysis only - no test execution)
 intensity: ⚡⚡⚡
 pattern: 📝📝📝
 ---
 
-# 📝📝📝 CRITICAL ANNOTATION VALIDATION: COMPREHENSIVE BIDIRECTIONAL LINKAGE ANALYSIS! 📝📝📝
+# 📝📝📝 CRITICAL ANNOTATION ANALYSIS: COMPREHENSIVE BIDIRECTIONAL LINKAGE VALIDATION! 📝📝📝
 
-**THIS IS NOT A SIMPLE ANNOTATION CHECK - THIS IS A COMPREHENSIVE ANNOTATION VALIDATION SYSTEM!**
+**THIS IS NOT TEST EXECUTION - THIS IS COMPREHENSIVE ANNOTATION COVERAGE ANALYSIS!**
+
+**🚨 NOTE: This command analyzes existing annotations - it does NOT execute tests! 🚨**
 
 When you run `/test annotation`, you are REQUIRED to:
 
