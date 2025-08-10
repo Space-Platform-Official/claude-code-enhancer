@@ -1,0 +1,60 @@
+2025-08-02T20:07:30+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:07:30+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:07:33+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:07:33+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:07:52+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:07:52+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:07:52+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:07:52+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:08:13+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:08:13+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:08:13+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:08:13+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:08:30+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:08:30+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:08:30+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:08:30+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:08:38+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:08:38+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:08:38+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:08:38+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:08:44+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:08:44+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:08:44+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:08:44+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:11:22+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:11:22+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:11:22+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:11:22+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:18:59+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:18:59+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:18:59+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:18:59+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:19:29+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:19:29+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:19:29+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:19:29+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:19:52+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:19:52+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:19:52+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:19:52+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:22:15+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:22:15+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:22:15+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-02T20:22:15+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/README.md
+2025-08-07T00:15:55+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/smart-merge-claude.sh
+2025-08-07T00:15:55+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/smart-merge-claude.sh
+2025-08-07T00:23:07+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/smart-merge-claude.sh
+2025-08-07T00:23:07+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/smart-merge-claude.sh
+2025-08-07T00:24:02+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/hooks/post-commit.sh
+2025-08-07T00:24:02+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/hooks/post-commit.sh
+2025-08-07T00:24:04+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/hooks/post-commit.sh
+2025-08-07T00:24:04+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/hooks/post-commit.sh
+2025-08-07T00:24:10+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/hooks/post-commit.sh
+2025-08-07T00:24:10+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/hooks/post-commit.sh
+2025-08-07T00:24:11+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/hooks/post-commit.sh
+2025-08-07T00:24:11+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/hooks/post-commit.sh
+2025-08-07T00:24:59+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/commands/clean-backups.md
+2025-08-07T00:24:59+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/commands/clean-backups.md
+2025-08-07T00:28:57+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/commands/clean-backups.md
+2025-08-07T00:28:57+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/commands/clean-backups.md

@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(.claude/hooks/claude-pre-edit-adapter.sh:*)",
+      "Bash(.claude/hooks/claude-post-edit-adapter.sh:*)",
+      "Bash(.claude/hooks/php-paradigm/pre-edit.sh:*)",
+      "Bash(.claude/hooks/php-paradigm/post-edit.sh:*)"
+    ],
+    "deny": []
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|MultiEdit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/claude-pre-edit-adapter.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|MultiEdit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/claude-post-edit-adapter.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

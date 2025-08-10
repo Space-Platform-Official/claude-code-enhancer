@@ -1,6 +1,6 @@
 ---
 allowed-tools: all
-description: Unit test execution with comprehensive coverage analysis and parallel agent coordination
+description: **EXECUTE all unit tests** with comprehensive coverage analysis and parallel agent coordination
 ---
 
 # ⚡⚡⚡ CRITICAL REQUIREMENT: UNIT TEST EXECUTION AND VALIDATION! ⚡⚡⚡
