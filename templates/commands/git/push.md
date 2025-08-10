@@ -44,16 +44,59 @@ if [ "$behind" -gt 0 ]; then
 fi
 ```
 
-**Step 2: Protection Rules**
+**Step 2: Protection Rules with Smart Branch Creation**
 ```bash
-# Protected branches check
+# Protected branches check with auto-branch creation
 protected_branches=("main" "master" "develop" "production")
 
 for branch in "${protected_branches[@]}"; do
     if [[ "$current_branch" == "$branch" ]]; then
-        echo "🛑 ERROR: Direct pushes to $branch are not allowed!"
-        echo "Please create a pull request instead."
-        exit 1
+        echo "🛡️ Protected branch detected: $branch"
+        echo "📝 Creating feature branch for safe push..."
+        
+        # Extract meaningful branch name from latest commit
+        commit_msg=$(git log -1 --pretty=%s)
+        # Extract type and description (e.g., "feat: add auth" -> "feature/add-auth")
+        branch_type=$(echo "$commit_msg" | grep -oE '^(feat|fix|chore|docs|style|refactor|test):' | tr -d ':')
+        branch_desc=$(echo "$commit_msg" | sed 's/^[^:]*: //' | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]//g')
+        
+        # Map commit types to branch prefixes
+        case "$branch_type" in
+            feat) branch_prefix="feature" ;;
+            fix) branch_prefix="bugfix" ;;
+            docs) branch_prefix="docs" ;;
+            chore|style|refactor) branch_prefix="refactor" ;;
+            test) branch_prefix="test" ;;
+            *) branch_prefix="feature" ;;
+        esac
+        
+        # Create unique branch name
+        new_branch="${branch_prefix}/${branch_desc}"
+        
+        # Add timestamp if branch already exists
+        if git show-ref --verify --quiet "refs/heads/$new_branch"; then
+            timestamp=$(date +%Y%m%d-%H%M%S)
+            new_branch="${new_branch}-${timestamp}"
+        fi
+        
+        echo "🌿 Creating and switching to: $new_branch"
+        git checkout -b "$new_branch"
+        
+        echo "📤 Pushing to new branch..."
+        if git push -u origin "$new_branch"; then
+            echo "✅ Successfully pushed to $new_branch"
+            echo ""
+            echo "🎯 Next steps:"
+            echo "1️⃣  Create PR: gh pr create --base $branch"
+            echo "2️⃣  Or visit: $(git remote get-url origin | sed 's/\.git$//' | sed 's/git@github.com:/https:\/\/github.com\//')/compare/$branch...$new_branch"
+            echo ""
+            echo "💡 Quick PR creation command:"
+            echo "   gh pr create --title \"$commit_msg\" --body \"Auto-created from protected branch push\""
+            exit 0
+        else
+            echo "❌ Failed to push new branch"
+            exit 1
+        fi
     fi
 done
 
@@ -98,6 +141,31 @@ git diff origin/"$current_branch"..HEAD | grep -E "(password|secret|key|token|ap
 ```
 
 ## Smart Push Strategies
+
+### 🎯 Auto-Branch Creation for Protected Branches
+
+When pushing to a protected branch (main/master/develop/production), the system automatically:
+
+1. **Detects protection** and prevents direct push
+2. **Creates feature branch** based on your latest commit message
+3. **Pushes to new branch** with upstream tracking
+4. **Provides PR commands** ready to execute
+
+**Branch Naming Convention:**
+- `feat: add auth` → `feature/add-auth`
+- `fix: login bug` → `bugfix/login-bug`
+- `docs: update readme` → `docs/update-readme`
+- `refactor: clean code` → `refactor/clean-code`
+
+**Example Workflow:**
+```bash
+# You're on main with committed changes
+git push
+# System detects main is protected
+# → Creates feature/your-changes
+# → Pushes to origin/feature/your-changes
+# → Provides: gh pr create --base main
+```
 
 **1. Feature Branch Push**
 ```bash
