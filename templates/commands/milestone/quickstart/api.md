@@ -54,7 +54,7 @@ description: API development milestone template - Backend-focused with clear dev
 
 ---
 
-## 🎯 Milestone Configuration
+## 🎯 Milestone Configuration (Kiro-Native Foundation)
 
 ```yaml
 milestone:
@@ -63,6 +63,18 @@ milestone:
   type: "api_development"
   duration: "10 days"
   complexity: "backend_focused"
+  
+  # Kiro workflow (deliverables visible for technical clarity)
+  kiro_configuration:
+    enabled: true
+    mode: "deliverable_focused"  # Show deliverables for API clarity
+    visibility: "technical"  # Show technical phase details
+    auto_approval: false  # Manual approval for API quality gates
+    phase_weights:
+      design: 15    # API design and architecture (shown as "API Design")
+      spec: 25      # Specification and schemas (shown as "Core Implementation")
+      task: 20      # Testing and security (shown as "Testing & Security")
+      execute: 40   # Documentation and deployment (shown as "Documentation & Deployment")
   
   # API development settings
   api_focus:
@@ -78,26 +90,35 @@ milestone:
     security_scans: true
     performance_benchmarks: true
     
+  # Phases mapped to kiro workflow
   phases:
     - name: "API Design"
+      kiro_phase: "design"
       duration: "2 days"
       focus: "specification_and_architecture"
       testing: "design_validation"
+      deliverables: ["openapi_spec", "data_model", "security_architecture"]
       
     - name: "Core Implementation"
+      kiro_phase: "spec"
       duration: "4 days"
       focus: "endpoint_development"
       testing: "unit_and_integration"
+      deliverables: ["core_endpoints", "auth_system", "data_layer"]
       
     - name: "Testing & Security"
+      kiro_phase: "task"
       duration: "2 days"
       focus: "quality_and_security"
       testing: "comprehensive_validation"
+      deliverables: ["test_suite", "security_audit", "performance_benchmarks"]
       
     - name: "Documentation & Deployment"
+      kiro_phase: "execute"
       duration: "2 days"
       focus: "deployment_and_docs"
       testing: "production_readiness"
+      deliverables: ["api_documentation", "deployment_pipeline", "monitoring_setup"]
 ```
 
 ---
@@ -466,19 +487,42 @@ This template automatically:
 │   └── api-docs/               # Generated API documentation
 ```
 
-**API Development Workflow:**
+**API Development Workflow (Kiro-Native):**
 ```bash
-# Test-driven API development
+# Test-driven API development with kiro workflow
 develop_api_milestone() {
     local api_description="$1"
+    local milestone_id="api-$(date +%Y%m%d-%H%M%S)"
+    
+    # Source kiro-native components
+    source "templates/commands/milestone/_shared/kiro-native.md"
+    source "templates/commands/milestone/_shared/kiro-visualizer.md"
+    
+    # Initialize kiro with technical visibility
+    export KIRO_POLICY_MODE="mandatory"
+    export KIRO_AUTO_PROGRESS=false  # Manual for quality gates
+    export KIRO_SHOW_PHASES=true     # Show phase names
+    export KIRO_SHOW_DELIVERABLES=true  # Show deliverables for APIs
+    initialize_kiro_native
     
     # Initialize API-focused milestone
     initialize_api_milestone "$api_description"
     
-    # Set up testing framework
-    setup_api_testing_framework
+    # Create kiro tasks with deliverables
+    create_kiro_native_task "$milestone_id" "API specification and design"
+    set_task_deliverables "$milestone_id" 1 "openapi_spec" "data_model" "security_architecture"
     
-    # Enable continuous testing
+    create_kiro_native_task "$milestone_id" "Core API implementation"
+    set_task_deliverables "$milestone_id" 2 "core_endpoints" "auth_system" "data_layer"
+    
+    create_kiro_native_task "$milestone_id" "Testing and security hardening"
+    set_task_deliverables "$milestone_id" 3 "test_suite" "security_audit" "performance_benchmarks"
+    
+    create_kiro_native_task "$milestone_id" "Documentation and deployment"
+    set_task_deliverables "$milestone_id" 4 "api_documentation" "deployment_pipeline" "monitoring_setup"
+    
+    # Set up testing framework with kiro tracking
+    setup_api_testing_framework
     enable_test_driven_development
     
     # Configure security scanning
@@ -487,7 +531,9 @@ develop_api_milestone() {
     # Set up documentation generation
     configure_api_docs_generation
     
-    echo "✅ API milestone ready! Start with: /milestone/execute"
+    echo "✅ API milestone ready with kiro workflow!"
+    echo "📊 Deliverables tracked at each phase"
+    echo "🔒 Quality gates enforced via kiro approvals"
 }
 ```
 

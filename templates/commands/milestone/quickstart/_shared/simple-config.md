@@ -7,8 +7,9 @@ Quick-start templates use minimal configuration to reduce complexity for new use
 ### Core Principles
 
 - **Auto-configuration**: Smart defaults eliminate configuration decisions
-- **Hidden complexity**: Advanced features available but not visible initially
-- **Progressive enhancement**: Easy upgrade path to full system
+- **Kiro-native foundation**: All tasks use 4-phase workflow internally
+- **Progressive kiro revelation**: Phase details reveal as users advance
+- **Auto-managed phases**: Kiro phases progress automatically
 - **Zero setup**: Templates work immediately without configuration
 
 ### Simple Configuration Schema
@@ -19,13 +20,20 @@ quickstart_config:
   template_type: "personal|team|api|frontend|bugfix"
   complexity_level: "simple"
   auto_configuration: true
+  # Kiro is active but details are hidden
+  kiro_configuration:
+    enabled: true
+    mode: "auto_managed"  # Phases progress automatically
+    visibility: "progressive"  # Details reveal over time
+    auto_approval: true  # No manual approvals needed
+    
   hidden_features:
-    - kiro_workflow
+    - kiro_details  # Phase names, deliverables hidden initially
+    - approval_gates
     - hybrid_storage
     - advanced_dependencies
     - enterprise_features
     - risk_assessment
-    - multi_agent_coordination
     
   visible_features:
     - basic_tasks
@@ -48,20 +56,29 @@ quickstart_config:
 ### Template-Specific Defaults
 
 ```yaml
-# Personal project defaults
+# Personal project defaults with kiro
 personal_defaults:
   duration: "7 days"
   working_hours_per_day: 2
   buffer_percentage: 25
-  phases: 4
+  kiro_phases:
+    design: { weight: 15, auto_complete: true }
+    spec: { weight: 25, auto_complete: true }
+    task: { weight: 20, auto_complete: true }
+    execute: { weight: 40, auto_complete: true }
   max_tasks_per_phase: 3
   
-# Team collaboration defaults  
+# Team collaboration defaults with kiro
 team_defaults:
   duration: "14 days"
   team_size: "2-5"
   coordination_level: "light"
-  approval_gates: "essential_only"
+  kiro_phases:
+    design: { weight: 15, show_name: true }
+    spec: { weight: 25, show_name: true }
+    task: { weight: 20, show_name: true }
+    execute: { weight: 40, show_name: true }
+  approval_gates: "none"  # Auto-approve for simplicity
   daily_standups: false
   
 # API development defaults
@@ -92,10 +109,18 @@ bugfix_defaults:
 ### Auto-Configuration Functions
 
 ```bash
-# Apply template-specific configuration
+# Apply template-specific configuration with kiro
 apply_quickstart_config() {
     local template_type="$1"
     local description="$2"
+    
+    # Source kiro-native for all templates
+    source "templates/commands/milestone/_shared/kiro-native.md"
+    
+    # Initialize kiro with quickstart mode
+    export KIRO_QUICKSTART_MODE=true
+    export KIRO_AUTO_PROGRESS=true
+    initialize_kiro_native
     
     case "$template_type" in
         "personal")

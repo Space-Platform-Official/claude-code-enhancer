@@ -54,7 +54,7 @@ description: Frontend development milestone template - UI-focused with user expe
 
 ---
 
-## 🎯 Milestone Configuration
+## 🎯 Milestone Configuration (Kiro-Native Foundation)
 
 ```yaml
 milestone:
@@ -63,6 +63,18 @@ milestone:
   type: "frontend_development"
   duration: "10 days"
   complexity: "ui_focused"
+  
+  # Kiro workflow (visual progress for UI development)
+  kiro_configuration:
+    enabled: true
+    mode: "visual_progress"  # Show visual progress for UI
+    visibility: "progressive"  # Show progress with user context
+    auto_approval: false  # Manual approval for UX validation
+    phase_weights:
+      design: 20    # Design and planning (shown as "Design & Planning")
+      spec: 35      # Component development (shown as "Component Development") 
+      task: 25      # Integration and styling (shown as "Integration & Styling")
+      execute: 20   # Testing and polish (shown as "Testing & Polish")
   
   # Frontend development settings
   ui_focus:
@@ -79,26 +91,31 @@ milestone:
     performance_metrics: true
     user_feedback: true
     
+  # Phases mapped to kiro workflow
   phases:
     - name: "Design & Planning"
+      kiro_phase: "design"
       duration: "2 days"
       focus: "ux_and_component_design"
-      deliverables: ["wireframes", "component_specs"]
+      deliverables: ["wireframes", "component_specs", "design_system"]
       
     - name: "Component Development"
+      kiro_phase: "spec"
       duration: "4 days"
       focus: "component_implementation"
-      deliverables: ["components", "state_management"]
+      deliverables: ["components", "state_management", "interactive_ui"]
       
     - name: "Integration & Styling"
+      kiro_phase: "task"
       duration: "2 days"
       focus: "responsive_integration"
-      deliverables: ["responsive_ui", "accessibility"]
+      deliverables: ["responsive_ui", "accessibility", "performance_optimized"]
       
     - name: "Testing & Polish"
+      kiro_phase: "execute"
       duration: "2 days"
       focus: "ux_validation_and_polish"
-      deliverables: ["user_tested_ui", "performance_optimized"]
+      deliverables: ["user_tested_ui", "production_ready_ui"]
 ```
 
 ---
@@ -506,14 +523,34 @@ This template automatically:
 
 **Frontend Development Workflow:**
 ```bash
-# Component-driven frontend development
+# Component-driven frontend development (kiro-native)
 develop_frontend_milestone() {
     local frontend_description="$1"
+    
+    # Initialize kiro with visual progress for UI
+    export KIRO_POLICY_MODE="mandatory"
+    export KIRO_AUTO_PROGRESS=false  # Manual for UX validation gates
+    export KIRO_SHOW_PHASES=true     # Show progressive UI phases
+    export KIRO_VISUAL_MODE=true     # Visual progress for UI development
+    initialize_kiro_native
     
     # Initialize frontend-focused milestone
     initialize_frontend_milestone "$frontend_description"
     
-    # Set up component development framework
+    # Create kiro tasks with UI-focused deliverables
+    create_kiro_native_task "$milestone_id" "Design and component planning"
+    set_task_deliverables "$milestone_id" 1 "wireframes" "component_specs" "design_system"
+    
+    create_kiro_native_task "$milestone_id" "Component development and state"
+    set_task_deliverables "$milestone_id" 2 "components" "state_management" "interactive_ui"
+    
+    create_kiro_native_task "$milestone_id" "Integration and responsive styling"
+    set_task_deliverables "$milestone_id" 3 "responsive_ui" "accessibility" "performance_optimized"
+    
+    create_kiro_native_task "$milestone_id" "Testing and UX polish"
+    set_task_deliverables "$milestone_id" 4 "user_tested_ui" "production_ready_ui"
+    
+    # Set up component development framework with kiro tracking
     setup_component_development
     
     # Enable responsive testing
@@ -525,7 +562,9 @@ develop_frontend_milestone() {
     # Set up user testing framework
     configure_user_testing
     
-    echo "✅ Frontend milestone ready! Start with: /milestone/execute"
+    echo "✅ Frontend milestone ready with kiro workflow!"
+    echo "🎨 Visual progress tracking for UI development"
+    echo "👥 UX validation gates via kiro approvals"
 }
 ```
 

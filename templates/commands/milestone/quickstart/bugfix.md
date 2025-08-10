@@ -54,7 +54,7 @@ description: Bug fix milestone template - Fast resolution with root cause analys
 
 ---
 
-## 🎯 Milestone Configuration
+## 🎯 Milestone Configuration (Kiro-Native Foundation)
 
 ```yaml
 milestone:
@@ -63,6 +63,18 @@ milestone:
   type: "bug_fix"
   duration: "2 days"  # 16 working hours typical
   complexity: "focused_fix"
+  
+  # Kiro workflow (compressed timeline for bugs)
+  kiro_configuration:
+    enabled: true
+    mode: "compressed"  # Quick phases for bugs
+    visibility: "minimal"  # Minimal visibility for focused work
+    auto_approval: true   # Auto-approve for fast bug fixes
+    phase_weights:
+      design: 25    # Investigation (shown as "Investigation")
+      spec: 25      # Fix implementation (shown as "Fix Implementation")
+      task: 25      # Testing and validation (shown as "Testing & Validation")
+      execute: 25   # Deploy and monitor (shown as "Deploy & Monitor")
   
   # Bug fix settings
   bug_focus:
@@ -78,26 +90,35 @@ milestone:
     fix_validation: true
     deployment_monitoring: true
     
+  # Phases mapped to kiro workflow
   phases:
     - name: "Investigation"
+      kiro_phase: "design"
       duration: "4 hours"
       focus: "root_cause_identification"
       outcome: "clear_understanding"
+      deliverables: ["reproduction_steps", "root_cause_analysis"]
       
     - name: "Fix Implementation"
+      kiro_phase: "spec"
       duration: "4 hours"
       focus: "targeted_solution"
       outcome: "working_fix"
+      deliverables: ["fix_code", "test_cases"]
       
     - name: "Testing & Validation"
+      kiro_phase: "task"
       duration: "4 hours"
       focus: "comprehensive_testing"
       outcome: "validated_solution"
+      deliverables: ["test_results", "regression_validation"]
       
     - name: "Deploy & Monitor"
+      kiro_phase: "execute"
       duration: "4 hours"
       focus: "safe_deployment"
       outcome: "production_fix"
+      deliverables: ["deployed_fix", "monitoring_setup"]
 ```
 
 ---
@@ -542,14 +563,34 @@ This template automatically:
 
 **Bug Fix Workflow:**
 ```bash
-# Investigation-driven bug fix
+# Investigation-driven bug fix (kiro-native)
 fix_bug_milestone() {
     local bug_description="$1"
+    
+    # Initialize kiro with compressed timeline for bugs
+    export KIRO_POLICY_MODE="mandatory"
+    export KIRO_AUTO_PROGRESS=true   # Auto-approve for fast fixes
+    export KIRO_SHOW_PHASES=false    # Minimal visibility for focused work
+    export KIRO_COMPRESSED_MODE=true # Quick phases for urgent fixes
+    initialize_kiro_native
     
     # Initialize bug fix milestone
     initialize_bugfix_milestone "$bug_description"
     
-    # Set up investigation tools
+    # Create kiro tasks with bug-focused deliverables
+    create_kiro_native_task "$milestone_id" "Bug investigation and root cause"
+    set_task_deliverables "$milestone_id" 1 "reproduction_steps" "root_cause_analysis"
+    
+    create_kiro_native_task "$milestone_id" "Fix implementation and testing"
+    set_task_deliverables "$milestone_id" 2 "fix_code" "test_cases"
+    
+    create_kiro_native_task "$milestone_id" "Testing and regression validation"
+    set_task_deliverables "$milestone_id" 3 "test_results" "regression_validation"
+    
+    create_kiro_native_task "$milestone_id" "Deployment and monitoring"
+    set_task_deliverables "$milestone_id" 4 "deployed_fix" "monitoring_setup"
+    
+    # Set up investigation tools with kiro tracking
     setup_bug_investigation
     
     # Enable testing and validation
@@ -558,7 +599,9 @@ fix_bug_milestone() {
     # Configure deployment monitoring
     setup_deployment_monitoring
     
-    echo "✅ Bug fix milestone ready! Start with: /milestone/execute"
+    echo "✅ Bug fix milestone ready with kiro workflow!"
+    echo "⚡ Compressed timeline for fast resolution"
+    echo "🔍 Auto-approval for focused bug fixing"
 }
 ```
 
