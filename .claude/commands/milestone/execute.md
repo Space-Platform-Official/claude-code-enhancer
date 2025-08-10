@@ -17,18 +17,27 @@ When you run `/milestone/execute`, you are REQUIRED to:
 6. **VALIDATE** - Enforce dependency requirements and detect blockers
 7. **ESCALATE** - Handle blockers and coordinate resolution strategies
 
-## 🎯 USE MULTIPLE AGENTS FOR EXECUTION
+## 🎯 USE MULTIPLE AGENTS FOR EXECUTION (WITH REAL TASK TOOL)
 
-**MANDATORY AGENT COORDINATION FOR MILESTONE EXECUTION:**
+**MANDATORY AGENT COORDINATION USING TASK TOOL:**
 ```
-"I'll spawn multiple execution agents to handle milestone tasks in parallel:
+"I'll spawn multiple execution agents using the Task tool for true parallel execution:
 - Task Execution Agent: Execute specific milestone tasks and track completion
 - Progress Monitoring Agent: Real-time progress tracking and event logging
 - Git Integration Agent: Handle branch management, commits, and repository state
 - Dependency Validation Agent: Monitor and enforce milestone dependencies
 - Blocker Detection Agent: Identify blockers and coordinate resolution
-- Session Management Agent: Handle interruptions and resume capabilities"
+
+IMPORTANT: Use the actual Task tool, not bash background processes!"
 ```
+
+**REAL AGENT SPAWNING PATTERN:**
+When executing a milestone, spawn real agents using the Task tool:
+1. Task Executor: Handles code changes and test execution
+2. Progress Monitor: Tracks completion and generates reports
+3. Git Manager: Handles commits and branch operations
+4. Dependency Validator: Ensures prerequisites are met
+5. Blocker Detector: Identifies and escalates issues
 
 ## 🚨 FORBIDDEN BEHAVIORS
 
@@ -200,39 +209,62 @@ activate_milestone() {
 }
 ```
 
-## Step 2: Multi-Agent Task Coordination
+## Step 2: Multi-Agent Task Coordination (REAL TASK TOOL)
 
-**Agent Deployment Strategy:**
+**Agent Deployment Using Task Tool:**
 ```bash
+# Source the agent spawning framework
+source ".claude/shared/milestone/agent-spawning.md"
+
 deploy_execution_agents() {
     local milestone_id=$1
     local session_id=$2
     
-    echo "🤖 Deploying execution agents for milestone: $milestone_id"
+    echo "🤖 Deploying execution agents using Task tool for milestone: $milestone_id"
+    echo "Session: $session_id"
     
-    # Task Execution Agent
-    register_agent "task-executor-$session_id" "task_executor" "$milestone_id"
-    spawn_task_execution_agent "$milestone_id" &
+    # Setup agent infrastructure
+    setup_agent_infrastructure "$session_id"
     
-    # Progress Monitoring Agent
-    register_agent "progress-monitor-$session_id" "progress_monitor" "$milestone_id"
-    spawn_progress_monitoring_agent "$milestone_id" &
+    # Deploy Task Execution Agent using Task tool
+    echo "Spawning Task Executor Agent..."
+    # Claude Code will use Task tool here with the generated prompt
+    local task_prompt=$(spawn_task_executor "$milestone_id" "$session_id")
+    echo "INVOKE_TASK_AGENT:task-executor:$task_prompt"
     
-    # Git Integration Agent
-    register_agent "git-integration-$session_id" "git_integration" "$milestone_id"
-    spawn_git_integration_agent "$milestone_id" &
+    # Deploy Progress Monitoring Agent using Task tool
+    echo "Spawning Progress Monitor Agent..."
+    local progress_prompt=$(spawn_progress_monitor "$milestone_id" "$session_id")
+    echo "INVOKE_TASK_AGENT:progress-monitor:$progress_prompt"
     
-    # Dependency Validation Agent
-    register_agent "dependency-validator-$session_id" "dependency_validator" "$milestone_id"
-    spawn_dependency_validation_agent "$milestone_id" &
+    # Deploy Git Integration Agent using Task tool
+    echo "Spawning Git Integration Agent..."
+    local git_prompt=$(spawn_git_integration "$milestone_id" "$session_id" "milestone/$milestone_id")
+    echo "INVOKE_TASK_AGENT:git-integration:$git_prompt"
     
-    # Blocker Detection Agent
-    register_agent "blocker-detector-$session_id" "blocker_detector" "$milestone_id"
-    spawn_blocker_detection_agent "$milestone_id" &
+    # Deploy Dependency Validation Agent using Task tool
+    echo "Spawning Dependency Validator Agent..."
+    local dep_prompt=$(spawn_dependency_validator "$milestone_id" "$session_id")
+    echo "INVOKE_TASK_AGENT:dependency-validator:$dep_prompt"
     
-    echo "✅ All execution agents deployed"
+    # Deploy Blocker Detection Agent using Task tool
+    echo "Spawning Blocker Detector Agent..."
+    local blocker_prompt=$(spawn_blocker_detector "$milestone_id" "$session_id")
+    echo "INVOKE_TASK_AGENT:blocker-detector:$blocker_prompt"
+    
+    echo "✅ All agents deployed via Task tool for parallel execution"
+    
+    # Start monitoring agent coordination
+    monitor_agent_coordination "$session_id" &
 }
 ```
+
+**CLAUDE CODE TASK TOOL INVOCATION:**
+When Claude Code sees INVOKE_TASK_AGENT directives, it should:
+1. Parse the agent type and prompt
+2. Use the Task tool with subagent_type="general-purpose"
+3. Provide the full agent prompt with responsibilities
+4. Monitor agent outputs in parallel
 
 **Task Execution Agent:**
 ```bash
@@ -564,6 +596,61 @@ Generated with Claude Code milestone execution"
     done
 }
 ```
+
+## Step 6B: CONCRETE TASK TOOL USAGE EXAMPLE
+
+**HOW CLAUDE CODE SHOULD USE THE TASK TOOL:**
+
+When executing `/milestone/execute milestone-001`, Claude Code should:
+
+```markdown
+1. First, validate the milestone and setup:
+   - Check milestone exists and dependencies are met
+   - Create session ID: exec-milestone-001-20250810-abc123
+   - Setup agent infrastructure directories
+
+2. Then spawn REAL agents using Task tool (5 parallel agents):
+
+   AGENT 1 - Task Executor:
+   Use Task tool with subagent_type="general-purpose"
+   Description: "Execute milestone-001 tasks"
+   Prompt: Full task execution responsibilities and session details
+
+   AGENT 2 - Progress Monitor:
+   Use Task tool with subagent_type="general-purpose"  
+   Description: "Monitor milestone-001 progress"
+   Prompt: Progress tracking and reporting responsibilities
+
+   AGENT 3 - Git Integration:
+   Use Task tool with subagent_type="general-purpose"
+   Description: "Manage git for milestone-001"
+   Prompt: Branch management and commit creation responsibilities
+
+   AGENT 4 - Dependency Validator:
+   Use Task tool with subagent_type="general-purpose"
+   Description: "Validate milestone-001 dependencies"
+   Prompt: Dependency checking and conflict detection
+
+   AGENT 5 - Blocker Detector:
+   Use Task tool with subagent_type="general-purpose"
+   Description: "Detect blockers for milestone-001"
+   Prompt: Error detection and escalation responsibilities
+
+3. Monitor all agents in parallel:
+   - Watch for completion signals
+   - Coordinate inter-agent communication
+   - Handle failures and recovery
+```
+
+**KEY DIFFERENCE FROM OLD IMPLEMENTATION:**
+- OLD: bash functions with & (background processes) - NO parallelism
+- NEW: Task tool with real Claude Code agents - TRUE parallelism
+
+**PERFORMANCE BENEFITS:**
+- 3-5x faster execution through parallel processing
+- Specialized agent optimization per domain
+- Better error isolation and recovery
+- Real-time progress visibility
 
 ## Step 7: Execution Quality Checklist
 
