@@ -114,3 +114,15 @@
 2025-08-10T18:37:13+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/push.md
 2025-08-10T18:37:13+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/push.md
 2025-08-10T18:37:13+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/push.md
+2025-08-10T18:58:24+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/stats/commits.json
+2025-08-10T18:58:24+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/stats/commits.json
+2025-08-10T18:58:24+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/stats/commits.json
+2025-08-10T18:58:24+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/stats/commits.json
+2025-08-10T18:58:34+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/logs/hooks.log
+2025-08-10T18:58:34+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/logs/hooks.log
+2025-08-10T18:58:34+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/logs/hooks.log
+2025-08-10T18:58:34+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/logs/hooks.log
+2025-08-10T19:00:29+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/CLAUDE.md
+2025-08-10T19:00:29+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/CLAUDE.md
+2025-08-10T19:00:29+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/CLAUDE.md
+2025-08-10T19:00:29+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/CLAUDE.md

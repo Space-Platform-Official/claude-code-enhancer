@@ -433,9 +433,6 @@ Before creating ANY folder, you MUST:
 
 
 
-
-
-
 # ========== CLAUDE FLOW TEMPLATE ==========
 # Auto-updated: 2025-08-10 18:15:20
 
