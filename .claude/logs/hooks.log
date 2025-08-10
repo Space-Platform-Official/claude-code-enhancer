@@ -58,3 +58,51 @@
 2025-08-07T00:24:59+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/commands/clean-backups.md
 2025-08-07T00:28:57+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/commands/clean-backups.md
 2025-08-07T00:28:57+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/commands/clean-backups.md
+2025-08-08T11:01:12+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/commands/compare-commands.md
+2025-08-08T11:01:12+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/commands/compare-commands.md
+2025-08-08T11:01:17+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/commands/compare-commands.md
+2025-08-08T11:01:17+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/commands/compare-commands.md
+2025-08-08T11:03:24+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/commands/compare-commands.md
+2025-08-08T11:03:24+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/commands/compare-commands.md
+2025-08-08T11:03:27+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/commands/compare-commands.md
+2025-08-08T11:03:27+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/commands/compare-commands.md
+2025-08-08T11:11:00+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/commands/comparison-report.md
+2025-08-08T11:11:00+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/commands/comparison-report.md
+2025-08-08T11:11:08+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/commands/comparison-report.md
+2025-08-08T11:11:08+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/.claude/commands/comparison-report.md
+2025-08-08T11:16:06+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/README.md
+2025-08-08T11:16:06+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/README.md
+2025-08-08T11:16:06+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/README.md
+2025-08-08T11:16:06+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/README.md
+2025-08-10T12:27:48+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/.gitignore
+2025-08-10T12:27:48+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/.gitignore
+2025-08-10T12:27:50+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/.gitignore
+2025-08-10T12:27:50+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/.gitignore
+2025-08-10T18:07:25+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/branch.md
+2025-08-10T18:07:25+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/branch.md
+2025-08-10T18:07:25+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/branch.md
+2025-08-10T18:07:25+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/branch.md
+2025-08-10T18:08:14+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/status.md
+2025-08-10T18:08:14+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/status.md
+2025-08-10T18:08:14+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/status.md
+2025-08-10T18:08:14+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/status.md
+2025-08-10T18:09:00+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/status.md
+2025-08-10T18:09:00+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/status.md
+2025-08-10T18:09:00+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/status.md
+2025-08-10T18:09:00+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/status.md
+2025-08-10T18:10:23+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/push.md
+2025-08-10T18:10:23+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/push.md
+2025-08-10T18:10:23+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/push.md
+2025-08-10T18:10:23+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/push.md
+2025-08-10T18:11:27+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/workflows/sync.md
+2025-08-10T18:11:27+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/workflows/sync.md
+2025-08-10T18:11:27+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/workflows/sync.md
+2025-08-10T18:11:27+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/workflows/sync.md
+2025-08-10T18:11:58+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/_shared/utils.md
+2025-08-10T18:11:58+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/_shared/utils.md
+2025-08-10T18:11:58+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/_shared/utils.md
+2025-08-10T18:11:58+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/_shared/utils.md
+2025-08-10T18:12:28+10:00 [INFO] [claude-pre-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/_shared/utils.md
+2025-08-10T18:12:28+10:00 [DEBUG] [claude-pre-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/_shared/utils.md
+2025-08-10T18:12:28+10:00 [INFO] [claude-post-edit-adapter] Triggered for: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/_shared/utils.md
+2025-08-10T18:12:28+10:00 [DEBUG] [claude-post-edit-adapter] Skipping non-PHP file: /Users/nashgao/Desktop/claude/claude-code/instruction/templates/commands/git/_shared/utils.md

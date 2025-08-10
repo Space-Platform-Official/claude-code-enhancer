@@ -41,89 +41,27 @@ fi
 
 print_status "Post-commit cleanup and notifications..."
 
-# Clean up old backups and perform duplicate detection
+# Clean up old backups
 cleanup_old_backups() {
     local backup_retention="${CLAUDE_MERGE_BACKUP_RETENTION:-24}"
     local cleaned_count=0
     
-    # Clean old backups from standard locations
-    for backup_dir in ".claude/backups" ".claude" "." "templates"; do
-        if [[ -d "$backup_dir" ]]; then
-            find "$backup_dir" -name "*.backup.*" -type f -mtime +1 2>/dev/null | while read -r backup_file; do
-                if [[ -f "$backup_file" ]]; then
-                    local file_age_hours=$(( ($(date +%s) - $(stat -f %m "$backup_file" 2>/dev/null || echo 0)) / 3600 ))
-                    
-                    if [[ $file_age_hours -gt $backup_retention ]]; then
-                        rm -f "$backup_file"
-                        ((cleaned_count++))
-                    fi
-                fi
-            done
-        fi
-    done
-    
-    if [[ $cleaned_count -gt 0 ]]; then
-        print_status "Cleaned $cleaned_count old backup files"
-    fi
-}
-
-# Auto-cleanup duplicates and enhanced packages  
-auto_cleanup_project() {
-    print_status "Performing automatic project cleanup..."
-    
-    # Detect and remove duplicate files between templates/ and .claude/
-    local duplicates_cleaned=0
-    if [[ -d "templates" && -d ".claude" ]]; then
-        # Find duplicate files by comparing content hashes
-        find ".claude" -name "*.md" -type f | while read -r claude_file; do
-            local rel_path="${claude_file#.claude/}"
-            local template_file="templates/$rel_path"
-            
-            if [[ -f "$template_file" ]]; then
-                local claude_hash=$(sha256sum "$claude_file" 2>/dev/null | cut -d' ' -f1)
-                local template_hash=$(sha256sum "$template_file" 2>/dev/null | cut -d' ' -f1)
+    if [[ -d ".claude/backups" ]]; then
+        # Find and clean old backup files
+        find ".claude/backups" -name "*.backup.*" -type f -mtime +1 2>/dev/null | while read -r backup_file; do
+            if [[ -f "$backup_file" ]]; then
+                local file_age_hours=$(( ($(date +%s) - $(stat -f %m "$backup_file" 2>/dev/null || echo 0)) / 3600 ))
                 
-                if [[ "$claude_hash" == "$template_hash" ]]; then
-                    rm -f "$claude_file"
-                    ((duplicates_cleaned++))
-                    print_status "Auto-cleaned duplicate: .claude/$rel_path"
+                if [[ $file_age_hours -gt $backup_retention ]]; then
+                    rm -f "$backup_file"
+                    ((cleaned_count++))
                 fi
             fi
         done
-    fi
-    
-    # Remove enhanced package violations
-    local enhanced_cleaned=0
-    find . -name "*CLAUDE_ENHANCED.md" -type f 2>/dev/null | while read -r enhanced_file; do
-        local base_file="${enhanced_file%_ENHANCED.md}.md"
-        local base_claude="${enhanced_file%_ENHANCED.md}/CLAUDE.md"
         
-        # Merge enhanced content into base file
-        local target_file=""
-        if [[ -f "$base_claude" ]]; then
-            target_file="$base_claude"
-        elif [[ -f "$base_file" ]]; then
-            target_file="$base_file"
-        else
-            target_file="$base_claude"
-            touch "$target_file"
+        if [[ $cleaned_count -gt 0 ]]; then
+            print_status "Cleaned $cleaned_count old backup files"
         fi
-        
-        if [[ -n "$target_file" ]]; then
-            {
-                echo ""
-                echo "# Enhanced Features (Auto-Consolidated)"
-                cat "$enhanced_file"
-            } >> "$target_file"
-            
-            rm -f "$enhanced_file"
-            ((enhanced_cleaned++))
-            print_status "Auto-consolidated: $(basename "$enhanced_file")"
-        fi
-    done
-    
-    if [[ $duplicates_cleaned -gt 0 || $enhanced_cleaned -gt 0 ]]; then
-        print_success "Auto-cleanup: $duplicates_cleaned duplicates, $enhanced_cleaned enhanced packages removed"
     fi
 }
 
@@ -231,9 +169,6 @@ main() {
     
     # Clean up old backups
     cleanup_old_backups
-    
-    # Perform automatic project cleanup
-    auto_cleanup_project
     
     # Update documentation if needed
     update_documentation

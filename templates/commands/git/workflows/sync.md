@@ -48,16 +48,174 @@ comprehensive_sync() {
     # Level 2: Branch synchronization
     sync_local_branches
     
-    # Level 3: Dependency synchronization
+    # Level 3: Fork synchronization (if applicable)
+    sync_fork_with_upstream
+    
+    # Level 4: Dependency synchronization
     sync_dependencies
     
-    # Level 4: Configuration synchronization
+    # Level 5: Configuration synchronization
     sync_configurations
+    
+    # Level 6: Submodule synchronization
+    sync_submodules
     
     # Generate sync report
     generate_sync_report
     
     echo "✅ Comprehensive synchronization completed"
+}
+
+# Enhanced remote synchronization
+sync_with_remotes() {
+    echo -e "\n🌐 Synchronizing with Remote Repositories"
+    echo "========================================"
+    
+    # Fetch from all remotes
+    echo "📡 Fetching from all remotes..."
+    git fetch --all --prune --tags
+    
+    # Check each remote
+    for remote in $(git remote); do
+        echo -e "\n🔍 Checking remote: $remote"
+        
+        # Test connectivity
+        if ! git ls-remote "$remote" HEAD &>/dev/null; then
+            echo "  ❌ Cannot connect to $remote"
+            continue
+        fi
+        
+        echo "  ✅ Connected to $remote"
+        
+        # Get remote info
+        remote_url=$(git remote get-url "$remote")
+        echo "  🔗 URL: $remote_url"
+        
+        # Count branches and tags
+        remote_branches=$(git ls-remote --heads "$remote" | wc -l)
+        remote_tags=$(git ls-remote --tags "$remote" | wc -l)
+        echo "  🌿 Branches: $remote_branches"
+        echo "  🏷️  Tags: $remote_tags"
+        
+        # Check for new branches
+        new_branches=$(git branch -r | grep "^  $remote/" | while read branch; do
+            local_branch="${branch#  $remote/}"
+            if ! git show-ref --verify --quiet "refs/heads/$local_branch"; then
+                echo "    🆕 New branch: $branch"
+            fi
+        done)
+        
+        if [ -n "$new_branches" ]; then
+            echo "$new_branches"
+        fi
+    done
+    
+    # Update remote tracking branches
+    echo -e "\n🔄 Updating remote tracking branches..."
+    git remote update
+    
+    echo "✅ Remote synchronization completed"
+}
+
+# Fork synchronization with upstream
+sync_fork_with_upstream() {
+    if ! git remote | grep -q upstream; then
+        echo -e "\nℹ️  No upstream remote configured (not a fork)"
+        return
+    fi
+    
+    echo -e "\n🎆 Synchronizing Fork with Upstream"
+    echo "==================================="
+    
+    # Fetch upstream changes
+    echo "📥 Fetching upstream changes..."
+    git fetch upstream
+    
+    # Check main branch sync status
+    local_main="main"
+    upstream_main="upstream/main"
+    
+    if ! git rev-parse --verify "$local_main" &>/dev/null; then
+        local_main="master"
+        upstream_main="upstream/master"
+    fi
+    
+    # Calculate divergence
+    behind=$(git rev-list --count "$local_main".."$upstream_main" 2>/dev/null || echo 0)
+    ahead=$(git rev-list --count "$upstream_main".."$local_main" 2>/dev/null || echo 0)
+    
+    echo "📊 Fork Status:"
+    echo "  ⬆️  Ahead of upstream: $ahead commits"
+    echo "  ⬇️  Behind upstream: $behind commits"
+    
+    if [ "$behind" -gt 0 ]; then
+        echo -e "\n⚠️  Fork is behind upstream!"
+        read -p "Sync with upstream? (y/n): " sync_upstream
+        
+        if [[ "$sync_upstream" == "y" ]]; then
+            current_branch=$(git branch --show-current)
+            
+            # Switch to main branch
+            git checkout "$local_main"
+            
+            # Merge or rebase
+            echo "Sync strategy:"
+            echo "  1) Merge upstream (preserve fork history)"
+            echo "  2) Rebase onto upstream (linear history)"
+            read -p "Choice (1-2): " strategy
+            
+            case $strategy in
+                1)
+                    git merge "$upstream_main" -m "Merge upstream changes"
+                    ;;
+                2)
+                    git rebase "$upstream_main"
+                    ;;
+            esac
+            
+            # Push to origin
+            echo "🚀 Pushing updated main to origin..."
+            git push origin "$local_main"
+            
+            # Return to original branch
+            git checkout "$current_branch"
+            
+            echo "✅ Fork synchronized with upstream"
+        fi
+    else
+        echo "✅ Fork is up to date with upstream"
+    fi
+}
+
+# Submodule synchronization
+sync_submodules() {
+    if [ ! -f .gitmodules ]; then
+        return
+    fi
+    
+    echo -e "\n📦 Synchronizing Submodules"
+    echo "=========================="
+    
+    # Initialize submodules if needed
+    if [ ! -d .git/modules ]; then
+        echo "🆕 Initializing submodules..."
+        git submodule init
+    fi
+    
+    # Update all submodules
+    echo "🔄 Updating submodules..."
+    git submodule update --remote --recursive
+    
+    # Check submodule status
+    echo -e "\n📊 Submodule Status:"
+    git submodule status --recursive
+    
+    # Check for uncommitted changes in submodules
+    if git status --porcelain | grep -q "^.M"; then
+        echo "⚠️  Submodules have uncommitted changes"
+    else
+        echo "✅ All submodules clean"
+    fi
 }
 
 init_sync_session() {
@@ -138,16 +296,26 @@ check_repo_integrity() {
 check_network_connectivity() {
     echo "🌐 Checking Network Connectivity"
     
-    # Test connection to remote
-    remote_url=$(git remote get-url origin)
+    # Test connection to all remotes
+    all_connected=true
     
-    if echo "$remote_url" | grep -q "github.com"; then
-        if ! ping -c 1 github.com &>/dev/null; then
-            echo "❌ Cannot reach GitHub"
-            exit 1
+    for remote in $(git remote); do
+        remote_url=$(git remote get-url "$remote")
+        echo -n "  Testing $remote: "
+        
+        # Test with git ls-remote (more reliable than ping)
+        if git ls-remote "$remote" HEAD &>/dev/null; then
+            echo "✅ Connected"
+        else
+            echo "❌ Failed"
+            all_connected=false
         fi
-    elif echo "$remote_url" | grep -q "gitlab.com"; then
-        if ! ping -c 1 gitlab.com &>/dev/null; then
+    done
+    
+    if [ "$all_connected" = false ]; then
+        echo "⚠️  Some remotes are unreachable"
+        read -p "Continue with available remotes? (y/n): " continue_sync
+        if [[ "$continue_sync" != "y" ]]; then
             echo "❌ Cannot reach GitLab"
             exit 1
         fi

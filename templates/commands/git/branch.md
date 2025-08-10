@@ -97,11 +97,118 @@ create_feature_branch() {
 }
 ```
 
+## Remote Branch Operations
+
+**1. Remote Branch Discovery**
+```bash
+# Discover and track remote branches
+discover_remote_branches() {
+    echo "🔍 Discovering Remote Branches"
+    echo "=============================="
+    
+    # Fetch all remote branch information
+    git fetch --all --prune
+    
+    # List all remote branches
+    echo -e "\n📡 Remote branches:"
+    git branch -r --format='%(refname:short) %(committerdate:relative) %(authorname)' | 
+        column -t -s' '
+    
+    # Find untracked remote branches
+    echo -e "\n🆕 Untracked remote branches:"
+    git branch -r | grep -v '\->' | while read remote; do
+        branch="${remote#origin/}"
+        if ! git show-ref --verify --quiet refs/heads/"$branch"; then
+            echo "  - $remote"
+        fi
+    done
+    
+    # Offer to track branches
+    read -p "Track a remote branch? (y/n): " track
+    if [[ "$track" == "y" ]]; then
+        read -p "Enter remote branch name (without origin/): " branch_name
+        git checkout -b "$branch_name" "origin/$branch_name"
+    fi
+}
+
+# Clone specific remote branch
+clone_remote_branch() {
+    branch=$1
+    repo_url=$2
+    
+    echo "📥 Cloning specific branch: $branch"
+    git clone -b "$branch" --single-branch "$repo_url"
+}
+```
+
+**2. Remote Branch Synchronization**
+```bash
+# Sync local branch with remote
+sync_with_remote() {
+    current_branch=$(git branch --show-current)
+    
+    echo "🔄 Syncing $current_branch with remote"
+    echo "====================================="
+    
+    # Check if branch exists on remote
+    if ! git ls-remote --heads origin "$current_branch" | grep -q "$current_branch"; then
+        echo "⚠️  Branch doesn't exist on remote"
+        read -p "Push branch to remote? (y/n): " push_branch
+        if [[ "$push_branch" == "y" ]]; then
+            git push -u origin "$current_branch"
+        fi
+        return
+    fi
+    
+    # Fetch latest remote changes
+    git fetch origin "$current_branch"
+    
+    # Check divergence
+    local_commit=$(git rev-parse HEAD)
+    remote_commit=$(git rev-parse "origin/$current_branch")
+    merge_base=$(git merge-base HEAD "origin/$current_branch")
+    
+    if [ "$local_commit" = "$remote_commit" ]; then
+        echo "✅ Branch is up to date with remote"
+    elif [ "$local_commit" = "$merge_base" ]; then
+        echo "⬇️  Branch is behind remote"
+        read -p "Pull changes? (y/n): " pull
+        if [[ "$pull" == "y" ]]; then
+            git pull --rebase origin "$current_branch"
+        fi
+    elif [ "$remote_commit" = "$merge_base" ]; then
+        echo "⬆️  Branch is ahead of remote"
+        read -p "Push changes? (y/n): " push
+        if [[ "$push" == "y" ]]; then
+            git push origin "$current_branch"
+        fi
+    else
+        echo "🔀 Branch has diverged from remote"
+        echo "Options:"
+        echo "  1) Rebase onto remote"
+        echo "  2) Merge remote changes"
+        echo "  3) Force push (dangerous)"
+        read -p "Choice (1-3): " choice
+        case $choice in
+            1) git pull --rebase origin "$current_branch" ;;
+            2) git pull --no-rebase origin "$current_branch" ;;
+            3) 
+                echo "⚠️  WARNING: This will overwrite remote!"
+                read -p "Are you SURE? (type 'yes'): " confirm
+                if [[ "$confirm" == "yes" ]]; then
+                    git push --force-with-lease origin "$current_branch"
+                fi
+                ;;
+        esac
+    fi
+}
+```
+
 ## Branch Lifecycle Management
 
-**1. Branch Health Check**
+**1. Branch Health Check (Enhanced with Remote)**
 ```bash
-# Check branch age and activity
+# Check branch age and activity including remote status
 check_branch_health() {
     branch=$1
     
@@ -113,17 +220,36 @@ check_branch_health() {
     last_commit=$(git log -1 --format=%cr "$branch")
     commit_count=$(git rev-list --count "$branch" ^main)
     
-    # Divergence check
+    # Divergence check with local main
     behind=$(git rev-list --count "$branch"..main)
     ahead=$(git rev-list --count main.."$branch")
+    
+    # Remote status check
+    if git ls-remote --heads origin "$branch" | grep -q "$branch"; then
+        remote_behind=$(git rev-list --count "$branch".."origin/$branch" 2>/dev/null || echo "N/A")
+        remote_ahead=$(git rev-list --count "origin/$branch".."$branch" 2>/dev/null || echo "N/A")
+        remote_status="✅ Tracked"
+    else
+        remote_behind="N/A"
+        remote_ahead="N/A"
+        remote_status="❌ Not on remote"
+    fi
     
     echo "🏥 Branch Health Report: $branch"
     echo "================================"
     echo "📅 Age: $age_days days"
     echo "🕐 Last commit: $last_commit"
     echo "📊 Commits: $commit_count"
-    echo "⬆️  Ahead of main: $ahead"
-    echo "⬇️  Behind main: $behind"
+    echo ""
+    echo "Local Status:"
+    echo "  ⬆️  Ahead of main: $ahead"
+    echo "  ⬇️  Behind main: $behind"
+    echo ""
+    echo "Remote Status: $remote_status"
+    if [[ "$remote_status" == "✅ Tracked" ]]; then
+        echo "  ⬆️  Ahead of remote: $remote_ahead"
+        echo "  ⬇️  Behind remote: $remote_behind"
+    fi
     
     # Recommendations
     if [ "$age_days" -gt 30 ]; then
@@ -133,21 +259,31 @@ check_branch_health() {
     if [ "$behind" -gt 50 ]; then
         echo "⚠️  WARNING: Branch is $behind commits behind main. Rebase recommended."
     fi
+    
+    if [[ "$remote_behind" != "N/A" ]] && [ "$remote_behind" -gt 0 ]; then
+        echo "⚠️  WARNING: Branch is behind remote. Pull recommended."
+    fi
 }
 ```
 
-**2. Branch Cleanup**
+**2. Branch Cleanup (Local and Remote)**
 ```bash
-# Smart branch cleanup
+# Smart branch cleanup with remote awareness
 cleanup_branches() {
     echo "🧹 Branch Cleanup Analysis"
     echo "========================="
     
-    # Find merged branches
+    # Find merged branches (local)
     echo -e "\n✅ Merged branches (safe to delete):"
     git branch --merged main | grep -v -E "(main|master|develop)" | while read branch; do
         last_commit=$(git log -1 --format=%cr "$branch")
         echo "  - $branch (last commit: $last_commit)"
+    done
+    
+    # Find merged remote branches
+    echo -e "\n✅ Merged remote branches:"
+    git branch -r --merged origin/main | grep -v -E "(main|master|develop|HEAD)" | while read branch; do
+        echo "  - $branch"
     done
     
     # Find stale branches
@@ -155,15 +291,46 @@ cleanup_branches() {
     git for-each-ref --format='%(refname:short) %(committerdate:relative)' refs/heads/ | \
         awk '$2 ~ /months|years/ {print "  - " $1 " (last activity: " $2 " " $3 " ago)"}' 
     
-    # Find orphaned branches
-    echo -e "\n👻 Orphaned branches (author no longer active):"
-    # Implementation depends on team structure
+    # Find orphaned remote tracking branches
+    echo -e "\n👻 Orphaned remote tracking branches:"
+    git remote prune origin --dry-run
     
     # Interactive cleanup
-    read -p "Delete all merged branches? (y/n): " confirm
-    if [[ "$confirm" == "y" ]]; then
-        git branch --merged main | grep -v -E "(main|master|develop)" | xargs -n 1 git branch -d
-    fi
+    echo -e "\n🔧 Cleanup Options:"
+    echo "1) Delete merged local branches"
+    echo "2) Delete merged remote branches"
+    echo "3) Prune orphaned remote tracking branches"
+    echo "4) Full cleanup (all of the above)"
+    echo "5) Cancel"
+    
+    read -p "Choice (1-5): " cleanup_choice
+    
+    case $cleanup_choice in
+        1)
+            git branch --merged main | grep -v -E "(main|master|develop)" | xargs -n 1 git branch -d
+            echo "✅ Merged local branches deleted"
+            ;;
+        2)
+            git branch -r --merged origin/main | grep -v -E "(main|master|develop|HEAD)" | \
+                sed 's/origin\///' | xargs -n 1 git push origin --delete
+            echo "✅ Merged remote branches deleted"
+            ;;
+        3)
+            git remote prune origin
+            echo "✅ Orphaned remote tracking branches pruned"
+            ;;
+        4)
+            # Full cleanup
+            git branch --merged main | grep -v -E "(main|master|develop)" | xargs -n 1 git branch -d
+            git branch -r --merged origin/main | grep -v -E "(main|master|develop|HEAD)" | \
+                sed 's/origin\///' | xargs -n 1 git push origin --delete 2>/dev/null || true
+            git remote prune origin
+            echo "✅ Full cleanup completed"
+            ;;
+        5)
+            echo "Cleanup cancelled"
+            ;;
+    esac
 }
 ```
 
@@ -249,37 +416,212 @@ EOF
 }
 ```
 
+## Remote Management
+
+**1. Multiple Remote Configuration**
+```bash
+# Setup multiple remotes
+setup_multiple_remotes() {
+    echo "🌐 Configuring Multiple Remotes"
+    echo "================================"
+    
+    # Show current remotes
+    echo "Current remotes:"
+    git remote -v
+    
+    echo -e "\n🔧 Remote Setup Options:"
+    echo "1) Add upstream (original repository for forks)"
+    echo "2) Add backup remote"
+    echo "3) Add team member's fork"
+    echo "4) Configure push URLs"
+    echo "5) Remove a remote"
+    
+    read -p "Choice (1-5): " remote_choice
+    
+    case $remote_choice in
+        1)
+            read -p "Enter upstream repository URL: " upstream_url
+            git remote add upstream "$upstream_url"
+            git fetch upstream
+            echo "✅ Upstream remote added"
+            ;;
+        2)
+            read -p "Enter backup repository URL: " backup_url
+            git remote add backup "$backup_url"
+            echo "✅ Backup remote added"
+            ;;
+        3)
+            read -p "Enter team member's name: " member_name
+            read -p "Enter repository URL: " member_url
+            git remote add "$member_name" "$member_url"
+            git fetch "$member_name"
+            echo "✅ Team member remote added: $member_name"
+            ;;
+        4)
+            read -p "Remote name to configure: " remote_name
+            read -p "New push URL: " push_url
+            git remote set-url --push "$remote_name" "$push_url"
+            echo "✅ Push URL configured for $remote_name"
+            ;;
+        5)
+            git remote
+            read -p "Remote name to remove: " remote_to_remove
+            git remote remove "$remote_to_remove"
+            echo "✅ Remote $remote_to_remove removed"
+            ;;
+    esac
+}
+
+# Fetch from all remotes
+fetch_all_remotes() {
+    echo "📥 Fetching from all remotes..."
+    git fetch --all --prune --tags
+    
+    # Show summary
+    echo -e "\n📊 Remote Summary:"
+    for remote in $(git remote); do
+        echo -e "\n$remote:"
+        git ls-remote --heads "$remote" | wc -l | xargs echo "  Branches:"
+        git ls-remote --tags "$remote" | wc -l | xargs echo "  Tags:"
+    done
+}
+```
+
+**2. Pull Operations with Strategy**
+```bash
+# Smart pull with conflict handling
+smart_pull() {
+    current_branch=$(git branch --show-current)
+    
+    echo "📥 Smart Pull Operation"
+    echo "======================"
+    
+    # Check for uncommitted changes
+    if ! git diff-index --quiet HEAD --; then
+        echo "⚠️  Uncommitted changes detected"
+        echo "1) Stash and pull"
+        echo "2) Commit and pull"
+        echo "3) Cancel"
+        read -p "Choice (1-3): " pull_choice
+        
+        case $pull_choice in
+            1)
+                git stash push -m "pull-stash-$(date +%s)"
+                ;;
+            2)
+                git add -A
+                git commit -m "WIP: Save work before pull"
+                ;;
+            3)
+                echo "Pull cancelled"
+                return
+                ;;
+        esac
+    fi
+    
+    # Choose pull strategy
+    echo -e "\n📋 Pull Strategy:"
+    echo "1) Rebase (keep linear history)"
+    echo "2) Merge (preserve branch topology)"
+    echo "3) Fast-forward only (safest)"
+    read -p "Choice (1-3): " strategy
+    
+    case $strategy in
+        1)
+            git pull --rebase origin "$current_branch"
+            if [ $? -ne 0 ]; then
+                echo "⚠️  Rebase conflicts detected!"
+                echo "Resolve conflicts, then run: git rebase --continue"
+            fi
+            ;;
+        2)
+            git pull --no-rebase origin "$current_branch"
+            if [ $? -ne 0 ]; then
+                echo "⚠️  Merge conflicts detected!"
+                echo "Resolve conflicts, then run: git commit"
+            fi
+            ;;
+        3)
+            git pull --ff-only origin "$current_branch"
+            if [ $? -ne 0 ]; then
+                echo "⚠️  Cannot fast-forward. Manual intervention required."
+            fi
+            ;;
+    esac
+    
+    # Restore stashed changes if any
+    if git stash list | grep -q "pull-stash"; then
+        echo "Restoring stashed changes..."
+        git stash pop
+    fi
+}
+```
+
 ## Branch Workflows
 
-**1. Feature Branch Workflow**
+**1. Feature Branch Workflow (Enhanced)**
 ```bash
-# Complete feature workflow
+# Complete feature workflow with remote operations
 feature_workflow() {
-    # 1. Create feature branch
-    git checkout -b feature/TICKET-description
-    
-    # 2. Work on feature
-    # ... make changes ...
-    
-    # 3. Keep updated
-    git fetch origin
-    git rebase origin/main
-    
-    # 4. Push for review
-    git push -u origin feature/TICKET-description
-    
-    # 5. Create PR
-    gh pr create --title "TICKET: Description" --body "..."
-    
-    # 6. After approval, squash merge
+    # 1. Sync with remote first
+    git fetch origin main
     git checkout main
     git pull origin main
-    git merge --squash feature/TICKET-description
-    git commit -m "feat(scope): add feature description"
     
-    # 7. Cleanup
-    git branch -d feature/TICKET-description
-    git push origin --delete feature/TICKET-description
+    # 2. Create feature branch
+    read -p "Enter ticket number: " ticket
+    read -p "Enter feature description: " description
+    branch_name="feature/$ticket-$description"
+    git checkout -b "$branch_name"
+    
+    # 3. Work on feature
+    echo "🔨 Working on feature branch: $branch_name"
+    echo "Remember to commit frequently!"
+    
+    # 4. Keep updated with main
+    echo -e "\n🔄 Sync strategy:"
+    echo "Run periodically: git fetch origin && git rebase origin/main"
+    
+    # 5. Push for review
+    git push -u origin "$branch_name"
+    
+    # 6. Create PR
+    if command -v gh &> /dev/null; then
+        gh pr create --title "$ticket: $description" \
+                     --body "## Description\n\n## Changes\n\n## Testing"
+    else
+        echo "Visit: https://github.com/.../compare/$branch_name"
+    fi
+    
+    # 7. After approval, merge
+    echo -e "\n📋 Merge Options:"
+    echo "1) Squash and merge (clean history)"
+    echo "2) Rebase and merge (linear history)"
+    echo "3) Create merge commit (preserve history)"
+    read -p "Choice (1-3): " merge_choice
+    
+    git checkout main
+    git pull origin main
+    
+    case $merge_choice in
+        1)
+            git merge --squash "$branch_name"
+            git commit -m "feat($ticket): $description"
+            ;;
+        2)
+            git rebase "$branch_name"
+            ;;
+        3)
+            git merge --no-ff "$branch_name" -m "Merge feature/$ticket"
+            ;;
+    esac
+    
+    git push origin main
+    
+    # 8. Cleanup
+    git branch -d "$branch_name"
+    git push origin --delete "$branch_name"
+    echo "✅ Feature workflow completed!"
 }
 ```
 
