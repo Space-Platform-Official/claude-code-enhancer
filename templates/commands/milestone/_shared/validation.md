@@ -112,6 +112,10 @@ validate_milestone_integrity() {
     if [ "$task_count" -gt 0 ]; then
         local task_errors=$(validate_milestone_tasks "$milestone_id")
         ((errors+=task_errors))
+        
+        # Validate kiro workflow compliance
+        local kiro_errors=$(validate_kiro_compliance "$milestone_id")
+        ((errors+=kiro_errors))
     fi
     
     # Additional strict mode validations
@@ -192,7 +196,142 @@ validate_milestone_tasks() {
                 ((errors++))
             fi
         done
+        
+        # Validate kiro workflow structure if enabled
+        local kiro_enabled=$(yq e "${task_prefix}.kiro_workflow.enabled" "$milestone_file" 2>/dev/null)
+        if [ "$kiro_enabled" = "true" ]; then
+            # Validate kiro phases exist
+            for phase in design spec task execute; do
+                local phase_status=$(yq e "${task_prefix}.kiro_workflow.phases.$phase.status" "$milestone_file" 2>/dev/null)
+                if [ "$phase_status" = "null" ] || [ -z "$phase_status" ]; then
+                    echo "❌ ERROR: Task $i missing kiro phase: $phase"
+                    ((errors++))
+                fi
+            done
+        fi
     done
+    
+    return $errors
+}
+
+# Validate kiro workflow compliance
+validate_kiro_compliance() {
+    local milestone_id=$1
+    local milestone_file=".milestones/active/$milestone_id.yaml"
+    local errors=0
+    
+    echo "=== Kiro Workflow Compliance Validation ==="
+    
+    # Check if kiro is mandatory for this milestone
+    local kiro_policy=$(yq e '.kiro_configuration.policy // "optional"' "$milestone_file")
+    local kiro_enforcement=$(yq e '.kiro_configuration.enforcement // "flexible"' "$milestone_file")
+    
+    if [ "$kiro_policy" = "mandatory" ]; then
+        echo "📋 Kiro policy: MANDATORY (enforcement: $kiro_enforcement)"
+        
+        # Check all tasks have kiro enabled
+        local non_kiro_tasks=$(yq e '.tasks[] | select(.kiro_workflow.enabled != true) | .id' "$milestone_file" 2>/dev/null)
+        
+        if [ -n "$non_kiro_tasks" ]; then
+            echo "❌ ERROR: Mandatory kiro policy violated. Non-kiro tasks found:"
+            echo "$non_kiro_tasks" | while read -r task_id; do
+                echo "  - $task_id"
+            done
+            ((errors++))
+            
+            if [ "$kiro_enforcement" = "strict" ]; then
+                echo "📝 GUIDANCE: All tasks must use kiro workflow in strict mode"
+                echo "💡 SUGGESTION: Run '/milestone/migrate $milestone_id --to-kiro' to fix"
+            fi
+        fi
+    fi
+    
+    # Validate kiro-enabled tasks
+    local task_count=$(yq e '.tasks | length' "$milestone_file" 2>/dev/null || echo "0")
+    
+    for ((i=0; i<task_count; i++)); do
+        local task_id=$(yq e ".tasks[$i].id" "$milestone_file")
+        local kiro_enabled=$(yq e ".tasks[$i].kiro_workflow.enabled" "$milestone_file" 2>/dev/null)
+        
+        if [ "$kiro_enabled" = "true" ]; then
+            # Validate phase structure
+            for phase in design spec task execute; do
+                local phase_data=$(yq e ".tasks[$i].kiro_workflow.phases.$phase" "$milestone_file" 2>/dev/null)
+                
+                if [ "$phase_data" = "null" ] || [ -z "$phase_data" ]; then
+                    echo "❌ ERROR: Task $task_id missing kiro phase structure: $phase"
+                    ((errors++))
+                    continue
+                fi
+                
+                # Check required phase fields
+                local phase_status=$(yq e ".tasks[$i].kiro_workflow.phases.$phase.status" "$milestone_file")
+                local deliverables=$(yq e ".tasks[$i].kiro_workflow.phases.$phase.deliverables" "$milestone_file")
+                
+                if [ "$phase_status" = "null" ]; then
+                    echo "❌ ERROR: Task $task_id phase $phase missing status"
+                    ((errors++))
+                fi
+                
+                if [ "$deliverables" = "null" ] || [ "$deliverables" = "[]" ]; then
+                    echo "⚠️  WARNING: Task $task_id phase $phase has no deliverables defined"
+                fi
+            done
+            
+            # Validate current phase
+            local current_phase=$(yq e ".tasks[$i].kiro_workflow.current_phase" "$milestone_file")
+            if [ "$current_phase" = "null" ] || [ -z "$current_phase" ]; then
+                echo "❌ ERROR: Task $task_id missing current_phase"
+                ((errors++))
+            elif [[ ! "$current_phase" =~ ^(design|spec|task|execute)$ ]]; then
+                echo "❌ ERROR: Task $task_id has invalid current_phase: $current_phase"
+                ((errors++))
+            fi
+            
+            # Validate phase progression logic
+            local phase_order=("design" "spec" "task" "execute")
+            local current_index=-1
+            
+            for idx in "${!phase_order[@]}"; do
+                if [ "${phase_order[$idx]}" = "$current_phase" ]; then
+                    current_index=$idx
+                    break
+                fi
+            done
+            
+            # Check that all phases before current are completed or approved
+            if [ "$current_index" -gt 0 ]; then
+                for ((j=0; j<current_index; j++)); do
+                    local prev_phase="${phase_order[$j]}"
+                    local prev_status=$(yq e ".tasks[$i].kiro_workflow.phases.$prev_phase.status" "$milestone_file")
+                    
+                    if [ "$prev_status" != "completed" ] && [ "$prev_status" != "approved" ]; then
+                        echo "❌ ERROR: Task $task_id phase progression violated. $prev_phase not completed (status: $prev_status)"
+                        ((errors++))
+                    fi
+                done
+            fi
+        fi
+    done
+    
+    # Calculate and display compliance score
+    if [ "$task_count" -gt 0 ]; then
+        local kiro_task_count=$(yq e '.tasks[] | select(.kiro_workflow.enabled == true) | .id' "$milestone_file" 2>/dev/null | wc -l)
+        local compliance_score=$((kiro_task_count * 100 / task_count))
+        
+        echo "📊 Kiro Compliance Score: $compliance_score%"
+        
+        if [ "$compliance_score" -lt 100 ] && [ "$kiro_policy" = "mandatory" ]; then
+            echo "❌ ERROR: Compliance score below 100% with mandatory policy"
+            ((errors++))
+        fi
+    fi
+    
+    if [ $errors -eq 0 ]; then
+        echo "✅ Kiro workflow compliance validation passed"
+    else
+        echo "❌ Kiro workflow compliance validation failed with $errors errors"
+    fi
     
     return $errors
 }
