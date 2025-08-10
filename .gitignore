@@ -1,8 +1,6 @@
 # Claude Runtime Data (ignore these)
-.claude/.cache/
-.claude/logs/
-.claude/stats/
-.claude/settings.local.json
+# Ignore entire .claude directory
+.claude/
 
 # Keep tracking these .claude directories:
 # .claude/commands/ (templates)
