@@ -14,9 +14,16 @@ get_current_branch() {
     git branch --show-current || git rev-parse --abbrev-ref HEAD
 }
 
-# Check if branch exists
+# Check if branch exists locally
 branch_exists() {
     git show-ref --verify --quiet refs/heads/"$1"
+}
+
+# Check if branch exists on remote
+remote_branch_exists() {
+    local remote=${1:-origin}
+    local branch=$2
+    git ls-remote --exit-code --heads "$remote" "$branch" &>/dev/null
 }
 
 # Check if on protected branch
@@ -41,6 +48,103 @@ get_branch_age() {
     else
         echo 0
     fi
+}
+
+# Get branch sync status with remote
+get_branch_sync_status() {
+    local branch=${1:-$(get_current_branch)}
+    local remote=${2:-origin}
+    
+    if ! remote_branch_exists "$remote" "$branch"; then
+        echo "no-remote"
+        return
+    fi
+    
+    local ahead=$(git rev-list --count "$remote/$branch".."$branch" 2>/dev/null || echo 0)
+    local behind=$(git rev-list --count "$branch".."$remote/$branch" 2>/dev/null || echo 0)
+    
+    if [ "$ahead" -eq 0 ] && [ "$behind" -eq 0 ]; then
+        echo "synced"
+    elif [ "$ahead" -gt 0 ] && [ "$behind" -eq 0 ]; then
+        echo "ahead:$ahead"
+    elif [ "$ahead" -eq 0 ] && [ "$behind" -gt 0 ]; then
+        echo "behind:$behind"
+    else
+        echo "diverged:ahead=$ahead,behind=$behind"
+    fi
+}
+```
+
+## Remote Utilities
+
+```bash
+# Check if remote exists
+remote_exists() {
+    git remote | grep -q "^$1$"
+}
+
+# Get remote URL
+get_remote_url() {
+    local remote=${1:-origin}
+    git remote get-url "$remote" 2>/dev/null
+}
+
+# Test remote connectivity
+test_remote_connection() {
+    local remote=${1:-origin}
+    git ls-remote "$remote" HEAD &>/dev/null
+}
+
+# Get all remotes with status
+get_remotes_status() {
+    for remote in $(git remote); do
+        echo -n "$remote: "
+        if test_remote_connection "$remote"; then
+            echo "connected"
+        else
+            echo "unreachable"
+        fi
+    done
+}
+
+# Fetch from all remotes safely
+fetch_all_remotes() {
+    local success_count=0
+    local fail_count=0
+    
+    for remote in $(git remote); do
+        if git fetch "$remote" --prune --tags 2>/dev/null; then
+            ((success_count++))
+        else
+            ((fail_count++))
+            echo "Warning: Failed to fetch from $remote" >&2
+        fi
+    done
+    
+    echo "Fetched from $success_count remote(s), $fail_count failed"
+}
+
+# Check if current repo is a fork
+is_fork() {
+    remote_exists "upstream"
+}
+
+# Get fork sync status
+get_fork_sync_status() {
+    if ! is_fork; then
+        echo "not-a-fork"
+        return
+    fi
+    
+    local main_branch="main"
+    if ! branch_exists "$main_branch"; then
+        main_branch="master"
+    fi
+    
+    local behind=$(git rev-list --count "$main_branch".."upstream/$main_branch" 2>/dev/null || echo 0)
+    local ahead=$(git rev-list --count "upstream/$main_branch".."$main_branch" 2>/dev/null || echo 0)
+    
+    echo "ahead:$ahead,behind:$behind"
 }
 ```
 
@@ -120,18 +224,117 @@ is_repo_clean() {
     [ -z "$(git status --porcelain)" ]
 }
 
-# Get ahead/behind counts
+# Get ahead/behind counts with any remote
 get_branch_divergence() {
     local branch=${1:-$(get_current_branch)}
-    local upstream=$(git rev-parse --abbrev-ref "$branch"@{upstream} 2>/dev/null)
+    local remote=${2:-origin}
     
-    if [ -n "$upstream" ]; then
-        local ahead=$(git rev-list --count "$upstream".."$branch")
-        local behind=$(git rev-list --count "$branch".."$upstream")
-        echo "ahead:$ahead behind:$behind upstream:$upstream"
+    if remote_branch_exists "$remote" "$branch"; then
+        local ahead=$(git rev-list --count "$remote/$branch".."$branch" 2>/dev/null || echo 0)
+        local behind=$(git rev-list --count "$branch".."$remote/$branch" 2>/dev/null || echo 0)
+        echo "ahead:$ahead behind:$behind remote:$remote/$branch"
     else
-        echo "ahead:0 behind:0 upstream:none"
+        local upstream=$(git rev-parse --abbrev-ref "$branch"@{upstream} 2>/dev/null)
+        if [ -n "$upstream" ]; then
+            local ahead=$(git rev-list --count "$upstream".."$branch")
+            local behind=$(git rev-list --count "$branch".."$upstream")
+            echo "ahead:$ahead behind:$behind upstream:$upstream"
+        else
+            echo "ahead:0 behind:0 upstream:none"
+        fi
     fi
+}
+
+# Get comprehensive remote status
+get_remote_status() {
+    local branch=$(get_current_branch)
+    
+    echo "Branch: $branch"
+    for remote in $(git remote); do
+        if remote_branch_exists "$remote" "$branch"; then
+            local status=$(get_branch_sync_status "$branch" "$remote")
+            echo "  $remote: $status"
+        else
+            echo "  $remote: not-tracked"
+        fi
+    done
+}
+```
+
+## Pull/Push Utilities
+
+```bash
+# Safe pull with stash handling
+safe_pull() {
+    local remote=${1:-origin}
+    local branch=${2:-$(get_current_branch)}
+    local strategy=${3:-rebase}  # rebase, merge, or ff-only
+    
+    # Stash if needed
+    local stashed=false
+    if ! is_repo_clean; then
+        git stash push -m "auto-stash-$(date +%s)"
+        stashed=true
+    fi
+    
+    # Pull with specified strategy
+    case $strategy in
+        rebase)
+            git pull --rebase "$remote" "$branch"
+            ;;
+        merge)
+            git pull --no-rebase "$remote" "$branch"
+            ;;
+        ff-only)
+            git pull --ff-only "$remote" "$branch"
+            ;;
+    esac
+    
+    local result=$?
+    
+    # Restore stash if needed
+    if [ "$stashed" = true ]; then
+        git stash pop
+    fi
+    
+    return $result
+}
+
+# Safe push with validation
+safe_push() {
+    local remote=${1:-origin}
+    local branch=${2:-$(get_current_branch)}
+    local force=${3:-false}
+    
+    # Check if protected branch
+    if is_protected_branch "$branch" && [ "$force" != "true" ]; then
+        echo "ERROR: Cannot push to protected branch: $branch"
+        return 1
+    fi
+    
+    # Check for unpushed commits
+    local unpushed=$(git rev-list --count "$remote/$branch".."$branch" 2>/dev/null || echo 0)
+    if [ "$unpushed" -eq 0 ]; then
+        echo "Nothing to push"
+        return 0
+    fi
+    
+    echo "Pushing $unpushed commit(s) to $remote/$branch"
+    
+    if [ "$force" = "true" ]; then
+        git push --force-with-lease "$remote" "$branch"
+    else
+        git push "$remote" "$branch"
+    fi
+}
+
+# Fetch with progress reporting
+fetch_with_progress() {
+    local remote=${1:-origin}
+    
+    echo "Fetching from $remote..."
+    git fetch "$remote" --prune --tags --progress 2>&1 | \
+        grep -E "(remote:|Receiving|Resolving|Unpacking|From )"
 }
 ```
 
