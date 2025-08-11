@@ -227,16 +227,106 @@ template_updates:
 **Step 5: Multi-Agent Archive Execution**
 
 **Agent Spawning Strategy for Archive Process:**
+### Validation Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Validate completion</parameter>
+<parameter name="prompt">You are the Validation Agent for milestone {{MILESTONE_ID}} archival.
+
+Your responsibilities:
+1. Read milestone from .milestones/active/{{MILESTONE_ID}}.yaml
+2. Verify all tasks have status: "completed"
+3. Check all deliverables are present and documented
+4. Validate acceptance criteria are met
+5. Confirm all kiro phases completed for each task
+6. Generate validation report to .milestones/archive/{{MILESTONE_ID}}/validation.json
+
+Report: PASS if ready for archive, FAIL with specific issues if not.</parameter>
+</invoke>
+</function_calls>
 ```
-"I'll spawn specialized agents to handle different aspects of milestone archival:
 
-1. **Validation Agent**: 'Verify all completion criteria and deliverables against original definition'
-2. **Metrics Agent**: 'Analyze performance data and calculate variance metrics'
-3. **Knowledge Agent**: 'Extract lessons learned and identify process improvements'
-4. **Template Agent**: 'Update estimation models and milestone templates based on outcomes'
-5. **Archive Agent**: 'Manage data migration and cleanup with proper audit trail'
+### Metrics Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Analyze performance</parameter>
+<parameter name="prompt">You are the Metrics Agent for milestone {{MILESTONE_ID}} archival.
 
-Each agent will work in parallel while ensuring comprehensive knowledge capture."
+Your responsibilities:
+1. Calculate actual vs estimated timeline variance
+2. Analyze task completion velocity and patterns
+3. Compute resource utilization metrics
+4. Identify performance bottlenecks and delays
+5. Generate metrics report to .milestones/archive/{{MILESTONE_ID}}/metrics.json
+
+Provide comprehensive performance analysis with variance percentages.</parameter>
+</invoke>
+</function_calls>
+```
+
+### Knowledge Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Extract lessons</parameter>
+<parameter name="prompt">You are the Knowledge Agent for milestone {{MILESTONE_ID}} archival.
+
+Your responsibilities:
+1. Analyze what went well and should be repeated
+2. Identify challenges and how they were overcome
+3. Document process improvements discovered
+4. Capture technical decisions and their outcomes
+5. Generate lessons learned to .milestones/archive/{{MILESTONE_ID}}/lessons.md
+
+Extract actionable insights for future milestones.</parameter>
+</invoke>
+</function_calls>
+```
+
+### Template Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Update templates</parameter>
+<parameter name="prompt">You are the Template Agent for milestone {{MILESTONE_ID}} archival.
+
+Your responsibilities:
+1. Read metrics from .milestones/archive/{{MILESTONE_ID}}/metrics.json
+2. Update estimation models based on actual performance
+3. Refine milestone templates with learned patterns
+4. Adjust default timelines and resource allocations
+5. Generate template updates to .milestones/templates/updates.yaml
+
+Improve future planning accuracy based on this milestone's outcomes.</parameter>
+</invoke>
+</function_calls>
+```
+
+### Archive Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Archive milestone</parameter>
+<parameter name="prompt">You are the Archive Agent for milestone {{MILESTONE_ID}}.
+
+Your responsibilities:
+1. Create archive structure at .milestones/completed/{{MILESTONE_ID}}/
+2. Move milestone YAML and all associated files
+3. Generate completion certificate with timestamp
+4. Update archive index for searchability
+5. Clean up active directory and temporary files
+6. Create audit trail of archival process
+
+Complete the archival with full data preservation and cleanup.</parameter>
+</invoke>
+</function_calls>
 ```
 
 **Step 6: Data Archival and State Management**
@@ -400,7 +490,39 @@ milestone_template_v1.1:
     - stakeholder_availability_risk: "verified|assumed|unknown"
 ```
 
-**Step 10: Future Planning Integration**
+**Step 10: Implementation Pattern**
+
+**Complete Execution Flow:**
+
+```markdown
+When user runs `/milestone/archive [milestone-id]`, follow this EXACT pattern:
+
+1. **Validate Prerequisites:**
+   - Confirm milestone exists and is complete
+   - Check all tasks have completed status
+
+2. **Spawn All 5 Agents Using Task Tool:**
+   
+   I'll now spawn 5 specialized agents for comprehensive archival:
+   
+   [Use Task tool with Validation Agent template - replace {{MILESTONE_ID}}]
+   [Use Task tool with Metrics Agent template - replace {{MILESTONE_ID}}]
+   [Use Task tool with Knowledge Agent template - replace {{MILESTONE_ID}}]
+   [Use Task tool with Template Agent template - replace {{MILESTONE_ID}}]
+   [Use Task tool with Archive Agent template - replace {{MILESTONE_ID}}]
+
+3. **Monitor Coordination:**
+   - Validation must pass before archival
+   - All analysis completes in parallel
+   - Archive agent performs final migration
+
+4. **Confirm Completion:**
+   - Milestone moved to completed directory
+   - Lessons learned captured
+   - Templates updated for future use
+```
+
+**Step 11: Future Planning Integration**
 
 **Forward-Looking Improvements:**
 ```yaml

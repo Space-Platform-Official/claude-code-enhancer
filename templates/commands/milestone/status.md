@@ -248,15 +248,126 @@ Let me ultrathink about comprehensive milestone status visualization and health 
 
 **Step 1: Multi-Agent Status Analysis Strategy**
 
-**Agent Spawning Strategy for Comprehensive Analysis:**
+**Agent Spawning Using Task Tool:**
+
+### Discovery Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Discover milestone files</parameter>
+<parameter name="prompt">You are the Discovery Agent for milestone status analysis.
+
+Your responsibilities:
+1. Scan .milestones/ directory for all milestone files
+2. Inventory active, completed, and archived milestones
+3. Map directory structure and file organization
+4. Check for orphaned or corrupted milestone files
+5. Generate file manifest to .milestones/status/discovery.json
+
+Report the complete milestone inventory with counts and status.</parameter>
+</invoke>
+</function_calls>
 ```
-"I'll spawn multiple agents to handle milestone status analysis comprehensively:
-- Discovery Agent: Scan and inventory all milestone files and directory structure
-- Parser Agent: Extract milestone data, progress metrics, and completion status
-- Calculator Agent: Compute accurate progress percentages and timeline analysis
-- Visualizer Agent: Generate interactive dashboards, charts, and progress bars
-- Health Agent: Assess project health, risks, and critical path status
-- Reporter Agent: Create actionable insights and recommendations"
+
+### Parser Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Parse milestone data</parameter>
+<parameter name="prompt">You are the Parser Agent for milestone status analysis.
+
+Your responsibilities:
+1. Read all milestone YAML files from .milestones/active/
+2. Extract key fields: id, title, status, progress, tasks
+3. Parse kiro workflow states and phase completion
+4. Identify data inconsistencies or missing fields
+5. Generate parsed data to .milestones/status/parsed.json
+
+Output structured milestone data for analysis.</parameter>
+</invoke>
+</function_calls>
+```
+
+### Calculator Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Calculate progress metrics</parameter>
+<parameter name="prompt">You are the Calculator Agent for milestone status analysis.
+
+Your responsibilities:
+1. Read parsed milestone data from .milestones/status/parsed.json
+2. Calculate accurate progress percentages using kiro phase weights (15/25/20/40%)
+3. Compute timeline variance and estimated completion dates
+4. Analyze velocity trends and completion rates
+5. Generate metrics to .milestones/status/metrics.json
+
+Provide comprehensive progress calculations.</parameter>
+</invoke>
+</function_calls>
+```
+
+### Visualizer Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Generate visualizations</parameter>
+<parameter name="prompt">You are the Visualizer Agent for milestone status analysis.
+
+Your responsibilities:
+1. Read metrics from .milestones/status/metrics.json
+2. Generate ASCII progress bars for each milestone
+3. Create timeline visualization with critical path
+4. Build dependency graph visualization
+5. Output dashboard to .milestones/status/dashboard.md
+
+Create clear visual representations of milestone status.</parameter>
+</invoke>
+</function_calls>
+```
+
+### Health Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Assess project health</parameter>
+<parameter name="prompt">You are the Health Agent for milestone status analysis.
+
+Your responsibilities:
+1. Analyze milestone blockers and risks
+2. Identify stalled or at-risk milestones
+3. Assess resource constraints and bottlenecks
+4. Evaluate critical path impact
+5. Generate health report to .milestones/status/health.json
+
+Provide comprehensive project health assessment.</parameter>
+</invoke>
+</function_calls>
+```
+
+### Reporter Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Generate status report</parameter>
+<parameter name="prompt">You are the Reporter Agent for milestone status analysis.
+
+Your responsibilities:
+1. Aggregate all analysis from other agents
+2. Generate executive summary with key insights
+3. Create actionable recommendations
+4. Identify immediate action items
+5. Output final report to .milestones/status/report.md
+
+Deliver comprehensive milestone status report with recommendations.</parameter>
+</invoke>
+</function_calls>
 ```
 
 **Step 2: Milestone Data Parsing and Extraction**
@@ -468,7 +579,39 @@ STRATEGIC INSIGHTS:
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Step 7: Multi-Agent Coordination for Complex Projects**
+**Step 7: Implementation Pattern**
+
+**Complete Execution Flow:**
+
+```markdown
+When user runs `/milestone/status [options]`, follow this EXACT pattern:
+
+1. **Setup Infrastructure:**
+   - Create .milestones/status/ directory
+   - Initialize shared state files
+
+2. **Spawn All 6 Agents Using Task Tool:**
+   
+   I'll now spawn 6 specialized agents for comprehensive status analysis:
+   
+   [Use Task tool with Discovery Agent template above]
+   [Use Task tool with Parser Agent template above]
+   [Use Task tool with Calculator Agent template above]
+   [Use Task tool with Visualizer Agent template above]
+   [Use Task tool with Health Agent template above]
+   [Use Task tool with Reporter Agent template above]
+
+3. **Monitor Coordination:**
+   - All agents running in parallel
+   - Data flows through shared JSON files
+   - Final report aggregates all analysis
+
+4. **Present Results:**
+   - Display comprehensive status dashboard
+   - Show actionable recommendations
+```
+
+**Step 8: Multi-Agent Coordination for Complex Projects**
 
 **Agent Coordination Strategy:**
 ```

@@ -19,15 +19,86 @@ When you run `/milestone/update`, you are REQUIRED to:
 
 ## 🎯 USE MULTIPLE AGENTS FOR COMPREHENSIVE STATUS ANALYSIS
 
-**MANDATORY KIRO-AWARE AGENT SPAWNING:**
+**MANDATORY TASK TOOL AGENT SPAWNING:**
+
+### Kiro Dashboard Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Generate kiro dashboard</parameter>
+<parameter name="prompt">You are the Kiro Dashboard Agent for milestone monitoring.
+
+Your responsibilities:
+1. Read all active milestones from .milestones/active/
+2. Generate phase progression visualizations for each task
+3. Create ASCII-based kiro workflow diagrams
+4. Show phase completion bars (Design→Spec→Task→Execute)
+5. Output dashboard to .milestones/updates/kiro-dashboard.md
+
+Create clear visual representation of kiro phase progression.</parameter>
+</invoke>
+</function_calls>
 ```
-"I'll spawn kiro-native monitoring agents for phase-based status analysis:
-- Kiro Dashboard Agent: Generate phase progression visualizations
-- Phase Metrics Agent: Calculate kiro-weighted progress (15/25/20/40%)
-- Deliverable Monitor Agent: Track phase deliverable completion
-- Approval Workflow Agent: Monitor approval gates and waiting states
-- Phase Analytics Agent: Analyze phase-specific performance metrics
-- Kiro Reporting Agent: Generate phase-based stakeholder reports"
+
+### Phase Metrics Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Calculate kiro metrics</parameter>
+<parameter name="prompt">You are the Phase Metrics Agent for milestone monitoring.
+
+Your responsibilities:
+1. Calculate phase-weighted progress (Design:15%, Spec:25%, Task:20%, Execute:40%)
+2. Compute per-phase completion rates
+3. Analyze phase transition times
+4. Identify phase bottlenecks
+5. Generate metrics to .milestones/updates/phase-metrics.json
+
+Provide comprehensive kiro phase analytics.</parameter>
+</invoke>
+</function_calls>
+```
+
+### Deliverable Monitor Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Monitor deliverables</parameter>
+<parameter name="prompt">You are the Deliverable Monitor Agent for milestone monitoring.
+
+Your responsibilities:
+1. Track phase deliverables for all active tasks
+2. Verify deliverable completion and quality
+3. Identify missing or incomplete deliverables
+4. Flag deliverables blocking phase transitions
+5. Generate report to .milestones/updates/deliverables.json
+
+Monitor all phase deliverables and their status.</parameter>
+</invoke>
+</function_calls>
+```
+
+### Approval Workflow Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Track approvals</parameter>
+<parameter name="prompt">You are the Approval Workflow Agent for milestone monitoring.
+
+Your responsibilities:
+1. Identify all pending approvals across milestones
+2. Track approval wait times and SLAs
+3. Map approval dependencies and chains
+4. Alert on overdue approvals
+5. Generate approval status to .milestones/updates/approvals.json
+
+Ensure approval workflows are not blocking progress.</parameter>
+</invoke>
+</function_calls>
 ```
 
 ## 🚨 FORBIDDEN BEHAVIORS
@@ -337,7 +408,37 @@ interface ActionableInsight {
 }
 ```
 
-**Step 8: Multi-Agent Status Coordination**
+**Step 8: Implementation Pattern**
+
+**Complete Execution Flow:**
+
+```markdown
+When user runs `/milestone/update [options]`, follow this EXACT pattern:
+
+1. **Setup Infrastructure:**
+   - Create .milestones/updates/ directory
+   - Initialize shared state files
+
+2. **Spawn All 4 Agents Using Task Tool:**
+   
+   I'll now spawn 4 specialized agents for comprehensive monitoring:
+   
+   [Use Task tool with Kiro Dashboard Agent template above]
+   [Use Task tool with Phase Metrics Agent template above]
+   [Use Task tool with Deliverable Monitor Agent template above]
+   [Use Task tool with Approval Workflow Agent template above]
+
+3. **Monitor Coordination:**
+   - All agents running in parallel
+   - Kiro metrics calculated with proper weights
+   - Dashboard generated with phase visualizations
+
+4. **Present Results:**
+   - Display kiro phase progression dashboard
+   - Show approval bottlenecks and recommendations
+```
+
+**Step 9: Multi-Agent Status Coordination**
 
 **Agent Spawning Strategy for Comprehensive Analysis:**
 ```
