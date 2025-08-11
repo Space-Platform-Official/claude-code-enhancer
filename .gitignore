@@ -34,8 +34,17 @@ ehthumbs.db
 *.temp
 *.bak
 *.backup
+*.backup.*
+*.pre-rollback.*
+*_ENHANCED.md
+*.orig
 *.log
 *.pid
+*.save
+*.autosave
+*.rej
+*.patch
+*.diff
 
 # Environment Files
 .env

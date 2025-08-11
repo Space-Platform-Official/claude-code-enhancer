@@ -45,21 +45,97 @@ print_status "Post-commit cleanup and notifications..."
 cleanup_old_backups() {
     local backup_retention="${CLAUDE_MERGE_BACKUP_RETENTION:-24}"
     local cleaned_count=0
+    local cleaned_enhanced=0
+    local cleaned_editor=0
+    local cleaned_rollback=0
     
+    # Clean backups in .claude/backups directory
     if [[ -d ".claude/backups" ]]; then
-        # Find and clean old backup files
-        find ".claude/backups" -name "*.backup.*" -type f -mtime +1 2>/dev/null | while read -r backup_file; do
+        # Find and clean old backup files with various patterns
+        while IFS= read -r backup_file; do
             if [[ -f "$backup_file" ]]; then
-                local file_age_hours=$(( ($(date +%s) - $(stat -f %m "$backup_file" 2>/dev/null || echo 0)) / 3600 ))
+                # Calculate age more robustly for different systems
+                local file_age_hours=0
+                if command -v stat >/dev/null 2>&1; then
+                    # macOS and BSD stat
+                    local file_mtime=$(stat -f %m "$backup_file" 2>/dev/null || stat -c %Y "$backup_file" 2>/dev/null || echo 0)
+                    file_age_hours=$(( ($(date +%s) - file_mtime) / 3600 ))
+                fi
                 
-                if [[ $file_age_hours -gt $backup_retention ]]; then
+                # Enhanced packages get cleaned immediately
+                if [[ "$backup_file" == *"_ENHANCED.md" ]]; then
+                    rm -f "$backup_file"
+                    ((cleaned_enhanced++))
+                    ((cleaned_count++))
+                # Pre-rollback files with timestamp check
+                elif [[ "$backup_file" == *".pre-rollback."* ]]; then
+                    if [[ $file_age_hours -gt $backup_retention ]]; then
+                        rm -f "$backup_file"
+                        ((cleaned_rollback++))
+                        ((cleaned_count++))
+                    fi
+                # Editor backup files
+                elif [[ "$backup_file" =~ \.(orig|bak)$ ]] || [[ "$backup_file" == *"~" ]]; then
+                    if [[ $file_age_hours -gt $backup_retention ]]; then
+                        rm -f "$backup_file"
+                        ((cleaned_editor++))
+                        ((cleaned_count++))
+                    fi
+                # Standard backup files with timestamps
+                elif [[ $file_age_hours -gt $backup_retention ]]; then
                     rm -f "$backup_file"
                     ((cleaned_count++))
                 fi
             fi
-        done
+        done < <(find ".claude/backups" -type f \( \
+            -name "*.backup.*" -o \
+            -name "*.pre-rollback.*" -o \
+            -name "*_ENHANCED.md" -o \
+            -name "*.orig" -o \
+            -name "*.bak" -o \
+            -name "*~" \
+            \) 2>/dev/null)
+    fi
+    
+    # Also clean backup files in project root (outside .claude/backups)
+    # Be more careful here - only clean files that match strict backup patterns
+    while IFS= read -r backup_file; do
+        if [[ -f "$backup_file" ]]; then
+            local file_age_hours=0
+            if command -v stat >/dev/null 2>&1; then
+                local file_mtime=$(stat -f %m "$backup_file" 2>/dev/null || stat -c %Y "$backup_file" 2>/dev/null || echo 0)
+                file_age_hours=$(( ($(date +%s) - file_mtime) / 3600 ))
+            fi
+            
+            # Enhanced packages get cleaned immediately
+            if [[ "$backup_file" == *"_ENHANCED.md" ]]; then
+                rm -f "$backup_file"
+                ((cleaned_enhanced++))
+                ((cleaned_count++))
+            # Other backups respect retention period
+            elif [[ $file_age_hours -gt $backup_retention ]]; then
+                rm -f "$backup_file"
+                ((cleaned_count++))
+            fi
+        fi
+    done < <(find . -maxdepth 3 -type f \( \
+        -name "*.backup.[0-9]*" -o \
+        -name "*.pre-rollback.[0-9]*" -o \
+        -name "*_ENHANCED.md" \
+        \) -not -path "./.git/*" -not -path "./node_modules/*" -not -path "./.claude/backups/*" 2>/dev/null)
+    
+    # Report what was cleaned
+    if [[ $cleaned_count -gt 0 ]]; then
+        local details=""
+        [[ $cleaned_enhanced -gt 0 ]] && details="${details}$cleaned_enhanced enhanced packages, "
+        [[ $cleaned_rollback -gt 0 ]] && details="${details}$cleaned_rollback rollback backups, "
+        [[ $cleaned_editor -gt 0 ]] && details="${details}$cleaned_editor editor backups, "
         
-        if [[ $cleaned_count -gt 0 ]]; then
+        if [[ -n "$details" ]]; then
+            # Remove trailing comma and space
+            details="${details%, }"
+            print_status "Cleaned $cleaned_count backup files ($details)"
+        else
             print_status "Cleaned $cleaned_count old backup files"
         fi
     fi
