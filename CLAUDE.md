@@ -4,6 +4,44 @@ We're building production-quality code together. Your role is to create maintain
 
 When you seem stuck or overly complex, I'll redirect you - my guidance helps you stay on track.
 
+## 🚨 CRITICAL: Template Directory vs .claude Directory
+
+**MANDATORY UNDERSTANDING OF DIRECTORY STRUCTURE:**
+
+### templates/ Directory (FOR DISTRIBUTION)
+- **Purpose**: Contains templates that will be INSTALLED to target projects via `claude-merge` command
+- **Usage**: ALL shareable commands, hooks, and configurations go here
+- **Installation**: `claude-merge` copies these to target project's `.claude/` directory
+- **Examples**:
+  - `templates/commands/` → Distributed command templates
+  - `templates/hooks/` → Distributed hook templates
+  - `templates/shared/` → Distributed shared utilities
+
+### .claude/ Directory (LOCAL ONLY)
+- **Purpose**: Local project-specific Claude configuration (NOT for distribution)
+- **Usage**: Generated/installed files specific to THIS project only
+- **Installation**: Created by `claude-merge` from templates
+- **Examples**:
+  - `.claude/commands/` → Installed from templates
+  - `.claude/logs/` → Local execution logs
+  - `.claude/cache/` → Local cache data
+
+### 🔴 CRITICAL RULE:
+**When creating new Claude commands or utilities that should be available to other projects:**
+- ✅ **ALWAYS** create them in `templates/` directory
+- ❌ **NEVER** create them in `.claude/` directory
+- The `.claude/` directory is the OUTPUT of `claude-merge`, not the INPUT
+
+### Example Correct Flow:
+1. Create: `templates/commands/milestone/agent-spawning.md`
+2. Run: `claude-merge` in target project
+3. Result: Target gets `.claude/commands/milestone/agent-spawning.md`
+
+### Why This Matters:
+- Files in `.claude/` are NOT distributed to other projects
+- Only `templates/` content is shared via `claude-merge`
+- Creating in `.claude/` means the feature won't be available to users
+
 ## 🚨 MANDATORY COMPLEXITY TRIAGE SYSTEM
 
 **ZERO TOLERANCE FOR OVER-ENGINEERING! CATEGORIZE BEFORE SOLVING!**
@@ -441,6 +479,44 @@ Before creating ANY folder, you MUST:
 We're building production-quality code together. Your role is to create maintainable, efficient solutions while catching potential issues early.
 
 When you seem stuck or overly complex, I'll redirect you - my guidance helps you stay on track.
+
+## 🚨 CRITICAL: Template Directory vs .claude Directory
+
+**MANDATORY UNDERSTANDING OF DIRECTORY STRUCTURE:**
+
+### templates/ Directory (FOR DISTRIBUTION)
+- **Purpose**: Contains templates that will be INSTALLED to target projects via `claude-merge` command
+- **Usage**: ALL shareable commands, hooks, and configurations go here
+- **Installation**: `claude-merge` copies these to target project's `.claude/` directory
+- **Examples**:
+  - `templates/commands/` → Distributed command templates
+  - `templates/hooks/` → Distributed hook templates
+  - `templates/shared/` → Distributed shared utilities
+
+### .claude/ Directory (LOCAL ONLY)
+- **Purpose**: Local project-specific Claude configuration (NOT for distribution)
+- **Usage**: Generated/installed files specific to THIS project only
+- **Installation**: Created by `claude-merge` from templates
+- **Examples**:
+  - `.claude/commands/` → Installed from templates
+  - `.claude/logs/` → Local execution logs
+  - `.claude/cache/` → Local cache data
+
+### 🔴 CRITICAL RULE:
+**When creating new Claude commands or utilities that should be available to other projects:**
+- ✅ **ALWAYS** create them in `templates/` directory
+- ❌ **NEVER** create them in `.claude/` directory
+- The `.claude/` directory is the OUTPUT of `claude-merge`, not the INPUT
+
+### Example Correct Flow:
+1. Create: `templates/commands/milestone/agent-spawning.md`
+2. Run: `claude-merge` in target project
+3. Result: Target gets `.claude/commands/milestone/agent-spawning.md`
+
+### Why This Matters:
+- Files in `.claude/` are NOT distributed to other projects
+- Only `templates/` content is shared via `claude-merge`
+- Creating in `.claude/` means the feature won't be available to users
 
 ## 🚨 MANDATORY COMPLEXITY TRIAGE SYSTEM
 

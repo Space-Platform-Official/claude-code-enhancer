@@ -54,7 +54,7 @@ description: Personal project milestone template - Simple, focused, productive
 
 ---
 
-## 🎯 Milestone Configuration
+## 🎯 Milestone Configuration (Kiro-Native Foundation)
 
 ```yaml
 milestone:
@@ -63,6 +63,18 @@ milestone:
   type: "personal_project"
   duration: "7 days"
   complexity: "simple"
+  
+  # Kiro workflow (auto-managed for simplicity)
+  kiro_configuration:
+    enabled: true
+    mode: "auto_managed"  # Phases progress automatically
+    visibility: "hidden"  # Kiro details hidden for beginners
+    auto_approval: true   # No manual approvals needed
+    phase_weights:
+      design: 15    # Planning and setup (hidden as "Foundation")
+      spec: 25      # Requirements and structure (hidden as "Core Features")
+      task: 20      # Implementation tasks (hidden as "Polish")
+      execute: 40   # Execution and delivery (hidden as "Launch")
   
   # Simplified tracking - no enterprise features
   tracking:
@@ -76,20 +88,25 @@ milestone:
     buffer_percentage: 25
     auto_archive: true
     
+  # User-visible phases (kiro phases underneath)
   phases:
     - name: "Foundation"
+      kiro_phase: "design"
       duration: "2 days"
       tasks: ["setup", "config", "hello_world"]
       
     - name: "Core Features"
+      kiro_phase: "spec"
       duration: "3 days" 
       tasks: ["main_functionality", "data_handling", "user_interface"]
       
     - name: "Polish"
+      kiro_phase: "task"
       duration: "1 day"
       tasks: ["testing", "styling", "optimization"]
       
     - name: "Launch"
+      kiro_phase: "execute"
       duration: "1 day"
       tasks: ["deployment", "documentation", "sharing"]
 ```
@@ -308,25 +325,44 @@ This template automatically:
 │   └── celebration.md          # Success celebration when done
 ```
 
-**Command Integration:**
+**Command Integration (Kiro-Native):**
 ```bash
-# This template creates a milestone using simplified config
+# This template creates a kiro-native milestone with auto-management
 create_personal_milestone() {
     local project_description="$1"
     
-    # Create simplified milestone structure
+    # Source kiro-native components
+    source "templates/commands/milestone/_shared/kiro-native.md"
+    source "templates/commands/milestone/_shared/simple-config.md"
+    
+    # Initialize kiro with auto-management for personal projects
+    export KIRO_POLICY_MODE="mandatory"
+    export KIRO_AUTO_PROGRESS=true
+    export KIRO_SHOW_PHASES=false  # Hide kiro terminology
+    export KIRO_AUTO_APPROVAL=true
+    initialize_kiro_native
+    
+    # Create simplified milestone structure with kiro foundation
+    local milestone_id="personal-$(date +%Y%m%d-%H%M%S)"
     initialize_simple_milestone "personal" "$project_description"
     
     # Set personal project defaults
     configure_personal_settings
     
-    # Generate phase-based tasks
-    generate_personal_tasks "$project_description"
+    # Generate kiro-native tasks (auto-mapped to phases)
+    create_kiro_native_task "$milestone_id" "Set up project structure"
+    create_kiro_native_task "$milestone_id" "Implement core features"
+    create_kiro_native_task "$milestone_id" "Polish and test"
+    create_kiro_native_task "$milestone_id" "Deploy and document"
     
-    # Setup simple progress tracking
+    # Auto-assign tasks to kiro phases (hidden from user)
+    auto_distribute_tasks_to_phases "$milestone_id"
+    
+    # Setup simple progress tracking (kiro-powered underneath)
     enable_simple_tracking
     
     echo "✅ Personal milestone ready! Start with: /milestone/execute"
+    echo "📊 Progress tracked automatically through kiro workflow (hidden)"
 }
 ```
 

@@ -214,60 +214,120 @@ milestone_template:
       excluded: ["Future enhancement", "Nice-to-have feature"]
       assumptions: ["Dependency available", "Resource allocated"]
     
+    # KIRO WORKFLOW CONFIGURATION (MANDATORY)
+    kiro_configuration:
+      enabled: true
+      policy: "mandatory"  # All tasks must use kiro workflow
+      enforcement: "strict"  # No exceptions allowed
+      default_phases: ["design", "spec", "task", "execute"]
+      phase_weights:
+        design: 15
+        spec: 25
+        task: 20
+        execute: 40
+      approval_gates:
+        design_to_spec:
+          required: true
+          approvers: ["tech_lead", "architect"]
+          criteria: ["architecture_approved", "api_design_validated"]
+        spec_to_task:
+          required: true
+          approvers: ["tech_lead", "product_owner"]
+          criteria: ["specification_complete", "test_plan_approved"]
+        task_to_execute:
+          required: false
+          approvers: []
+        execute_completion:
+          required: false
+          approvers: []
+    
     timeline:
       estimated_duration: "${DURATION_WEEKS} weeks"
       critical_path_items: ["Blocking task 1", "Blocking task 2"]
       buffer_percentage: "${BUFFER_PERCENT}%"
+      phase_distribution:  # Time allocation per kiro phase
+        design_percentage: 15
+        spec_percentage: 25
+        task_percentage: 20
+        execute_percentage: 40
       
     dependencies:
       prerequisite_milestones: []
       external_dependencies: []
       shared_resources: []
+      phase_dependencies:  # Kiro phase-level dependencies
+        design_requires: ["requirements_complete", "stakeholder_alignment"]
+        spec_requires: ["design_approval", "technical_review"]
+        task_requires: ["spec_approval", "resource_allocation"]
+        execute_requires: ["task_breakdown", "environment_ready"]
 ```
 
-**Step 6: Multi-Agent Planning Execution**
+**Step 6: Multi-Agent Planning Execution with Kiro Integration**
 
-**Agent Spawning Strategy for Complex Projects:**
+**Agent Spawning Strategy for Kiro-Native Planning:**
 ```
-"I'll coordinate specialized planning agents for comprehensive analysis:
+"I'll coordinate specialized planning agents for kiro-integrated milestone planning:
 
-1. **Scope Analysis Agent**: 'Analyze project requirements and decompose into logical boundaries'
-2. **Timeline Estimation Agent**: 'Research historical data and estimate realistic durations'
-3. **Risk Assessment Agent**: 'Identify potential blockers and create mitigation strategies'
-4. **Dependency Mapping Agent**: 'Map technical, team, and business dependencies'
-5. **Template Generation Agent**: 'Create project-specific templates and configurations'
+1. **Scope Analysis Agent**: 'Analyze requirements and map to kiro phases (Design/Spec/Task/Execute)'
+2. **Timeline Estimation Agent**: 'Calculate phase durations using kiro weight distribution'
+3. **Risk Assessment Agent**: 'Identify phase-specific risks and approval bottlenecks'
+4. **Dependency Mapping Agent**: 'Map inter-phase dependencies and approval workflows'
+5. **Template Generation Agent**: 'Create kiro-native templates with phase deliverables'
+6. **Kiro Compliance Agent**: 'Ensure all tasks follow mandatory kiro workflow standard'
 
-Each agent will provide detailed analysis for strategic milestone planning."
+Each agent will ensure kiro workflow compliance from planning inception."
 ```
 
-**Planning Quality Checklist:**
-- [ ] Project scope fully analyzed and documented
-- [ ] Milestones provide standalone business value
-- [ ] Timeline estimates based on research and historical data
-- [ ] Dependencies mapped across technical, team, and business domains
-- [ ] Risk assessment completed with specific mitigation strategies
-- [ ] Milestone directory structure created with project-specific templates
-- [ ] Configuration files generated with appropriate project parameters
-- [ ] Planning documentation provides clear implementation roadmap
+**🚀 KIRO-NATIVE PLANNING ENFORCEMENT**
 
-**Milestone Planning Anti-Patterns:**
+```bash
+# Initialize kiro-native system during planning
+source "templates/commands/milestone/_shared/kiro-native.md"
+initialize_kiro_native
+
+# Enforce kiro compliance for all new milestones
+KIRO_POLICY_MODE="mandatory"
+KIRO_ENFORCEMENT_LEVEL="strict"
+```
+
+**Kiro-Enhanced Planning Quality Checklist:**
+- [ ] Project scope analyzed and mapped to kiro phases
+- [ ] All tasks created with mandatory kiro workflow structure
+- [ ] Phase-specific deliverables defined for each task
+- [ ] Approval gates configured for Design→Spec and Spec→Task transitions
+- [ ] Timeline estimates distributed across kiro phases (15% Design, 25% Spec, 20% Task, 40% Execute)
+- [ ] Dependencies mapped at phase level, not just task level
+- [ ] Risk assessment includes phase-specific risks and approval delays
+- [ ] Deliverable templates generated for each kiro phase
+- [ ] Visualization dashboard configured for kiro workflow tracking
+- [ ] Compliance validation ensures 100% kiro adoption
+
+**Kiro-Aware Planning Anti-Patterns:**
+- ❌ Creating tasks without kiro workflow structure
+- ❌ Skipping phase-specific deliverable definition
+- ❌ Ignoring approval gate configuration
+- ❌ Using flat task lists instead of phased workflows
+- ❌ Estimating at task level instead of phase level
 - ❌ Creating implementation tasks during planning phase
-- ❌ Estimating timelines without historical research
-- ❌ Ignoring external dependencies and constraints
-- ❌ Using generic templates without project customization
-- ❌ Skipping risk assessment for "simple" projects
+- ❌ Estimating timelines without kiro phase distribution
+- ❌ Ignoring phase-level dependencies and constraints
+- ❌ Using generic templates without kiro phase customization
+- ❌ Skipping phase-specific risk assessment
 - ❌ Planning milestones longer than 4 weeks (too complex)
-- ❌ Creating milestones without clear business value
+- ❌ Creating milestones without clear phase-based value delivery
 
-**Final Planning Verification:**
+**Kiro-Native Planning Verification:**
 Before completing milestone planning:
-- Have I analyzed the complete project scope?
-- Are milestone boundaries logical and valuable?
-- Are timeline estimates research-based and realistic?
-- Have I mapped all critical dependencies?
-- Are risk assessments comprehensive with mitigation plans?
-- Is the directory structure project-appropriate?
-- Do templates match project requirements?
+- Have I enabled mandatory kiro workflow for all tasks?
+- Are all tasks structured with 4-phase kiro workflow?
+- Have I defined phase-specific deliverables for each task?
+- Are approval gates configured for critical phase transitions?
+- Are timeline estimates distributed across kiro phases (15/25/20/40)?
+- Have I mapped dependencies at both task and phase levels?
+- Are phase-specific risks identified with mitigation strategies?
+- Is the kiro visualization dashboard configured?
+- Do templates include phase-specific deliverable generation?
+- Have I validated 100% kiro compliance across the milestone?
 
 **Final Commitment:**
 - **I will**: Execute comprehensive scope analysis before decomposition

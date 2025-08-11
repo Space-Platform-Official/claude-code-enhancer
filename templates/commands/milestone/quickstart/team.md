@@ -58,7 +58,7 @@ description: Team collaboration milestone template - Simple coordination without
 
 ---
 
-## 🎯 Milestone Configuration
+## 🎯 Milestone Configuration (Kiro-Native Foundation)
 
 ```yaml
 milestone:
@@ -67,6 +67,18 @@ milestone:
   type: "team_collaboration"
   duration: "14 days"
   complexity: "simple_team"
+  
+  # Kiro workflow (visible phases for team coordination)
+  kiro_configuration:
+    enabled: true
+    mode: "semi_visible"  # Show phase names for team clarity
+    visibility: "progressive"  # Reveal more as team advances
+    auto_approval: false  # Light approval gates for coordination
+    phase_weights:
+      design: 15    # Planning and alignment (shown as "Team Alignment")
+      spec: 25      # Requirements and setup (shown as "Core Setup")
+      task: 20      # Feature implementation (shown as "Feature Development")
+      execute: 40   # Integration and delivery (shown as "Integration & Launch")
   
   # Team coordination settings
   team:
@@ -82,20 +94,25 @@ milestone:
     daily_standups: false  # Optional, not required
     progress_display: "team_friendly"
     
+  # Sprints mapped to kiro phases
   sprints:
     - name: "Team Alignment"
+      kiro_phase: "design"
       duration: "2 days"
       coordination: "high"
       
     - name: "Core Setup"  
+      kiro_phase: "spec"
       duration: "3 days"
       coordination: "medium"
       
     - name: "Feature Development"
+      kiro_phase: "task"
       duration: "4 days"
       coordination: "low"
       
     - name: "Integration & Launch"
+      kiro_phase: "execute"
       duration: "5 days"
       coordination: "high"
 ```
@@ -387,20 +404,53 @@ This template automatically:
 │   └── celebration.md          # Team success celebration
 ```
 
-**Team Access:**
+**Team Access (Kiro-Native):**
 ```bash
-# Each team member accesses the same milestone
+# Each team member accesses the same kiro-native milestone
 get_team_milestone() {
     local milestone_id="$1"
+    
+    # Source kiro-native components
+    source "templates/commands/milestone/_shared/kiro-native.md"
+    source "templates/commands/milestone/_shared/kiro-visualizer.md"
+    
+    # Initialize kiro with team-visible phases
+    export KIRO_POLICY_MODE="mandatory"
+    export KIRO_AUTO_PROGRESS=false  # Manual progression for coordination
+    export KIRO_SHOW_PHASES=true     # Show phase names to team
+    export KIRO_SHOW_DELIVERABLES=false  # Hide deliverables initially
+    initialize_kiro_native
     
     # Load shared milestone state
     load_team_milestone_state "$milestone_id"
     
-    # Show personalized view for this team member
-    display_team_member_view "$USER"
+    # Show personalized kiro-aware view for this team member
+    display_team_member_kiro_view "$USER" "$milestone_id"
     
-    # Enable team coordination features
+    # Enable team coordination features with kiro tracking
     enable_team_features
+    track_kiro_phase_progression "$milestone_id"
+}
+
+# Create team milestone with kiro workflow
+create_team_milestone() {
+    local project_description="$1"
+    local milestone_id="team-$(date +%Y%m%d-%H%M%S)"
+    
+    # Initialize kiro-native for team
+    initialize_team_kiro
+    
+    # Create kiro tasks with team assignments
+    create_kiro_native_task "$milestone_id" "Project planning and alignment"
+    create_kiro_native_task "$milestone_id" "Core infrastructure setup"
+    create_kiro_native_task "$milestone_id" "Feature development"
+    create_kiro_native_task "$milestone_id" "Integration and launch"
+    
+    # Distribute tasks across team members
+    distribute_team_tasks "$milestone_id"
+    
+    echo "✅ Team milestone ready with kiro workflow!"
+    echo "📊 Phases visible for team coordination"
 }
 ```
 

@@ -3,31 +3,31 @@ allowed-tools: all
 description: Real-time milestone status monitoring with dashboard generation, progress analytics, and cross-milestone reporting
 ---
 
-# 📊📊📊 CRITICAL REQUIREMENT: MILESTONE STATUS AND MONITORING MODE ENGAGED 📊📊📊
+# 📊📊📊 CRITICAL REQUIREMENT: KIRO-NATIVE MONITORING MODE ENGAGED 📊📊📊
 
-**THIS IS NOT A PLANNING OR EXECUTION TASK - THIS IS COMPREHENSIVE STATUS MONITORING AND DASHBOARD GENERATION!**
+**THIS IS KIRO WORKFLOW MONITORING - ALL STATUS TRACKED THROUGH 4-PHASE METHODOLOGY!**
 
 When you run `/milestone/update`, you are REQUIRED to:
 
-1. **MONITOR** - Generate real-time progress dashboards across all active milestones
-2. **AGGREGATE** - Collect and synthesize status data from multiple milestone sources
-3. **ANALYZE** - Calculate performance metrics, bottlenecks, and trend analysis
-4. **SYNC** - Update session context and resolve state conflicts across milestones
-5. **DETECT** - Identify cross-milestone dependencies and potential blockers
-6. **REPORT** - Generate stakeholder-ready status reports with actionable insights
-7. **RECOMMEND** - Provide data-driven recommendations for optimization
+1. **MONITOR KIRO PHASES** - Track phase progression for all tasks (Design→Spec→Task→Execute)
+2. **AGGREGATE KIRO METRICS** - Calculate phase-weighted progress (15/25/20/40%)
+3. **ANALYZE DELIVERABLES** - Monitor phase deliverable completion status
+4. **TRACK APPROVALS** - Identify approval gates and waiting states
+5. **VISUALIZE KIRO** - Generate phase-based dashboards and visualizations
+6. **DETECT PHASE BLOCKERS** - Identify phase-specific bottlenecks
+7. **RECOMMEND PHASE ACTIONS** - Provide phase-specific recommendations
 
 ## 🎯 USE MULTIPLE AGENTS FOR COMPREHENSIVE STATUS ANALYSIS
 
-**MANDATORY AGENT SPAWNING FOR STATUS MONITORING:**
+**MANDATORY KIRO-AWARE AGENT SPAWNING:**
 ```
-"I'll spawn multiple monitoring agents to analyze milestone status comprehensively:
-- Dashboard Generation Agent: Create real-time visual progress dashboards
-- Metrics Analysis Agent: Calculate performance indicators and efficiency ratios
-- Cross-Milestone Agent: Analyze dependencies and coordination across milestones
-- Session Context Agent: Update context state and resolve synchronization conflicts
-- Conflict Detection Agent: Identify blockers, risks, and resolution paths
-- Reporting Agent: Generate stakeholder reports with actionable insights"
+"I'll spawn kiro-native monitoring agents for phase-based status analysis:
+- Kiro Dashboard Agent: Generate phase progression visualizations
+- Phase Metrics Agent: Calculate kiro-weighted progress (15/25/20/40%)
+- Deliverable Monitor Agent: Track phase deliverable completion
+- Approval Workflow Agent: Monitor approval gates and waiting states
+- Phase Analytics Agent: Analyze phase-specific performance metrics
+- Kiro Reporting Agent: Generate phase-based stakeholder reports"
 ```
 
 ## 🚨 FORBIDDEN BEHAVIORS
@@ -99,27 +99,55 @@ Generate comprehensive visual dashboards covering:
 - **Performance Trends**: Historical analytics and efficiency tracking
 - **Risk Assessment**: Potential issues and mitigation status
 
-**Dashboard Components:**
+**Kiro Dashboard Components:**
+```bash
+# Generate kiro-native monitoring dashboard
+generate_kiro_monitoring_dashboard() {
+    local milestone_id=$1
+    
+    # Source kiro components
+    source "templates/commands/milestone/_shared/kiro-native.md"
+    source "templates/commands/milestone/_shared/kiro-visualizer.md"
+    
+    echo "KIRO WORKFLOW MONITORING DASHBOARD"
+    echo "==================================="
+    echo ""
+    
+    # Calculate kiro-weighted overall progress
+    local overall_progress=$(calculate_kiro_milestone_progress "$milestone_id")
+    echo "Overall Kiro Progress: $overall_progress% (Phase-Weighted)"
+    echo ""
+    
+    # Show phase distribution across all tasks
+    echo "PHASE DISTRIBUTION:"
+    local design_count=$(count_tasks_in_phase "$milestone_id" "design")
+    local spec_count=$(count_tasks_in_phase "$milestone_id" "spec") 
+    local task_count=$(count_tasks_in_phase "$milestone_id" "task")
+    local execute_count=$(count_tasks_in_phase "$milestone_id" "execute")
+    
+    echo "├── 📐 Design:  $design_count tasks (15% weight)"
+    echo "├── 📋 Spec:    $spec_count tasks (25% weight)"
+    echo "├── 📝 Task:    $task_count tasks (20% weight)"
+    echo "└── 🚀 Execute: $execute_count tasks (40% weight)"
+
+    echo ""
+    echo "APPROVAL QUEUE STATUS:"
+    local waiting_approvals=$(count_waiting_approvals "$milestone_id")
+    if [ "$waiting_approvals" -gt 0 ]; then
+        echo "🔐 $waiting_approvals phases awaiting approval:"
+        show_approval_queue "$milestone_id"
+    else
+        echo "✅ No pending approvals"
+    fi
+
+    echo ""
+    echo "KIRO PERFORMANCE METRICS:"
+    echo "- Phase Completion Rate: $(calculate_phase_completion_rate "$milestone_id")%"
+    echo "- Average Phase Duration: $(calculate_avg_phase_duration "$milestone_id")"
+    echo "- Deliverable Completion: $(calculate_deliverable_completion "$milestone_id")%"
+    echo "- Approval Wait Time: $(calculate_avg_approval_wait "$milestone_id")"
+}
 ```
-MILESTONE STATUS DASHBOARD
-==========================
-
-Overall Progress: [████████░░] 78% (12 of 15 milestones completed)
-Current Sprint: M-013 "Integration Testing" (Progress: 45%, Due: 2024-07-20)
-
-ACTIVE MILESTONES:
-├── M-013: Integration Testing    [████░░░░░] 45% (On track, 3 days remaining)
-├── M-014: Performance Optimization [██░░░░░░░] 25% (At risk, dependency delay)
-└── M-015: Deployment Preparation   [░░░░░░░░░]  0% (Pending M-014 completion)
-
-CRITICAL PATH STATUS:
-✅ Auth (M-001) → ✅ Database (M-002) → ✅ API (M-003) → 🟡 Testing (M-013) → ⏳ Deploy (M-015)
-
-PERFORMANCE METRICS:
-- Average milestone duration: 12.3 days (Target: 14 days) ✅
-- Completion rate: 96.2% on-time delivery ✅  
-- Efficiency ratio: 1.08 (8% over estimated effort) ⚠️
-- Blocker resolution time: 2.1 days average ✅
 
 RISK ALERTS:
 🔴 HIGH: M-014 dependency on external API changes (Impact: 2 milestones)
@@ -134,13 +162,13 @@ RECOMMENDATIONS:
 
 **Step 2: Performance Metrics and Analytics Implementation**
 
-**Key Performance Indicators (KPIs):**
-- **Completion Rate**: Percentage of milestones delivered on time
-- **Efficiency Ratio**: Actual vs estimated effort across milestones
-- **Velocity Trending**: Milestone completion rate over time periods
-- **Blocker Impact**: Average resolution time and cascade effects
-- **Resource Utilization**: Team capacity and allocation efficiency
-- **Quality Metrics**: Defect rates and rework requirements
+**Kiro-Native KPIs:**
+- **Phase Completion Rate**: Percentage of phases completed on schedule
+- **Phase Efficiency**: Actual vs estimated hours per phase (15/25/20/40%)
+- **Deliverable Quality**: Percentage of deliverables passing validation
+- **Approval Velocity**: Average time from request to approval
+- **Phase Transition Rate**: Smooth transitions between phases
+- **Kiro Compliance Score**: Percentage of tasks following kiro workflow
 
 **Metrics Calculation Functions:**
 ```typescript

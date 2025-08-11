@@ -392,7 +392,7 @@ format_phase_status() {
     
     if [ "$color_enabled" = "true" ]; then
         case "$status" in
-            "completed") echo "\033[32m✅ $phase_name\033[0m" ;;
+            "completed"|"approved") echo "\033[32m✅ $phase_name\033[0m" ;;
             "in_progress") echo "\033[33m🔄 $phase_name\033[0m" ;;
             "waiting_approval") echo "\033[35m⏳ $phase_name\033[0m" ;;
             "blocked") echo "\033[31m🚫 $phase_name\033[0m" ;;
@@ -401,6 +401,82 @@ format_phase_status() {
     else
         echo "$phase_name:$status"
     fi
+}
+
+# Enhanced kiro visualization for progressive UI
+display_kiro_phase_progress() {
+    local task_id=$1
+    local milestone_data=$2
+    local ui_level=$3
+    
+    local task_title=$(echo "$milestone_data" | yq e ".tasks[] | select(.id == \"$task_id\") | .title" -)
+    local current_phase=$(echo "$milestone_data" | yq e ".tasks[] | select(.id == \"$task_id\") | .kiro_workflow.current_phase" -)
+    
+    if [ "$ui_level" = "dashboard" ]; then
+        # Rich dashboard visualization
+        echo "╔══════════════════════════════════════════════════════════════╗"
+        echo "║ Task: $task_title"
+        echo "║ Current Phase: $current_phase"
+        echo "╠══════════════════════════════════════════════════════════════╣"
+        
+        for phase in design spec task execute; do
+            local phase_status=$(echo "$milestone_data" | yq e ".tasks[] | select(.id == \"$task_id\") | .kiro_workflow.phases.$phase.status" -)
+            local phase_hours=$(echo "$milestone_data" | yq e ".tasks[] | select(.id == \"$task_id\") | .kiro_workflow.phase_hours.$phase" -)
+            local deliverables=$(echo "$milestone_data" | yq e ".tasks[] | select(.id == \"$task_id\") | .kiro_workflow.phases.$phase.deliverables[]" - 2>/dev/null | wc -l)
+            
+            local phase_icon=""
+            case "$phase" in
+                "design") phase_icon="📐" ;;
+                "spec") phase_icon="📋" ;;
+                "task") phase_icon="📝" ;;
+                "execute") phase_icon="🚀" ;;
+            esac
+            
+            local status_icon=""
+            case "$phase_status" in
+                "completed"|"approved") status_icon="✅" ;;
+                "in_progress") status_icon="🔄" ;;
+                "waiting_approval") status_icon="⏳" ;;
+                "blocked") status_icon="🚫" ;;
+                *) status_icon="⏸️" ;;
+            esac
+            
+            echo "║ $phase_icon $(printf "%-8s" "$phase" | tr '[:lower:]' '[:upper:]') $status_icon │ ${phase_hours}h │ $deliverables deliverables"
+            
+            # Show approval status if waiting
+            if [ "$phase_status" = "waiting_approval" ]; then
+                echo "║   └─ 🔐 Awaiting approval to proceed"
+            fi
+        done
+        
+        echo "╚══════════════════════════════════════════════════════════════╝"
+    elif [ "$ui_level" = "rich" ]; then
+        # Compact rich visualization
+        echo "📌 $task_title"
+        echo -n "   "
+        for phase in design spec task execute; do
+            local phase_status=$(echo "$milestone_data" | yq e ".tasks[] | select(.id == \"$task_id\") | .kiro_workflow.phases.$phase.status" -)
+            echo -n "$(format_phase_status "$phase" "$phase_status" "true") "
+            if [ "$phase" != "execute" ]; then
+                echo -n "→ "
+            fi
+        done
+        echo ""
+    else
+        # Simple visualization
+        echo "$task_title: $(format_kiro_simple_status "$task_id" "$milestone_data")"
+    fi
+}
+
+# Format simple kiro status
+format_kiro_simple_status() {
+    local task_id=$1
+    local milestone_data=$2
+    
+    local current_phase=$(echo "$milestone_data" | yq e ".tasks[] | select(.id == \"$task_id\") | .kiro_workflow.current_phase" -)
+    local phase_status=$(echo "$milestone_data" | yq e ".tasks[] | select(.id == \"$task_id\") | .kiro_workflow.phases.$current_phase.status" -)
+    
+    echo "$current_phase:$phase_status"
 }
 ```
 

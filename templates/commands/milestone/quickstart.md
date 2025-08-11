@@ -202,12 +202,13 @@ Your choice: _
 
 ### Template Architecture
 
-**Core Principle: Hide Complexity, Show Value**
+**Core Principle: Hide Complexity, Show Value (with Kiro-Native Foundation)**
 
 Each quick-start template:
-- ✅ **Hides** advanced features initially
+- ✅ **Uses kiro workflow internally** (mandatory 4-phase structure)
+- ✅ **Auto-manages phases** for simplicity
 - ✅ **Shows** immediate value and clear progress
-- ✅ **Provides** upgrade path when ready
+- ✅ **Provides** progressive kiro revelation as users advance
 - ✅ **Maintains** full system compatibility
 
 ### Progressive Disclosure Strategy
@@ -216,24 +217,32 @@ Each quick-start template:
 complexity_levels:
   level_0_quickstart:
     features: [basic_tasks, simple_progress, clear_outcomes]
-    hidden: [kiro_workflow, dependencies, risk_assessment, hybrid_storage]
+    kiro_mode: "auto_managed"  # Kiro active but auto-progressed
+    hidden: [kiro_details, approval_gates, deliverables, dependencies]
+    display: "simple_progress_bar"
     
   level_1_enhanced:
-    features: [kiro_workflow, team_coordination]
-    hidden: [advanced_dependencies, enterprise_features]
+    features: [phase_names, basic_deliverables]
+    kiro_mode: "semi_visible"  # Show phase names
+    hidden: [approval_workflow, advanced_dependencies]
+    display: "phase_progress"
     
   level_2_full:
     features: [all_milestone_features]
+    kiro_mode: "fully_visible"  # Complete kiro visualization
     hidden: []
+    display: "kiro_dashboard"
 ```
 
-### Auto-Configuration
+### Auto-Configuration with Kiro-Native
 
 Each template automatically:
-- ✅ **Sets smart defaults** (no configuration needed)
-- ✅ **Creates appropriate structure** for project type
-- ✅ **Configures simple tracking** (file-based, no database)
-- ✅ **Provides clear next steps** after each task
+- ✅ **Creates kiro workflow structure** (4 phases mandatory)
+- ✅ **Auto-progresses phases** (no manual transitions)
+- ✅ **Sets smart kiro defaults** (auto-approval for quickstart)
+- ✅ **Generates simple deliverables** (template-specific)
+- ✅ **Configures progressive revelation** (kiro details unlock over time)
+- ✅ **Provides clear next steps** after each phase
 
 ### Upgrade Integration
 
@@ -244,6 +253,67 @@ Templates seamlessly upgrade to full system:
 - ✅ **Gradual complexity introduction**
 
 ---
+
+## 🚨 Quick-Start Command Implementation with Kiro-Native
+
+### Kiro Integration for Quickstart
+
+```bash
+# Initialize kiro-native for quickstart templates
+initialize_quickstart_kiro() {
+    local template_type=$1
+    local milestone_id=$2
+    
+    # Source kiro-native components
+    source "templates/commands/milestone/_shared/kiro-native.md"
+    
+    # Set quickstart-specific kiro configuration
+    export KIRO_POLICY_MODE="mandatory"
+    export KIRO_ENFORCEMENT_LEVEL="flexible"  # Allow auto-progression
+    export KIRO_VISUALIZATION_MODE="progressive"  # Start simple, reveal gradually
+    
+    # Configure auto-approval for quickstart
+    export KIRO_DESIGN_APPROVAL=false
+    export KIRO_SPEC_APPROVAL=false
+    export KIRO_TASK_APPROVAL=false
+    export KIRO_EXECUTE_APPROVAL=false
+    
+    # Initialize kiro system
+    initialize_kiro_native
+    
+    # Apply quickstart simplifications
+    configure_quickstart_kiro_mode "$template_type"
+}
+
+# Configure kiro mode based on template
+configure_quickstart_kiro_mode() {
+    local template_type=$1
+    
+    case "$template_type" in
+        "personal")
+            # Solo projects: fully automated phases
+            export KIRO_AUTO_PROGRESS=true
+            export KIRO_SHOW_PHASES=false
+            ;;
+        "team")
+            # Team projects: show phase names
+            export KIRO_AUTO_PROGRESS=true
+            export KIRO_SHOW_PHASES=true
+            ;;
+        "api"|"frontend")
+            # Technical projects: show deliverables
+            export KIRO_AUTO_PROGRESS=false
+            export KIRO_SHOW_PHASES=true
+            export KIRO_SHOW_DELIVERABLES=true
+            ;;
+        "bugfix")
+            # Quick fixes: compressed phases
+            export KIRO_AUTO_PROGRESS=true
+            export KIRO_COMPRESSED_PHASES=true
+            ;;
+    esac
+}
+```
 
 ## 🚨 Quick-Start Command Implementation
 
