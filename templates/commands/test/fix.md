@@ -27,16 +27,103 @@ When you run `/test fix`, you are REQUIRED to:
 ## 🎯 USE MULTIPLE AGENTS
 
 **MANDATORY AGENT SPAWNING FOR TEST DEBUGGING:**
-```
-"I'll spawn multiple agents to handle test debugging comprehensively:
-- Failure Analysis Agent: Analyze test failures and categorize issues
-- Root Cause Agent: Perform deep debugging to identify underlying problems
-- Environment Agent: Check test environment and configuration issues
-- Dependency Agent: Investigate external dependencies and mocking issues
-- Fix Implementation Agent: Implement fixes for identified root causes
-- Regression Testing Agent: Verify fixes don't introduce new issues
-- Prevention Agent: Improve test design to prevent similar failures"
-```
+
+I'll spawn 5 specialized agents using Task tool for comprehensive test fixing:
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">test-fixer</parameter>
+<parameter name="description">Analyze test failures and categorize issues</parameter>
+<parameter name="prompt">You are the Failure Analysis Agent for comprehensive test debugging.
+
+Your responsibilities:
+1. Collect all failing test information and error details
+2. Categorize failures by type (assertion, timeout, mock, async, environment, flaky)
+3. Analyze error patterns and stack traces
+4. Prioritize failures by severity and impact
+5. Group related failures together
+6. Generate comprehensive failure analysis report
+7. Coordinate with other test fix agents
+
+Analyze all failing tests systematically and provide detailed categorization for targeted fixes.</parameter>
+</invoke>
+</function_calls>
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">test-fixer</parameter>
+<parameter name="description">Implement fixes for identified root causes</parameter>
+<parameter name="prompt">You are the Fix Implementation Agent for comprehensive test debugging.
+
+Your responsibilities:
+1. Receive failure analysis from Failure Analysis Agent
+2. Perform deep root cause analysis for each failure category
+3. Implement systematic fixes addressing root causes (not symptoms)
+4. Handle assertion errors, timeout issues, mock problems, and async errors
+5. Apply fixes incrementally with proper rollback capability
+6. Document all changes made during fix implementation
+7. Coordinate with validation agents for fix verification
+
+Implement comprehensive fixes that address root causes and improve test reliability.</parameter>
+</invoke>
+</function_calls>
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">test-fixer</parameter>
+<parameter name="description">Verify fixes work correctly</parameter>
+<parameter name="prompt">You are the Validation Agent for comprehensive test debugging.
+
+Your responsibilities:
+1. Receive fix implementations from Fix Implementation Agent
+2. Execute fixed tests multiple times to verify stability
+3. Check that all previously failing tests now pass consistently
+4. Measure performance improvements and execution times
+5. Validate fix effectiveness without introducing new issues
+6. Generate validation reports with test execution results
+7. Coordinate with regression prevention agent
+
+Verify all fixes work correctly and provide stable, reliable test results.</parameter>
+</invoke>
+</function_calls>
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">test-fixer</parameter>
+<parameter name="description">Ensure fixes don't introduce regressions</parameter>
+<parameter name="prompt">You are the Regression Prevention Agent for comprehensive test debugging.
+
+Your responsibilities:
+1. Identify all tests related to the fixed functionality
+2. Execute comprehensive regression test suites
+3. Monitor for new test failures introduced by fixes
+4. Check integration points and dependency impacts
+5. Verify that existing passing tests remain stable
+6. Generate regression analysis reports
+7. Coordinate rollback if regressions are detected
+
+Ensure all fixes maintain system stability and don't introduce new failures.</parameter>
+</invoke>
+</function_calls>
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">test-fixer</parameter>
+<parameter name="description">Improve test design and prevent future failures</parameter>
+<parameter name="prompt">You are the Prevention Enhancement Agent for comprehensive test debugging.
+
+Your responsibilities:
+1. Analyze patterns in fixed failures to identify prevention opportunities
+2. Implement test reliability improvements (determinism, isolation, timing)
+3. Create linting rules and templates to prevent similar issues
+4. Add monitoring and alerting for test quality metrics
+5. Update documentation with lessons learned and best practices
+6. Establish failure prevention measures and quality gates
+7. Generate final comprehensive test debugging report
+
+Implement prevention measures to avoid similar test failures in the future.</parameter>
+</invoke>
+</function_calls>
 
 ## 🚨 FORBIDDEN BEHAVIORS
 
@@ -308,20 +395,19 @@ class TestFailureAnalyzer {
 **Step 2: Parallel Agent Deployment for Test Debugging**
 
 **Agent Spawning Strategy:**
-```
-"I've identified 23 failing tests across 6 different categories. I'll spawn specialized agents:
 
-1. **Assertion Error Agent**: 'Debug 8 tests with assertion failures and logic errors'
-2. **Timeout Issue Agent**: 'Fix 5 tests with timeout and timing issues'
-3. **Mock Error Agent**: 'Resolve 4 tests with mocking and stubbing problems'
-4. **Async Error Agent**: 'Fix 3 tests with async/await and promise issues'
-5. **Environment Agent**: 'Address 2 tests with environment and configuration issues'
-6. **Flaky Test Agent**: 'Stabilize 1 flaky test with inconsistent results'
-7. **Root Cause Agent**: 'Perform deep analysis on high-priority failures'
-8. **Regression Agent**: 'Verify fixes don't introduce new issues'
+After identifying failing tests, I deploy specialized agents through Task tool for targeted fixes:
 
-Each agent will work on their category while coordinating to avoid conflicts and share insights."
-```
+**Example Agent Deployment:**
+"I've identified 23 failing tests across 6 different categories. I'll spawn specialized agents using Task tool invocations above:
+
+1. **Failure Analysis Agent**: Categorizes all 23 failures into assertion errors (8), timeout issues (5), mock errors (4), async errors (3), environment issues (2), and flaky tests (1)
+2. **Fix Implementation Agent**: Implements targeted fixes for each failure category using systematic root cause analysis
+3. **Validation Agent**: Verifies each fix through multiple test runs to ensure stability and effectiveness
+4. **Regression Prevention Agent**: Runs comprehensive regression suites to prevent new failures
+5. **Prevention Enhancement Agent**: Analyzes patterns and implements prevention measures
+
+Each agent operates in parallel while coordinating through shared analysis reports and fix validation."
 
 **Step 3: Systematic Test Debugging Implementation**
 
@@ -1163,21 +1249,24 @@ describe('{{MODULE_NAME}}', () => {
 - [ ] Knowledge is documented for future reference
 
 **Agent Coordination for Test Debugging:**
-```
-"For comprehensive test debugging, I'll coordinate multiple specialized agents:
 
-Primary Debug Agent: Overall debugging coordination and management
-├── Failure Analysis Agent: Categorize and prioritize failing tests
-├── Root Cause Agent: Perform deep debugging and analysis
-├── Assertion Agent: Debug assertion errors and logic issues
-├── Timeout Agent: Fix timeout and timing-related issues
-├── Mock Agent: Resolve mocking and stubbing problems
-├── Async Agent: Fix async/await and promise issues
-├── Flaky Test Agent: Stabilize flaky and unreliable tests
-└── Prevention Agent: Implement measures to prevent future failures
+For comprehensive test debugging, I coordinate multiple specialized agents through Task tool:
 
-Each agent will focus on their expertise while coordinating to ensure comprehensive debugging coverage."
-```
+**Agent Coordination Flow:**
+1. **Failure Analysis Agent** → Provides categorized failure analysis to all other agents
+2. **Fix Implementation Agent** → Receives analysis, implements fixes, reports to validation
+3. **Validation Agent** → Receives fixes, validates effectiveness, reports to regression prevention
+4. **Regression Prevention Agent** → Receives validation results, runs regression tests, reports to prevention
+5. **Prevention Enhancement Agent** → Receives all reports, implements prevention measures, generates final report
+
+**Parallel Processing Architecture:**
+- All agents operate simultaneously using Task tool parallelism
+- Shared analysis files enable coordination without blocking
+- Each agent focuses on their specialized domain
+- Real-time progress reporting ensures comprehensive coverage
+- Automatic rollback capabilities if any agent detects issues
+
+This Task tool-based approach provides true parallelism and systematic test debugging coverage.
 
 **Anti-Patterns to Avoid:**
 - ❌ Commenting out failing tests (avoiding the problem)

@@ -27,6 +27,26 @@ When you run `/test coverage`, you are REQUIRED to:
 
 **MANDATORY TASK TOOL AGENT SPAWNING:**
 
+### Coverage Discovery Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">test-fixer</parameter>
+<parameter name="description">Discover coverage setup</parameter>
+<parameter name="prompt">You are the Coverage Discovery Agent.
+
+Your responsibilities:
+1. Scan project for test frameworks and coverage tools
+2. Identify existing test files and coverage configuration
+3. Set up coverage tooling if missing
+4. Configure coverage thresholds and targets
+5. Generate discovery report to .coverage/discovery.json
+
+Provide comprehensive coverage setup and discovery.</parameter>
+</invoke>
+</function_calls>
+```
+
 ### Coverage Analysis Agent:
 ```markdown
 <function_calls>
@@ -47,22 +67,42 @@ Provide comprehensive coverage gap analysis.</parameter>
 </function_calls>
 ```
 
-### Test Implementation Agent:
+### Gap Identification Agent:
 ```markdown
 <function_calls>
 <invoke name="Task">
 <parameter name="subagent_type">test-fixer</parameter>
-<parameter name="description">Implement tests</parameter>
-<parameter name="prompt">You are the Test Implementation Agent.
+<parameter name="description">Identify gaps</parameter>
+<parameter name="prompt">You are the Gap Identification Agent.
 
 Your responsibilities:
-1. Read coverage gaps from .coverage/gaps.json
-2. Implement missing unit tests for uncovered functions
-3. Create integration tests for system interactions
+1. Read coverage data from .coverage/gaps.json
+2. Identify critical business logic without tests
+3. Find missing edge cases and error paths
+4. Prioritize gaps by impact and complexity
+5. Generate prioritized gap list to .coverage/priority-gaps.json
+
+Provide systematic gap identification and prioritization.</parameter>
+</invoke>
+</function_calls>
+```
+
+### Test Creation Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">test-fixer</parameter>
+<parameter name="description">Create tests</parameter>
+<parameter name="prompt">You are the Test Creation Agent.
+
+Your responsibilities:
+1. Read prioritized gaps from .coverage/priority-gaps.json
+2. Create missing unit tests for uncovered functions
+3. Implement integration tests for system interactions
 4. Add edge case tests for boundary conditions
 5. Ensure all new tests pass and improve coverage
 
-Implement high-quality tests for all critical gaps.</parameter>
+Create high-quality tests for all critical gaps.</parameter>
 </invoke>
 </function_calls>
 ```
