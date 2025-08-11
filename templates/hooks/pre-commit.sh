@@ -94,6 +94,47 @@ run_tests() {
     fi
 }
 
+# Detect and unstage backup files to prevent them from being committed
+detect_and_unstage_backups() {
+    local backup_files_found=false
+    local staged_backups=()
+    
+    # Get list of staged files and check for backup patterns
+    while IFS= read -r staged_file; do
+        # Check if file matches backup patterns
+        if [[ "$staged_file" =~ \.backup\.[0-9]+ ]] || 
+           [[ "$staged_file" =~ \.pre-rollback\.[0-9]+ ]] || 
+           [[ "$staged_file" == *"_ENHANCED.md" ]] || 
+           [[ "$staged_file" =~ \.(bak|orig)$ ]] || 
+           [[ "$staged_file" == *"~" ]] || 
+           [[ "$staged_file" =~ \.backup\.[0-9]{8}-[0-9]{6} ]]; then
+            staged_backups+=("$staged_file")
+            backup_files_found=true
+        fi
+    done < <(git diff --cached --name-only)
+    
+    if [[ "$backup_files_found" == true ]]; then
+        print_warning "Backup files detected in staging area:"
+        for file in "${staged_backups[@]}"; do
+            echo "  - $file"
+        done
+        
+        # Unstage backup files
+        for file in "${staged_backups[@]}"; do
+            git reset HEAD -- "$file" 2>/dev/null || true
+        done
+        
+        print_success "Backup files automatically unstaged (${#staged_backups[@]} files)"
+        print_status "These files remain in your working directory but won't be committed"
+        
+        # Log the action for transparency
+        if [[ ! -d ".claude/logs" ]]; then
+            mkdir -p ".claude/logs"
+        fi
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Unstaged backup files: ${staged_backups[*]}" >> ".claude/logs/backup-prevention.log"
+    fi
+}
+
 # Check for secrets or sensitive data
 check_secrets() {
     local files_to_check=$(git diff --cached --name-only)
@@ -119,6 +160,9 @@ check_secrets() {
 # Main execution
 main() {
     local exit_code=0
+    
+    # Detect and unstage backup files first (non-blocking)
+    detect_and_unstage_backups
     
     # Always check CLAUDE.md
     check_claude_md
