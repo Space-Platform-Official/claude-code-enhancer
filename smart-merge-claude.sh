@@ -821,6 +821,69 @@ EOF
     print_success "Git hooks integration completed"
 }
 
+# Function to setup Claude agents with simple backup
+setup_claude_agents() {
+    local target_dir="$1"
+    local claude_dir="$target_dir/.claude"
+    local agents_dir="$claude_dir/agents"
+    local backup_path=""
+
+    # Create .claude directory if it doesn't exist
+    if [[ ! -d "$claude_dir" ]]; then
+        mkdir -p "$claude_dir"
+    fi
+
+    # Simple backup of existing agents
+    if [[ -d "$agents_dir" ]]; then
+        backup_path=$(create_backup "$agents_dir")
+        if [[ -n "$backup_path" ]]; then
+            print_status "Agents backup created: $(basename "$backup_path")"
+        fi
+    fi
+
+    # Copy agents from templates
+    if [[ -d "$TEMPLATES_DIR/agents" ]]; then
+        print_status "Installing Claude agents..."
+        
+        # Remove existing agents and copy new ones (with size check)
+        local agents_size=$(du -s "$TEMPLATES_DIR/agents" 2>/dev/null | cut -f1)
+        if [[ $agents_size -gt 5120 ]]; then  # 5MB limit for agents
+            print_error "Agents directory too large: ${agents_size}KB"
+            return 1
+        fi
+        
+        rm -rf "$agents_dir"
+        cp -r "$TEMPLATES_DIR/agents" "$agents_dir"
+        
+        # Verify copy succeeded
+        if [[ -d "$agents_dir" ]]; then
+            local agent_count=$(find "$agents_dir" -name "*.md" 2>/dev/null | wc -l)
+            print_success "Agents installed successfully ($agent_count agent templates)"
+            
+            # Clean up backup on success
+            if [[ -n "$backup_path" && -d "$backup_path" ]]; then
+                local grace_period="${CLAUDE_MERGE_BACKUP_GRACE:-0}"
+                if [[ "$grace_period" -eq 0 ]]; then
+                    rm -rf "$backup_path"
+                else
+                    print_status "Agents backup preserved for ${grace_period}h grace period: $(basename "$backup_path")"
+                fi
+            fi
+        else
+            print_error "Failed to install agents"
+            # Restore from backup if it exists
+            if [[ -n "$backup_path" && -d "$backup_path" ]]; then
+                cp -r "$backup_path" "$agents_dir"
+                print_status "Restored agents from backup"
+            fi
+            return 1
+        fi
+    else
+        print_status "No agent templates found in $TEMPLATES_DIR/agents - skipping agent installation"
+        return 0
+    fi
+}
+
 # Function to setup Claude commands with simple backup and _shared relocation
 setup_claude_commands() {
     local target_dir="$1"
@@ -937,6 +1000,7 @@ main() {
         echo "  - Automatically detects and removes duplicate files"
         echo "  - Eliminates enhanced package violations per CLAUDE.md policy"
         echo "  - Installs command templates to .claude/commands"
+        echo "  - Installs agent templates to .claude/agents"
         echo "  - Installs and integrates git hooks from templates"
         echo "  - Merges settings.json intelligently (permissions + hooks)"
         echo "  - Auto-updates script when template version is newer"
@@ -957,6 +1021,7 @@ main() {
         echo "Files installed/updated:"
         echo "  - target-dir/CLAUDE.md            # Development guidelines"
         echo "  - target-dir/.claude/commands/    # Command templates (user commands only)"
+        echo "  - target-dir/.claude/agents/      # Agent templates for Task tool"
         echo "  - target-dir/.claude/shared/      # Shared utilities (moved from _shared)"
         echo "  - target-dir/.claude/hooks/       # Hook scripts"
         echo "  - target-dir/.git/hooks/          # Git hook integration"
@@ -1022,6 +1087,9 @@ main() {
     # Setup Claude commands
     setup_claude_commands "$target_dir"
     
+    # Setup Claude agents
+    setup_claude_agents "$target_dir"
+    
     # Setup Claude hooks
     setup_claude_hooks "$target_dir"
     
@@ -1039,6 +1107,7 @@ main() {
     print_status "Target directory: $target_dir"
     print_status "CLAUDE.md: $target_claude"
     print_status "Commands: $target_dir/.claude/commands (user commands only)"
+    print_status "Agents: $target_dir/.claude/agents (Task tool templates)"
     print_status "Shared: $target_dir/.claude/shared (utilities moved from _shared)"
     print_status "Hooks: $target_dir/.claude/hooks"
     print_status "Settings: $target_dir/.claude/settings.local.json"

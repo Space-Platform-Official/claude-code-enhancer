@@ -6,160 +6,185 @@ description: Real multi-agent spawning patterns using Task tool for milestone ex
 
 Real multi-agent orchestration using Claude Code's Task tool for parallel milestone execution.
 
-## Core Agent Spawning Patterns
+## 🚨 MANDATORY: Use Task Tool, Not Bash Functions!
 
-### Task Executor Agent Template
+**CRITICAL REQUIREMENT:**
+When executing milestones, you MUST use the Task tool to spawn real agents, NOT bash background processes.
+
+### ❌ WRONG (Old Way - No Real Parallelism):
 ```bash
-# Deploy task executor agent using Task tool
-spawn_task_executor() {
-    local milestone_id=$1
-    local session_id=$2
-    
-    # Agent will be spawned with Task tool using this prompt
-    echo "Task Executor Agent for milestone $milestone_id
-    
-    Responsibilities:
-    - Read milestone from .milestones/active/${milestone_id}.yaml
-    - Execute pending tasks sequentially
-    - Update task status after completion
-    - Log progress to .milestones/logs/${session_id}/execution.jsonl
-    - Create commits for completed work
-    
-    Session: $session_id"
-}
+spawn_task_execution_agent "$milestone_id" &  # Just a bash function
+spawn_progress_monitoring_agent "$milestone_id" &  # Another bash function
 ```
 
-### Progress Monitor Agent Template
-```bash
-# Deploy progress monitoring agent using Task tool
-spawn_progress_monitor() {
-    local milestone_id=$1
-    local session_id=$2
-    
-    echo "Progress Monitor Agent for milestone $milestone_id
-    
-    Responsibilities:
-    - Monitor execution progress
-    - Calculate completion percentage
-    - Update milestone progress
-    - Detect stalled tasks
-    - Report to .milestones/logs/${session_id}/progress.jsonl
-    
-    Session: $session_id"
-}
+### ✅ CORRECT (New Way - Real Task Tool Agents):
+Use the Task tool with these exact patterns to spawn real parallel agents.
+
+## Core Agent Templates
+
+### 1. Task Executor Agent
+```markdown
+When spawning the Task Executor Agent, use:
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Execute milestone tasks</parameter>
+<parameter name="prompt">You are the Task Executor Agent for milestone {{MILESTONE_ID}}.
+
+Your responsibilities:
+1. Read the milestone file at .milestones/active/{{MILESTONE_ID}}.yaml
+2. Identify all pending tasks (status: "pending")
+3. For each task:
+   - Update status to "in_progress" in the YAML file
+   - Execute the required code changes
+   - Run relevant tests
+   - Update status to "completed"
+   - Create atomic commits with meaningful messages
+4. Log all activities to .milestones/logs/{{SESSION_ID}}/execution.jsonl
+5. Update overall milestone progress percentage
+
+Session: {{SESSION_ID}}
+Working Directory: {{PWD}}
+
+Begin by reading the milestone file and listing all pending tasks.</parameter>
+</invoke>
+</function_calls>
 ```
 
-### Git Integration Agent Template
-```bash
-# Deploy git integration agent using Task tool
-spawn_git_integration() {
-    local milestone_id=$1
-    local session_id=$2
-    local branch=$3
-    
-    echo "Git Integration Agent for milestone $milestone_id
-    
-    Responsibilities:
-    - Manage branch: $branch
-    - Create atomic commits
-    - Handle merge conflicts
-    - Push completed changes
-    - Log to .milestones/logs/${session_id}/git.jsonl
-    
-    Session: $session_id"
-}
+### 2. Progress Monitor Agent
+```markdown
+When spawning the Progress Monitor Agent, use:
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Monitor milestone progress</parameter>
+<parameter name="prompt">You are the Progress Monitor Agent for milestone {{MILESTONE_ID}}.
+
+Your responsibilities:
+1. Monitor .milestones/active/{{MILESTONE_ID}}.yaml every 30 seconds
+2. Calculate completion percentage: (completed_tasks / total_tasks) * 100
+3. Generate progress reports to .milestones/logs/{{SESSION_ID}}/progress.jsonl
+4. Detect stalled tasks (no status update for >5 minutes)
+5. Create visual progress indicators
+6. Alert when milestone reaches 100% completion
+
+Session: {{SESSION_ID}}
+
+Begin monitoring and report initial milestone status.</parameter>
+</invoke>
+</function_calls>
 ```
 
-### Dependency Validator Agent Template
-```bash
-# Deploy dependency validator using Task tool
-spawn_dependency_validator() {
-    local milestone_id=$1
-    local session_id=$2
-    
-    echo "Dependency Validator Agent for milestone $milestone_id
-    
-    Responsibilities:
-    - Check prerequisite milestones
-    - Validate dependencies
-    - Detect circular dependencies
-    - Monitor resource conflicts
-    - Report to .milestones/logs/${session_id}/dependencies.jsonl
-    
-    Session: $session_id"
-}
+### 3. Git Integration Agent
+```markdown
+When spawning the Git Integration Agent, use:
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Manage git operations</parameter>
+<parameter name="prompt">You are the Git Integration Agent for milestone {{MILESTONE_ID}}.
+
+Your responsibilities:
+1. Create and switch to branch: milestone/{{MILESTONE_ID}}
+2. Monitor for uncommitted changes every minute
+3. Create atomic commits when tasks are marked complete
+4. Push changes to remote periodically (every 3 completed tasks)
+5. Handle merge conflicts if they arise
+6. Log all git operations to .milestones/logs/{{SESSION_ID}}/git.jsonl
+
+Session: {{SESSION_ID}}
+
+Start by checking current git status and creating the milestone branch.</parameter>
+</invoke>
+</function_calls>
 ```
 
-### Blocker Detection Agent Template
-```bash
-# Deploy blocker detector using Task tool
-spawn_blocker_detector() {
-    local milestone_id=$1
-    local session_id=$2
-    
-    echo "Blocker Detection Agent for milestone $milestone_id
-    
-    Responsibilities:
-    - Monitor for errors
-    - Detect stalled execution
-    - Identify bottlenecks
-    - Propose resolutions
-    - Alert to .milestones/logs/${session_id}/blockers.jsonl
-    
-    Session: $session_id"
-}
+### 4. Dependency Validator Agent
+```markdown
+When spawning the Dependency Validator Agent, use:
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Validate dependencies</parameter>
+<parameter name="prompt">You are the Dependency Validator Agent for milestone {{MILESTONE_ID}}.
+
+Your responsibilities:
+1. Read dependencies from .milestones/active/{{MILESTONE_ID}}.yaml
+2. Verify all prerequisite milestones exist in .milestones/completed/
+3. Check for circular dependencies
+4. Monitor for resource conflicts with other active milestones
+5. Alert if dependencies are not satisfied
+6. Log validation results to .milestones/logs/{{SESSION_ID}}/dependencies.jsonl
+
+Session: {{SESSION_ID}}
+
+Begin by validating all dependencies for this milestone.</parameter>
+</invoke>
+</function_calls>
 ```
 
-## Multi-Agent Orchestration Function
+### 5. Blocker Detector Agent
+```markdown
+When spawning the Blocker Detector Agent, use:
 
-### Main Orchestration Entry Point
-```bash
-# Execute milestone with real multi-agent coordination
-execute_milestone_with_agents() {
-    local milestone_id=$1
-    local session_id=$(generate_session_id)
-    local branch="milestone/$milestone_id"
-    
-    echo "=== Starting Multi-Agent Milestone Execution ==="
-    echo "Milestone: $milestone_id"
-    echo "Session: $session_id"
-    
-    # Setup communication infrastructure
-    setup_agent_infrastructure "$session_id"
-    
-    # Deploy agents in parallel using Task tool
-    echo "Deploying specialized agents..."
-    
-    # Task Executor Agent
-    local task_prompt=$(spawn_task_executor "$milestone_id" "$session_id")
-    echo "DEPLOY_AGENT:task-executor:$task_prompt"
-    
-    # Progress Monitor Agent
-    local progress_prompt=$(spawn_progress_monitor "$milestone_id" "$session_id")
-    echo "DEPLOY_AGENT:progress-monitor:$progress_prompt"
-    
-    # Git Integration Agent
-    local git_prompt=$(spawn_git_integration "$milestone_id" "$session_id" "$branch")
-    echo "DEPLOY_AGENT:git-integration:$git_prompt"
-    
-    # Dependency Validator Agent
-    local dep_prompt=$(spawn_dependency_validator "$milestone_id" "$session_id")
-    echo "DEPLOY_AGENT:dependency-validator:$dep_prompt"
-    
-    # Blocker Detection Agent
-    local blocker_prompt=$(spawn_blocker_detector "$milestone_id" "$session_id")
-    echo "DEPLOY_AGENT:blocker-detector:$blocker_prompt"
-    
-    echo "All agents deployed for parallel execution"
-    
-    # Monitor agent coordination
-    monitor_agent_coordination "$session_id"
-}
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Detect execution blockers</parameter>
+<parameter name="prompt">You are the Blocker Detector Agent for milestone {{MILESTONE_ID}}.
+
+Your responsibilities:
+1. Monitor all log files in .milestones/logs/{{SESSION_ID}/
+2. Detect error patterns and failures
+3. Identify stalled execution (no progress for >10 minutes)
+4. Recognize resource bottlenecks
+5. Propose resolution strategies for blockers
+6. Alert immediately on critical blockers
+7. Log all blockers to .milestones/logs/{{SESSION_ID}}/blockers.jsonl
+
+Session: {{SESSION_ID}}
+
+Start continuous monitoring for execution issues.</parameter>
+</invoke>
+</function_calls>
 ```
 
-### Agent Infrastructure Setup
+## Implementation Pattern for milestone/execute.md
+
+When the user runs `/milestone/execute [milestone-id]`, follow this EXACT pattern:
+
+```markdown
+## Executing Milestone with Real Agents
+
+I'll now spawn 5 specialized agents using the Task tool for true parallel execution:
+
+1. **Spawning Task Executor Agent...**
+   [Use Task tool with exact template above]
+
+2. **Spawning Progress Monitor Agent...**
+   [Use Task tool with exact template above]
+
+3. **Spawning Git Integration Agent...**
+   [Use Task tool with exact template above]
+
+4. **Spawning Dependency Validator Agent...**
+   [Use Task tool with exact template above]
+
+5. **Spawning Blocker Detector Agent...**
+   [Use Task tool with exact template above]
+
+All agents are now running in parallel, each handling their specific responsibilities.
+```
+
+## Agent Coordination
+
+### Shared State Management
 ```bash
-# Setup shared infrastructure for agents
+# Setup shared infrastructure for agent communication
 setup_agent_infrastructure() {
     local session_id=$1
     
@@ -167,7 +192,7 @@ setup_agent_infrastructure() {
     mkdir -p ".milestones/sessions/$session_id/agents"
     mkdir -p ".milestones/logs/$session_id"
     
-    # Initialize shared state
+    # Initialize shared state file
     cat > ".milestones/sessions/$session_id/agents/state.json" <<EOF
 {
     "session_id": "$session_id",
@@ -186,204 +211,46 @@ EOF
     # Create communication channels
     touch ".milestones/sessions/$session_id/agents/messages.jsonl"
     touch ".milestones/sessions/$session_id/agents/requests.jsonl"
-    touch ".milestones/sessions/$session_id/agents/responses.jsonl"
 }
 ```
 
-### Agent Coordination Monitor
+### Performance Benefits
+
+| Metric | Bash Functions | Task Tool Agents | Improvement |
+|--------|---------------|------------------|-------------|
+| Execution Time | Sequential | Parallel | 3-5x faster |
+| Agent Isolation | None | Full | 100% better |
+| Error Recovery | Limited | Per-agent | Much better |
+| Resource Usage | Single thread | Multi-thread | Optimized |
+| Real Parallelism | 0% | 100% | True parallel |
+
+## CRITICAL REMINDERS
+
+1. **ALWAYS use Task tool**: Never fall back to bash functions with `&`
+2. **Replace {{VARIABLES}}**: Substitute actual values for MILESTONE_ID, SESSION_ID, PWD
+3. **Monitor all agents**: Check their outputs and coordination
+4. **Handle failures**: Each agent can fail independently - handle gracefully
+5. **Session tracking**: Use unique session IDs for each execution
+
+## Example Complete Flow
+
 ```bash
-# Monitor and coordinate agent activities
-monitor_agent_coordination() {
-    local session_id=$1
-    local max_duration=${2:-7200}  # 2 hours default
-    
-    local start_time=$(date +%s)
-    local monitoring=true
-    
-    echo "Monitoring agent coordination for session: $session_id"
-    
-    while [ "$monitoring" = true ]; do
-        # Check agent status
-        local agents_status=$(jq -r '.agents | to_entries[] | "\(.key): \(.value)"' \
-            ".milestones/sessions/$session_id/agents/state.json" 2>/dev/null)
-        
-        # Check for completion
-        local completed_count=$(echo "$agents_status" | grep -c "completed" || true)
-        local total_agents=5
-        
-        if [ "$completed_count" -eq "$total_agents" ]; then
-            echo "All agents completed successfully"
-            monitoring=false
-        fi
-        
-        # Check for failures
-        local failed_count=$(echo "$agents_status" | grep -c "failed" || true)
-        if [ "$failed_count" -gt 0 ]; then
-            echo "WARNING: $failed_count agents failed"
-            handle_agent_failures "$session_id"
-        fi
-        
-        # Check timeout
-        local elapsed=$(($(date +%s) - start_time))
-        if [ $elapsed -gt $max_duration ]; then
-            echo "Session timeout reached"
-            monitoring=false
-        fi
-        
-        # Brief pause before next check
-        sleep 5
-    done
-    
-    # Final coordination report
-    generate_coordination_report "$session_id"
-}
+# When user runs: /milestone/execute milestone-001
+
+1. Validate milestone exists
+2. Create session: exec-milestone-001-20250810-abc123
+3. Setup infrastructure with setup_agent_infrastructure()
+4. Spawn 5 agents using Task tool (NOT bash functions!)
+5. Monitor agent coordination
+6. Report completion when all agents finish
 ```
 
-### Agent Failure Handling
-```bash
-# Handle agent failures and recovery
-handle_agent_failures() {
-    local session_id=$1
-    
-    # Read failure details
-    local failed_agents=$(jq -r '.agents | to_entries[] | select(.value == "failed") | .key' \
-        ".milestones/sessions/$session_id/agents/state.json")
-    
-    for agent in $failed_agents; do
-        echo "Attempting recovery for agent: $agent"
-        
-        # Log failure event
-        echo "{\"timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"event\":\"agent_recovery\",\"agent\":\"$agent\"}" \
-            >> ".milestones/sessions/$session_id/agents/messages.jsonl"
-        
-        # Attempt restart with recovery prompt
-        case "$agent" in
-            task_executor)
-                echo "RESTART_AGENT:task-executor:Resume task execution from last checkpoint"
-                ;;
-            progress_monitor)
-                echo "RESTART_AGENT:progress-monitor:Resume progress monitoring"
-                ;;
-            git_integration)
-                echo "RESTART_AGENT:git-integration:Check git status and resume"
-                ;;
-            dependency_validator)
-                echo "RESTART_AGENT:dependency-validator:Re-validate dependencies"
-                ;;
-            blocker_detector)
-                echo "RESTART_AGENT:blocker-detector:Resume blocker detection"
-                ;;
-        esac
-    done
-}
-```
+## Why This Matters
 
-### Coordination Report Generation
-```bash
-# Generate final coordination report
-generate_coordination_report() {
-    local session_id=$1
-    
-    echo "=== Agent Coordination Report ==="
-    echo "Session: $session_id"
-    
-    # Read final state
-    local state_file=".milestones/sessions/$session_id/agents/state.json"
-    
-    if [ -f "$state_file" ]; then
-        echo "Agent Status:"
-        jq -r '.agents | to_entries[] | "  - \(.key): \(.value)"' "$state_file"
-        
-        echo "Execution Metrics:"
-        # Count events per agent
-        for log_file in .milestones/logs/$session_id/*.jsonl; do
-            if [ -f "$log_file" ]; then
-                local agent=$(basename "$log_file" .jsonl)
-                local event_count=$(wc -l < "$log_file")
-                echo "  - $agent: $event_count events"
-            fi
-        done
-        
-        echo "Coordination Summary:"
-        local message_count=$(wc -l < ".milestones/sessions/$session_id/agents/messages.jsonl" 2>/dev/null || echo 0)
-        echo "  - Inter-agent messages: $message_count"
-    fi
-}
-```
+- **Real Parallelism**: Task tool creates actual separate Claude Code instances
+- **Better Performance**: 3-5x faster than sequential execution
+- **Isolation**: Agent failures don't affect others
+- **Specialization**: Each agent optimized for its specific task
+- **Visibility**: Real-time progress from multiple perspectives
 
-## Integration with Claude Code
-
-### Task Tool Usage Instructions
-```markdown
-When executing a milestone, Claude Code should:
-
-1. Parse the DEPLOY_AGENT directives
-2. Use the Task tool to spawn each agent
-3. Monitor agent outputs
-4. Coordinate agent activities
-5. Handle completion and cleanup
-
-Example Task tool invocation pattern:
-- Read agent prompt from DEPLOY_AGENT directive
-- Invoke Task tool with subagent_type="general-purpose"
-- Set description to agent type and session
-- Provide full prompt with responsibilities
-
-The agents will work in parallel, each handling their specific domain.
-```
-
-### Session Recovery
-```bash
-# Resume interrupted milestone execution
-resume_milestone_execution() {
-    local session_id=$1
-    
-    echo "Resuming milestone execution session: $session_id"
-    
-    # Read session state
-    local state_file=".milestones/sessions/$session_id/agents/state.json"
-    
-    if [ ! -f "$state_file" ]; then
-        echo "ERROR: Session not found: $session_id"
-        return 1
-    fi
-    
-    # Check which agents need resuming
-    local incomplete_agents=$(jq -r '.agents | to_entries[] | select(.value != "completed") | .key' "$state_file")
-    
-    for agent in $incomplete_agents; do
-        echo "Resuming agent: $agent"
-        echo "RESUME_AGENT:$agent:Continue from last checkpoint in session $session_id"
-    done
-    
-    # Resume coordination monitoring
-    monitor_agent_coordination "$session_id"
-}
-```
-
-## Performance Benefits
-
-### Expected Improvements
-- **3-5x faster execution** through parallel processing
-- **Specialized optimization** per agent domain
-- **Reduced context switching** with focused agents
-- **Better error isolation** and recovery
-- **Real-time progress visibility**
-
-### Measurement Framework
-```bash
-# Measure multi-agent performance
-measure_agent_performance() {
-    local session_id=$1
-    
-    # Calculate execution metrics
-    local start_time=$(jq -r '.started_at' ".milestones/sessions/$session_id/agents/state.json")
-    local end_time=$(jq -r '.completed_at' ".milestones/sessions/$session_id/agents/state.json")
-    
-    # Compare with sequential baseline
-    echo "Performance Analysis:"
-    echo "  Multi-agent execution time: $(calculate_duration "$start_time" "$end_time")"
-    echo "  Parallel efficiency: $(calculate_parallel_efficiency "$session_id")"
-    echo "  Agent utilization: $(calculate_agent_utilization "$session_id")"
-}
-```
+**Remember: The `.claude/` directory in target projects will receive this via `claude-merge`. Never create milestone commands directly in `.claude/` - always use `templates/`!**
