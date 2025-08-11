@@ -69,14 +69,84 @@ Let me think through this challenge comprehensively with automatic solution sele
 **Step 1: Problem Decomposition and Multi-Agent Analysis**
 Deploy specialized analysis agents for comprehensive understanding:
 
+### Problem Analysis Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Analyze problem</parameter>
+<parameter name="prompt">You are the Problem Analysis Agent for think-through analysis.
+
+Your responsibilities:
+1. Break down the core challenges and constraints
+2. Identify key problem components and relationships
+3. Map problem boundaries and scope
+4. Determine success criteria and requirements
+5. Generate analysis report to .thinkthrough/analysis/problem.json
+
+Provide comprehensive problem decomposition.</parameter>
+</invoke>
+</function_calls>
 ```
-"I need to think through this challenge comprehensively. I'll spawn analysis agents:
-- Problem Analysis Agent: Break down core challenges and constraints
-- Context Research Agent: Investigate existing patterns and dependencies  
-- Solution Space Agent: Explore all viable solution approaches
-- Risk Assessment Agent: Identify potential issues and edge cases
-- Requirements Agent: Map functional and non-functional requirements
-Let me analyze this problem thoroughly from all angles..."
+
+### Context Research Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Research context</parameter>
+<parameter name="prompt">You are the Context Research Agent for think-through analysis.
+
+Your responsibilities:
+1. Investigate existing patterns and dependencies
+2. Analyze codebase conventions and standards
+3. Map integration points and impact areas
+4. Research similar problems and solutions
+5. Generate context report to .thinkthrough/analysis/context.json
+
+Provide comprehensive context investigation.</parameter>
+</invoke>
+</function_calls>
+```
+
+### Solution Space Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Explore solutions</parameter>
+<parameter name="prompt">You are the Solution Space Agent for think-through analysis.
+
+Your responsibilities:
+1. Generate multiple viable solution approaches
+2. Design implementation strategies for each
+3. Map resource requirements and complexity
+4. Evaluate trade-offs and implications
+5. Generate solutions to .thinkthrough/analysis/solutions.json
+
+Provide at least 3 distinct solution approaches.</parameter>
+</invoke>
+</function_calls>
+```
+
+### Risk Assessment Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Assess risks</parameter>
+<parameter name="prompt">You are the Risk Assessment Agent for think-through analysis.
+
+Your responsibilities:
+1. Identify potential issues and edge cases
+2. Evaluate failure modes and impacts
+3. Assess technical and operational risks
+4. Propose mitigation strategies
+5. Generate risk report to .thinkthrough/analysis/risks.json
+
+Provide comprehensive risk assessment.</parameter>
+</invoke>
+</function_calls>
 ```
 
 **Comprehensive Analysis Requirements:**
@@ -109,13 +179,25 @@ Generate comprehensive solution alternatives:
 **Step 4: Automatic Optimal Solution Selection**
 Deploy evaluation agents for systematic comparison:
 
-```
-"I'll spawn evaluation agents to select the optimal solution automatically:
-- Criteria Agent: Establish evaluation framework and scoring matrix
-- Analysis Agent: Score each solution against multiple criteria
-- Trade-off Agent: Evaluate pros/cons and implementation complexity
-- Selection Agent: Identify single optimal solution with justification
-- Validation Agent: Verify selection logic and recommendation quality"
+### Evaluation Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Evaluate solutions</parameter>
+<parameter name="prompt">You are the Evaluation Agent for solution selection.
+
+Your responsibilities:
+1. Read all solutions from .thinkthrough/analysis/solutions.json
+2. Establish evaluation criteria and scoring matrix
+3. Score each solution against multiple criteria
+4. Evaluate trade-offs and implementation complexity
+5. Select single optimal solution with justification
+6. Generate selection report to .thinkthrough/analysis/selection.json
+
+Auto-select the best solution with clear reasoning.</parameter>
+</invoke>
+</function_calls>
 ```
 
 **Solution Selection Criteria:**
@@ -161,13 +243,25 @@ Present optimal solution with explicit approval request:
 **Step 6: Parallel Implementation Execution** (ONLY after explicit permission)
 Deploy implementation agents for efficient execution:
 
-```
-"Permission granted! I'll spawn implementation agents for parallel execution:
-- Planning Agent: Create detailed implementation roadmap
-- Core Implementation Agent: Handle primary code changes
-- Integration Agent: Manage dependencies and integration points
-- Testing Agent: Validate implementation at each step
-- Quality Agent: Ensure standards compliance and optimization"
+### Implementation Coordinator Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Coordinate implementation</parameter>
+<parameter name="prompt">You are the Implementation Coordinator Agent.
+
+Your responsibilities:
+1. Read selected solution from .thinkthrough/analysis/selection.json
+2. Create detailed implementation roadmap
+3. Handle primary code changes
+4. Manage dependencies and integration points
+5. Validate implementation at each step
+6. Ensure standards compliance and optimization
+
+Execute the approved solution with full quality validation.</parameter>
+</invoke>
+</function_calls>
 ```
 
 **Implementation Requirements:**

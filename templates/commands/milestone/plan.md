@@ -21,14 +21,106 @@ When you run `/milestone/plan`, you are REQUIRED to:
 
 ## 🎯 USE MULTIPLE AGENTS
 
-**MANDATORY AGENT SPAWNING FOR PLANNING COMPLEXITY:**
+**MANDATORY TASK TOOL AGENT SPAWNING:**
+
+### Scope Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Analyze project scope</parameter>
+<parameter name="prompt">You are the Scope Agent for milestone planning.
+
+Your responsibilities:
+1. Analyze project requirements and objectives
+2. Identify major functional areas and components
+3. Assess technical complexity and dependencies
+4. Map stakeholder needs and constraints
+5. Generate scope analysis to .milestones/planning/scope.json
+
+Provide comprehensive project scope assessment for planning.</parameter>
+</invoke>
+</function_calls>
 ```
-"I'll spawn multiple agents to handle comprehensive milestone planning:
-- Scope Agent: Analyze requirements and project complexity
-- Timeline Agent: Estimate realistic durations and dependencies  
-- Risk Agent: Identify potential blockers and mitigation strategies
-- Structure Agent: Design milestone directory structure and templates
-- Decomposition Agent: Break down complex goals into manageable milestones"
+
+### Timeline Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Estimate timelines</parameter>
+<parameter name="prompt">You are the Timeline Agent for milestone planning.
+
+Your responsibilities:
+1. Read scope analysis from .milestones/planning/scope.json
+2. Estimate realistic durations for each component
+3. Identify dependencies and sequencing requirements
+4. Create critical path analysis
+5. Generate timeline plan to .milestones/planning/timeline.json
+
+Create realistic timeline with 2-4 week milestone chunks.</parameter>
+</invoke>
+</function_calls>
+```
+
+### Risk Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Assess risks</parameter>
+<parameter name="prompt">You are the Risk Agent for milestone planning.
+
+Your responsibilities:
+1. Identify technical risks and uncertainties
+2. Assess resource and dependency risks
+3. Evaluate timeline and scope risks
+4. Propose mitigation strategies for each risk
+5. Generate risk assessment to .milestones/planning/risks.json
+
+Provide comprehensive risk analysis with mitigation plans.</parameter>
+</invoke>
+</function_calls>
+```
+
+### Structure Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Design structure</parameter>
+<parameter name="prompt">You are the Structure Agent for milestone planning.
+
+Your responsibilities:
+1. Design milestone directory structure
+2. Create milestone YAML templates
+3. Setup tracking and reporting infrastructure
+4. Define milestone categories and tags
+5. Generate structure to .milestones/planning/structure.md
+
+Create organized framework for milestone management.</parameter>
+</invoke>
+</function_calls>
+```
+
+### Decomposition Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Decompose goals</parameter>
+<parameter name="prompt">You are the Decomposition Agent for milestone planning.
+
+Your responsibilities:
+1. Read all planning data from other agents
+2. Break down project into 2-4 week milestones
+3. Define clear objectives for each milestone
+4. Assign tasks with kiro workflow phases
+5. Generate milestone definitions to .milestones/planning/milestones/
+
+Create actionable milestone breakdown with clear deliverables.</parameter>
+</invoke>
+</function_calls>
 ```
 
 ## 🚨 FORBIDDEN BEHAVIORS
@@ -262,7 +354,39 @@ milestone_template:
         execute_requires: ["task_breakdown", "environment_ready"]
 ```
 
-**Step 6: Multi-Agent Planning Execution with Kiro Integration**
+**Step 6: Implementation Pattern**
+
+**Complete Execution Flow:**
+
+```markdown
+When user runs `/milestone/plan [project-description]`, follow this EXACT pattern:
+
+1. **Setup Infrastructure:**
+   - Create .milestones/planning/ directory
+   - Initialize planning workspace
+
+2. **Spawn All 5 Agents Using Task Tool:**
+   
+   I'll now spawn 5 specialized agents for comprehensive planning:
+   
+   [Use Task tool with Scope Agent template above]
+   [Use Task tool with Timeline Agent template above]
+   [Use Task tool with Risk Agent template above]
+   [Use Task tool with Structure Agent template above]
+   [Use Task tool with Decomposition Agent template above]
+
+3. **Monitor Coordination:**
+   - Scope analysis completes first
+   - Other agents use scope data
+   - Decomposition agent aggregates all planning
+
+4. **Present Results:**
+   - Display milestone breakdown
+   - Show timeline and dependencies
+   - Present risk mitigation strategies
+```
+
+**Step 7: Multi-Agent Planning Execution with Kiro Integration**
 
 **Agent Spawning Strategy for Kiro-Native Planning:**
 ```

@@ -25,15 +25,66 @@ When you run `/test coverage`, you are REQUIRED to:
 
 ## 🎯 USE MULTIPLE AGENTS
 
-**MANDATORY AGENT SPAWNING FOR COVERAGE IMPROVEMENT:**
+**MANDATORY TASK TOOL AGENT SPAWNING:**
+
+### Coverage Analysis Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">test-fixer</parameter>
+<parameter name="description">Analyze coverage</parameter>
+<parameter name="prompt">You are the Coverage Analysis Agent.
+
+Your responsibilities:
+1. Run existing tests to generate coverage data
+2. Analyze current coverage metrics and identify critical gaps
+3. Prioritize uncovered code paths by business impact
+4. Map untested functions and edge cases
+5. Generate gap analysis report to .coverage/gaps.json
+
+Provide comprehensive coverage gap analysis.</parameter>
+</invoke>
+</function_calls>
 ```
-"I'll spawn multiple agents to handle coverage improvement comprehensively:
-- Coverage Analysis Agent: Analyze current coverage and identify critical gaps
-- Unit Test Agent: Implement missing unit tests for uncovered functions
-- Integration Test Agent: Create integration tests for system interactions
-- Edge Case Agent: Test boundary conditions and error scenarios
-- Performance Test Agent: Add performance benchmarks for critical paths
-- Report Agent: Generate comprehensive coverage reports and metrics"
+
+### Test Implementation Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">test-fixer</parameter>
+<parameter name="description">Implement tests</parameter>
+<parameter name="prompt">You are the Test Implementation Agent.
+
+Your responsibilities:
+1. Read coverage gaps from .coverage/gaps.json
+2. Implement missing unit tests for uncovered functions
+3. Create integration tests for system interactions
+4. Add edge case tests for boundary conditions
+5. Ensure all new tests pass and improve coverage
+
+Implement high-quality tests for all critical gaps.</parameter>
+</invoke>
+</function_calls>
+```
+
+### Report Generation Agent:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Generate reports</parameter>
+<parameter name="prompt">You are the Report Generation Agent.
+
+Your responsibilities:
+1. Aggregate coverage metrics from all test runs
+2. Generate comprehensive coverage reports
+3. Create actionable improvement recommendations
+4. Visualize coverage trends and gaps
+5. Output final report to .coverage/report.md
+
+Deliver detailed coverage report with insights.</parameter>
+</invoke>
+</function_calls>
 ```
 
 ## 🚨 FORBIDDEN BEHAVIORS
