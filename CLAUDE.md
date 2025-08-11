@@ -466,8 +466,13 @@ Before creating ANY folder, you MUST:
 
 
 
+
+
+
+
+
 # ========== CLAUDE FLOW TEMPLATE ==========
-# Auto-updated: 2025-07-21 00:29:01
+# Auto-updated: 2025-08-10 18:15:20
 
 # Development Partnership
 

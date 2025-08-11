@@ -3,22 +3,22 @@ allowed-tools: all
 description: Git push with safety checks and branch protection awareness
 ---
 
-# Safe Git Push Command
+# Git Push, Pull & Fetch Operations
 
-Execute git push operations with comprehensive safety checks, branch protection awareness, and CI/CD integration.
+Comprehensive remote operations including push, pull, and fetch with safety checks, conflict resolution, and CI/CD integration.
 
-**Usage:** `/git/push $ARGUMENTS`
+**Usage:** `/git/push $ARGUMENTS` or `/git/pull` or `/git/fetch`
 
-## 🚨 CRITICAL PUSH SAFEGUARDS 🚨
+## 🚨 REMOTE OPERATIONS SAFEGUARDS 🚨
 
-**NEVER push without validation!**
+**NEVER sync without validation!**
 
-When you run `/git/push`, the system will:
+This command handles:
 
-1. **VERIFY** - Check branch protection rules
-2. **VALIDATE** - Ensure all tests pass locally
-3. **PROTECT** - Prevent force pushes to protected branches
-4. **TRACK** - Monitor push results and CI status
+1. **PUSH** - Upload local changes with safety checks
+2. **PULL** - Download and merge remote changes
+3. **FETCH** - Update remote tracking without merging
+4. **SYNC** - Bidirectional synchronization
 
 ## Pre-Push Validation
 
@@ -44,16 +44,59 @@ if [ "$behind" -gt 0 ]; then
 fi
 ```
 
-**Step 2: Protection Rules**
+**Step 2: Protection Rules with Smart Branch Creation**
 ```bash
-# Protected branches check
+# Protected branches check with auto-branch creation
 protected_branches=("main" "master" "develop" "production")
 
 for branch in "${protected_branches[@]}"; do
     if [[ "$current_branch" == "$branch" ]]; then
-        echo "🛑 ERROR: Direct pushes to $branch are not allowed!"
-        echo "Please create a pull request instead."
-        exit 1
+        echo "🛡️ Protected branch detected: $branch"
+        echo "📝 Creating feature branch for safe push..."
+        
+        # Extract meaningful branch name from latest commit
+        commit_msg=$(git log -1 --pretty=%s)
+        # Extract type and description (e.g., "feat: add auth" -> "feature/add-auth")
+        branch_type=$(echo "$commit_msg" | grep -oE '^(feat|fix|chore|docs|style|refactor|test):' | tr -d ':')
+        branch_desc=$(echo "$commit_msg" | sed 's/^[^:]*: //' | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]//g')
+        
+        # Map commit types to branch prefixes
+        case "$branch_type" in
+            feat) branch_prefix="feature" ;;
+            fix) branch_prefix="bugfix" ;;
+            docs) branch_prefix="docs" ;;
+            chore|style|refactor) branch_prefix="refactor" ;;
+            test) branch_prefix="test" ;;
+            *) branch_prefix="feature" ;;
+        esac
+        
+        # Create unique branch name
+        new_branch="${branch_prefix}/${branch_desc}"
+        
+        # Add timestamp if branch already exists
+        if git show-ref --verify --quiet "refs/heads/$new_branch"; then
+            timestamp=$(date +%Y%m%d-%H%M%S)
+            new_branch="${new_branch}-${timestamp}"
+        fi
+        
+        echo "🌿 Creating and switching to: $new_branch"
+        git checkout -b "$new_branch"
+        
+        echo "📤 Pushing to new branch..."
+        if git push -u origin "$new_branch"; then
+            echo "✅ Successfully pushed to $new_branch"
+            echo ""
+            echo "🎯 Next steps:"
+            echo "1️⃣  Create PR: gh pr create --base $branch"
+            echo "2️⃣  Or visit: $(git remote get-url origin | sed 's/\.git$//' | sed 's/git@github.com:/https:\/\/github.com\//')/compare/$branch...$new_branch"
+            echo ""
+            echo "💡 Quick PR creation command:"
+            echo "   gh pr create --title \"$commit_msg\" --body \"Auto-created from protected branch push\""
+            exit 0
+        else
+            echo "❌ Failed to push new branch"
+            exit 1
+        fi
     fi
 done
 
@@ -98,6 +141,31 @@ git diff origin/"$current_branch"..HEAD | grep -E "(password|secret|key|token|ap
 ```
 
 ## Smart Push Strategies
+
+### 🎯 Auto-Branch Creation for Protected Branches
+
+When pushing to a protected branch (main/master/develop/production), the system automatically:
+
+1. **Detects protection** and prevents direct push
+2. **Creates feature branch** based on your latest commit message
+3. **Pushes to new branch** with upstream tracking
+4. **Provides PR commands** ready to execute
+
+**Branch Naming Convention:**
+- `feat: add auth` → `feature/add-auth`
+- `fix: login bug` → `bugfix/login-bug`
+- `docs: update readme` → `docs/update-readme`
+- `refactor: clean code` → `refactor/clean-code`
+
+**Example Workflow:**
+```bash
+# You're on main with committed changes
+git push
+# System detects main is protected
+# → Creates feature/your-changes
+# → Pushes to origin/feature/your-changes
+# → Provides: gh pr create --base main
+```
 
 **1. Feature Branch Push**
 ```bash
@@ -286,6 +354,294 @@ git for-each-ref --format='%(refname:short) %(committerdate:relative)' refs/remo
 
 # Who pushed what
 git for-each-ref --format='%(committerdate) %09 %(authorname) %09 %(refname)' | sort -k5 | awk '{print $9" "$10" "$11" "$5}'
+```
+
+## Pull Operations
+
+**Safe Pull with Strategy Selection:**
+```bash
+# Intelligent pull operation
+safe_pull() {
+    current_branch=$(git branch --show-current)
+    
+    echo "📥 Safe Pull Operation"
+    echo "====================="
+    
+    # Pre-pull checks
+    echo "🔍 Pre-pull validation..."
+    
+    # Check for uncommitted changes
+    if ! git diff-index --quiet HEAD --; then
+        echo "⚠️  Uncommitted changes detected!"
+        echo "Options:"
+        echo "  1) Stash changes and pull"
+        echo "  2) Commit changes and pull"
+        echo "  3) Cancel pull"
+        read -p "Choice (1-3): " choice
+        
+        case $choice in
+            1)
+                stash_name="pull-$(date +%s)"
+                git stash push -m "$stash_name"
+                echo "💾 Stashed as: $stash_name"
+                ;;
+            2)
+                git add -A
+                git commit -m "WIP: Save work before pull"
+                ;;
+            3)
+                echo "Pull cancelled"
+                return 1
+                ;;
+        esac
+    fi
+    
+    # Fetch first to see what's coming
+    echo "🔄 Fetching remote changes..."
+    git fetch origin "$current_branch"
+    
+    # Analyze incoming changes
+    incoming=$(git rev-list --count HEAD.."origin/$current_branch")
+    if [ "$incoming" -eq 0 ]; then
+        echo "✅ Already up to date!"
+        return 0
+    fi
+    
+    echo "📦 Incoming: $incoming commit(s)"
+    echo "Preview of changes:"
+    git log --oneline HEAD.."origin/$current_branch" | head -5
+    
+    # Choose merge strategy
+    echo -e "\n🎯 Pull Strategy:"
+    echo "  1) Rebase (recommended - linear history)"
+    echo "  2) Merge (preserve branch points)"
+    echo "  3) Fast-forward only (safest)"
+    read -p "Strategy (1-3): " strategy
+    
+    case $strategy in
+        1)
+            echo "🔄 Rebasing..."
+            if git pull --rebase origin "$current_branch"; then
+                echo "✅ Rebase successful!"
+            else
+                echo "⚠️  Rebase conflicts detected!"
+                echo "Resolve conflicts, then run:"
+                echo "  git add <resolved-files>"
+                echo "  git rebase --continue"
+            fi
+            ;;
+        2)
+            echo "🔄 Merging..."
+            if git pull --no-rebase origin "$current_branch"; then
+                echo "✅ Merge successful!"
+            else
+                echo "⚠️  Merge conflicts detected!"
+                echo "Resolve conflicts, then run:"
+                echo "  git add <resolved-files>"
+                echo "  git commit"
+            fi
+            ;;
+        3)
+            echo "🔄 Fast-forward only..."
+            if git pull --ff-only origin "$current_branch"; then
+                echo "✅ Fast-forward successful!"
+            else
+                echo "⚠️  Cannot fast-forward (branches diverged)"
+                echo "Choose rebase or merge strategy instead"
+            fi
+            ;;
+    esac
+    
+    # Restore stash if exists
+    if git stash list | grep -q "pull-"; then
+        echo "🔄 Restoring stashed changes..."
+        if git stash pop; then
+            echo "✅ Stash restored successfully!"
+        else
+            echo "⚠️  Stash conflicts! Resolve manually."
+        fi
+    fi
+}
+
+# Pull from specific remote/branch
+pull_from() {
+    remote=${1:-origin}
+    branch=${2:-$(git branch --show-current)}
+    
+    echo "📥 Pulling from $remote/$branch"
+    git pull "$remote" "$branch"
+}
+```
+
+## Fetch Operations
+
+**Smart Fetch with Options:**
+```bash
+# Comprehensive fetch operation
+smart_fetch() {
+    echo "🔄 Smart Fetch Operation"
+    echo "======================"
+    
+    echo "Fetch Options:"
+    echo "  1) Fetch from origin (default remote)"
+    echo "  2) Fetch from all remotes"
+    echo "  3) Fetch specific branch"
+    echo "  4) Fetch with tags"
+    echo "  5) Fetch and prune deleted branches"
+    read -p "Choice (1-5): " fetch_choice
+    
+    case $fetch_choice in
+        1)
+            echo "📡 Fetching from origin..."
+            git fetch origin
+            ;;
+        2)
+            echo "🌐 Fetching from all remotes..."
+            git fetch --all
+            
+            # Show summary
+            echo -e "\n📊 Fetch Summary:"
+            for remote in $(git remote); do
+                echo "  $remote: $(git ls-remote --heads $remote | wc -l) branches"
+            done
+            ;;
+        3)
+            read -p "Enter branch name: " branch_name
+            echo "🎯 Fetching specific branch: $branch_name"
+            git fetch origin "$branch_name"
+            ;;
+        4)
+            echo "🏷️  Fetching with tags..."
+            git fetch --tags origin
+            echo "Tags fetched: $(git tag | wc -l)"
+            ;;
+        5)
+            echo "✂️  Fetching and pruning..."
+            git fetch --prune origin
+            echo "✅ Deleted remote branches pruned"
+            ;;
+    esac
+    
+    # Show what changed
+    echo -e "\n🔍 Post-fetch Analysis:"
+    current_branch=$(git branch --show-current)
+    
+    if git rev-parse --verify "origin/$current_branch" &>/dev/null; then
+        behind=$(git rev-list --count HEAD.."origin/$current_branch")
+        if [ "$behind" -gt 0 ]; then
+            echo "⚠️  Current branch is $behind commit(s) behind origin"
+            echo "   Run 'git pull' to update"
+        else
+            echo "✅ Current branch is up to date"
+        fi
+    fi
+    
+    # Check for new remote branches
+    new_branches=$(git branch -r | grep -v '\->' | while read remote; do
+        branch="${remote#origin/}"
+        if ! git show-ref --verify --quiet refs/heads/"$branch"; then
+            echo "  - $remote (new)"
+        fi
+    done)
+    
+    if [ -n "$new_branches" ]; then
+        echo -e "\n🆕 New remote branches available:"
+        echo "$new_branches"
+    fi
+}
+
+# Fetch and compare
+fetch_and_compare() {
+    branch=${1:-$(git branch --show-current)}
+    
+    echo "🔍 Fetching and comparing $branch..."
+    git fetch origin "$branch"
+    
+    echo -e "\n📊 Comparison with origin/$branch:"
+    echo "Local commits not in remote:"
+    git log --oneline "origin/$branch"..HEAD
+    
+    echo -e "\nRemote commits not in local:"
+    git log --oneline HEAD.."origin/$branch"
+}
+```
+
+## Clone Operations
+
+**Smart Clone with Options:**
+```bash
+# Enhanced clone operation
+smart_clone() {
+    repo_url=$1
+    
+    if [ -z "$repo_url" ]; then
+        read -p "Enter repository URL: " repo_url
+    fi
+    
+    echo "📦 Smart Clone Operation"
+    echo "======================"
+    
+    echo "Clone Options:"
+    echo "  1) Standard clone (full history)"
+    echo "  2) Shallow clone (last 100 commits)"
+    echo "  3) Single branch clone"
+    echo "  4) Mirror clone (bare repository)"
+    echo "  5) Clone with submodules"
+    read -p "Choice (1-5): " clone_choice
+    
+    repo_name=$(basename "$repo_url" .git)
+    
+    case $clone_choice in
+        1)
+            echo "📥 Standard clone..."
+            git clone "$repo_url"
+            ;;
+        2)
+            echo "⚡ Shallow clone..."
+            git clone --depth 100 "$repo_url"
+            echo "💡 To get full history later: git fetch --unshallow"
+            ;;
+        3)
+            read -p "Enter branch name: " branch_name
+            echo "🎯 Single branch clone: $branch_name"
+            git clone -b "$branch_name" --single-branch "$repo_url"
+            ;;
+        4)
+            echo "🪞 Mirror clone..."
+            git clone --mirror "$repo_url" "${repo_name}.git"
+            echo "💡 This is a bare repository for backup/mirror purposes"
+            ;;
+        5)
+            echo "📦 Clone with submodules..."
+            git clone --recurse-submodules "$repo_url"
+            ;;
+    esac
+    
+    # Post-clone setup
+    if [ -d "$repo_name" ]; then
+        cd "$repo_name"
+        
+        echo -e "\n🎆 Post-clone setup:"
+        
+        # Setup upstream for forks
+        if echo "$repo_url" | grep -q "github.com"; then
+            read -p "Is this a fork? (y/n): " is_fork
+            if [[ "$is_fork" == "y" ]]; then
+                read -p "Enter upstream URL: " upstream_url
+                git remote add upstream "$upstream_url"
+                git fetch upstream
+                echo "✅ Upstream configured"
+            fi
+        fi
+        
+        # Show repository info
+        echo -e "\n📊 Repository Info:"
+        echo "  Branches: $(git branch -r | wc -l)"
+        echo "  Tags: $(git tag | wc -l)"
+        echo "  Remotes: $(git remote | tr '\n' ' ')"
+        echo "  Size: $(du -sh .git | cut -f1)"
+    fi
+}
 ```
 
 ## Integration with PR Workflows

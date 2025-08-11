@@ -24,13 +24,35 @@ When you run `/git/status`, you'll receive:
 
 **Core Status Information:**
 ```bash
-# Enhanced status display
+# Enhanced status display with remote info
 show_rich_status() {
     echo "📊 Repository Intelligence Report"
     echo "================================="
     echo "📅 Generated: $(date '+%Y-%m-%d %H:%M:%S')"
     echo "🏢 Repository: $(basename $(git rev-parse --show-toplevel))"
     echo "🌿 Branch: $(git branch --show-current)"
+    
+    # Remote repository info
+    echo "🌐 Remotes:"
+    git remote -v | awk '{print "   " $1 " → " $2}' | uniq
+    echo ""
+    
+    # Last fetch time
+    fetch_head=".git/FETCH_HEAD"
+    if [ -f "$fetch_head" ]; then
+        last_fetch=$(stat -f "%Sm" -t "%Y-%m-%d %H:%M:%S" "$fetch_head" 2>/dev/null || \
+                     stat -c "%y" "$fetch_head" 2>/dev/null | cut -d' ' -f1,2)
+        echo "🔄 Last fetch: $last_fetch"
+        
+        # Check if fetch is stale (>1 hour old)
+        fetch_age=$(( ($(date +%s) - $(stat -f "%m" "$fetch_head" 2>/dev/null || stat -c "%Y" "$fetch_head" 2>/dev/null)) / 3600 ))
+        if [ "$fetch_age" -gt 1 ]; then
+            echo "   ⚠️  Remote info may be stale. Run: git fetch"
+        fi
+    else
+        echo "🔄 Last fetch: Never"
+        echo "   💡 Run: git fetch to update remote information"
+    fi
     echo ""
     
     # Working tree status
@@ -82,21 +104,65 @@ show_rich_status() {
 
 **Branch Context and Health:**
 ```bash
-# Analyze branch relationships
+# Analyze branch relationships with remote awareness
 analyze_branch_status() {
     current_branch=$(git branch --show-current)
     
     echo -e "\n🌳 Branch Intelligence:"
     echo "---------------------"
     
-    # Upstream tracking
+    # Local branch info
+    echo "📍 Current Branch: $current_branch"
+    
+    # Remote tracking status
     upstream=$(git rev-parse --abbrev-ref "$current_branch"@{upstream} 2>/dev/null)
     if [ -n "$upstream" ]; then
         echo "📡 Tracking: $upstream"
         
-        # Sync status
+        # Sync status with remote
         ahead=$(git rev-list --count "$upstream".."$current_branch")
         behind=$(git rev-list --count "$current_branch".."$upstream")
+        
+        if [ "$ahead" -eq 0 ] && [ "$behind" -eq 0 ]; then
+            echo "✅ Fully synchronized with remote"
+        elif [ "$ahead" -gt 0 ] && [ "$behind" -eq 0 ]; then
+            echo "⬆️  Ahead of remote by $ahead commit(s)"
+            echo "   💡 Run: git push"
+        elif [ "$ahead" -eq 0 ] && [ "$behind" -gt 0 ]; then
+            echo "⬇️  Behind remote by $behind commit(s)"
+            echo "   💡 Run: git pull"
+        else
+            echo "🔀 Diverged: $ahead ahead, $behind behind"
+            echo "   💡 Run: git pull --rebase or git pull --no-rebase"
+        fi
+    else
+        echo "❌ No remote tracking configured"
+        
+        # Check if branch exists on any remote
+        remote_refs=$(git ls-remote --heads 2>/dev/null | grep "refs/heads/$current_branch" | wc -l)
+        if [ "$remote_refs" -gt 0 ]; then
+            echo "   💡 Branch exists on remote. Run: git branch --set-upstream-to=origin/$current_branch"
+        else
+            echo "   💡 To push to remote: git push -u origin $current_branch"
+        fi
+    fi
+    
+    # Check other remotes
+    echo -e "\n🌐 Remote Repository Status:"
+    for remote in $(git remote); do
+        echo -n "  $remote: "
+        if git ls-remote --exit-code --heads "$remote" "$current_branch" &>/dev/null; then
+            remote_commit=$(git ls-remote "$remote" "$current_branch" | cut -f1)
+            local_commit=$(git rev-parse HEAD)
+            if [ "$remote_commit" = "$local_commit" ]; then
+                echo "✅ In sync"
+            else
+                echo "⚠️  Different commit"
+            fi
+        else
+            echo "❌ Branch not found"
+        fi
+    done
         
         if [ "$ahead" -eq 0 ] && [ "$behind" -eq 0 ]; then
             echo "✅ Fully synchronized with $upstream"
@@ -200,11 +266,89 @@ analyze_files() {
 }
 ```
 
+## Remote Operations Status
+
+**Fetch and Pull Status:**
+```bash
+# Check remote operations status
+check_remote_operations() {
+    echo -e "\n🌐 Remote Operations Status:"
+    echo "---------------------------"
+    
+    # Check all remotes connectivity
+    echo "🔌 Remote Connectivity:"
+    for remote in $(git remote); do
+        echo -n "  $remote: "
+        if git ls-remote "$remote" HEAD &>/dev/null; then
+            echo "✅ Connected"
+        else
+            echo "❌ Unreachable"
+        fi
+    done
+    
+    echo -e "\n📥 Fetch Status:"
+    # Check if we need to fetch
+    git remote update --dry-run 2>&1 | grep -q "up to date" && \
+        echo "  ✅ All remotes up to date" || \
+        echo "  🔄 Updates available. Run: git fetch --all"
+    
+    echo -e "\n🎯 Pull/Push Requirements:"
+    current_branch=$(git branch --show-current)
+    
+    # For each remote, check pull/push status
+    for remote in $(git remote); do
+        if git ls-remote --exit-code --heads "$remote" "$current_branch" &>/dev/null; then
+            # Calculate ahead/behind for this remote
+            ahead=$(git rev-list --count "$remote/$current_branch"..HEAD 2>/dev/null || echo 0)
+            behind=$(git rev-list --count HEAD.."$remote/$current_branch" 2>/dev/null || echo 0)
+            
+            echo "  $remote/$current_branch:"
+            if [ "$ahead" -gt 0 ]; then
+                echo "    ⬆️  Need to push: $ahead commit(s)"
+            fi
+            if [ "$behind" -gt 0 ]; then
+                echo "    ⬇️  Need to pull: $behind commit(s)"
+            fi
+            if [ "$ahead" -eq 0 ] && [ "$behind" -eq 0 ]; then
+                echo "    ✅ In sync"
+            fi
+        fi
+    done
+}
+
+# Check fork synchronization status
+check_fork_status() {
+    if git remote | grep -q upstream; then
+        echo -e "\n🎆 Fork Synchronization:"
+        echo "----------------------"
+        
+        # Compare with upstream
+        upstream_main="upstream/main"
+        if git rev-parse --verify "$upstream_main" &>/dev/null; then
+            behind=$(git rev-list --count HEAD.."$upstream_main" 2>/dev/null || echo 0)
+            ahead=$(git rev-list --count "$upstream_main"..HEAD 2>/dev/null || echo 0)
+            
+            if [ "$behind" -gt 0 ]; then
+                echo "⚠️  Your fork is $behind commit(s) behind upstream"
+                echo "   💡 To sync: git fetch upstream && git merge upstream/main"
+            else
+                echo "✅ Fork is up to date with upstream"
+            fi
+            
+            if [ "$ahead" -gt 0 ]; then
+                echo "🌟 You have $ahead commit(s) not in upstream"
+                echo "   💡 Consider creating a pull request"
+            fi
+        fi
+    fi
+}
+```
+
 ## Workflow Recommendations
 
 **Smart Next Steps:**
 ```bash
-# Provide intelligent recommendations
+# Provide intelligent recommendations with remote awareness
 provide_recommendations() {
     echo -e "\n💡 Recommended Actions:"
     echo "----------------------"
@@ -214,6 +358,15 @@ provide_recommendations() {
     has_unstaged=$(git diff --quiet; echo $?)
     has_untracked=$(git ls-files --others --exclude-standard | grep -q .; echo $?)
     branch=$(git branch --show-current)
+    
+    # Check remote state
+    if git rev-parse --abbrev-ref "$branch"@{upstream} &>/dev/null; then
+        ahead=$(git rev-list --count @{u}..HEAD 2>/dev/null || echo 0)
+        behind=$(git rev-list --count HEAD..@{u} 2>/dev/null || echo 0)
+    else
+        ahead=0
+        behind=0
+    fi
     
     # Priority 1: Conflicts
     if git ls-files -u | grep -q .; then
@@ -255,17 +408,30 @@ provide_recommendations() {
         echo "   - Or update .gitignore"
     fi
     
-    # Priority 6: Clean state
+    # Priority 6: Remote sync needed
+    if [ "$behind" -gt 0 ]; then
+        echo "3. 🔄 Remote has new changes"
+        echo "   - Pull changes: git pull"
+        echo "   - Or fetch and review: git fetch && git log HEAD..@{u}"
+    fi
+    
+    if [ "$ahead" -gt 0 ] && [ "$has_staged" -eq 0 ] && [ "$has_unstaged" -eq 0 ]; then
+        echo "4. 🚀 Ready to push"
+        echo "   - Push to remote: git push"
+        echo "   - Or create PR: gh pr create"
+    fi
+    
+    # Priority 7: Clean state
     if [ "$has_staged" -eq 0 ] && [ "$has_unstaged" -eq 0 ] && [ "$has_untracked" -eq 1 ]; then
         echo "1. ✨ Working directory clean!"
         
-        # Check if ahead of upstream
-        ahead=$(git rev-list --count @{u}..HEAD 2>/dev/null || echo 0)
         if [ "$ahead" -gt 0 ]; then
             echo "   - Push changes: git push"
+        elif [ "$behind" -gt 0 ]; then
+            echo "   - Pull latest: git pull"
         else
             echo "   - Start new work: git checkout -b feature/new-feature"
-            echo "   - Or pull latest: git pull"
+            echo "   - Or fetch updates: git fetch --all"
         fi
     fi
 }

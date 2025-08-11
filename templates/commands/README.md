@@ -74,6 +74,28 @@ When adding new command templates:
 4. Test with real projects
 5. Update this README
 
+## Recently Added: CCPlugins Integration
+
+The following high-value commands from [CCPlugins](https://github.com/brennercruvinel/CCPlugins) have been integrated:
+
+### 🌟 Developer Experience
+- **explain-like-senior.md** - Get senior developer perspective on code
+- **predict-issues.md** - Proactive issue identification before they occur
+- **understand.md** - Deep codebase comprehension and analysis
+
+### 🚀 Workflow Automation
+- **scaffold.md** - Intelligent pattern-based code generation
+- **session-start.md** - Initialize development sessions with context
+- **session-end.md** - Clean session termination and state preservation
+- **todos-to-issues.md** - Convert TODOs to GitHub issues automatically
+- **create-todos.md** - Initialize task tracking system
+
+### 🔧 Code Maintenance
+- **cleanproject.md** - Remove debug artifacts and temporary files
+- **fix-imports.md** - Automated import optimization and cleanup
+
 ## Source
 
-These command templates are sourced from the [Veraticus/nix-config](https://github.com/Veraticus/nix-config) repository and represent battle-tested development workflows.
+These command templates are sourced from:
+- [Veraticus/nix-config](https://github.com/Veraticus/nix-config) - Original battle-tested workflows
+- [CCPlugins](https://github.com/brennercruvinel/CCPlugins) - Professional command framework additions
