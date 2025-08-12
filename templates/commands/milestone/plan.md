@@ -21,7 +21,95 @@ When you run `/milestone/plan`, you are REQUIRED to:
 
 ## 🎯 USE MULTIPLE AGENTS
 
+**ENHANCED DUAL-MODE MILESTONE COORDINATOR:**
+
+### Planning Mode Activation
+The milestone-coordinator now operates in dual modes:
+
+```javascript
+// Coordinator mode selection
+const coordinatorMode = {
+  mode: 'planning',  // or 'execution'
+  capabilities: {
+    planning: [
+      'scope_analysis',
+      'effort_estimation',
+      'risk_assessment',
+      'kiro_strategy',
+      'dependency_mapping'
+    ],
+    execution: [
+      'phase_orchestration',
+      'progress_tracking',
+      'state_management',
+      'git_coordination'
+    ]
+  }
+};
+
+// Assess planning complexity
+const complexity = assessMilestoneComplexity({
+  scope: projectScope,
+  components: estimatedComponents,
+  risks: identifiedRisks,
+  dependencies: dependencyCount
+});
+
+if (complexity >= 'medium') {
+  // Deploy coordinator in planning mode with sub-agents
+  console.log('Using enhanced planning mode with parallel analysis');
+  console.log('Expected performance: 40-60% faster planning');
+} else {
+  // Use streamlined planning for simple milestones
+  console.log('Using direct planning for this simple milestone');
+}
+```
+
 **MANDATORY TASK TOOL AGENT SPAWNING:**
+
+### Enhanced Milestone Planning with Dual-Mode Coordinator:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Orchestrate comprehensive milestone planning</parameter>
+<parameter name="prompt">You are the Milestone Coordinator Agent operating in PLANNING MODE.
+
+Using enhanced milestone-coordinator planning capabilities:
+
+1. Initialize planning mode with state management
+2. Deploy specialized planning sub-agents:
+   - Scope Analysis Agent (project boundaries and requirements)
+   - Estimation Agent (effort and timeline calculations)
+   - Risk Assessment Agent (risk identification and mitigation)
+   - KIRO Strategy Agent (Keep/Improve/Remove/Originate framework)
+3. Coordinate parallel planning analysis
+4. Aggregate results into comprehensive planning artifacts
+5. Generate unified milestone plan with KIRO phases (Design 15%, Spec 25%, Task 20%, Execute 40%)
+6. Prepare state for seamless execution transition
+
+Milestone: {{MILESTONE_ID}}
+Title: {{MILESTONE_TITLE}}
+Scope: {{PROJECT_SCOPE}}
+Mode: planning
+
+Coordination Files:
+- Planning State: /tmp/milestone-planning-state-{{MILESTONE_ID}}.json
+- Artifacts: /tmp/milestone-planning-{{MILESTONE_ID}}/
+- Unified Plan: /tmp/milestone-plan-{{MILESTONE_ID}}.json
+
+Begin comprehensive parallel planning with automatic sub-agent deployment.</parameter>
+</invoke>
+</function_calls>
+```
+
+### Automatic Planning Sub-Agent Deployment:
+The coordinator will automatically spawn and coordinate these planning specialists:
+
+1. **Scope Analyzer** - Deep project analysis with KIRO methodology
+2. **Estimation Expert** - Three-point estimation with velocity calibration
+3. **Risk Assessor** - Risk matrix with mitigation strategies
+4. **KIRO Strategist** - Strategic framework application to phases
 
 ### Scope Agent:
 ```markdown
@@ -42,6 +130,13 @@ Provide comprehensive project scope assessment for planning.</parameter>
 </invoke>
 </function_calls>
 ```
+
+### Planning-to-Execution Transition:
+After planning completes, the coordinator will:
+1. Validate all planning artifacts are complete
+2. Generate execution-ready state configuration
+3. Transition seamlessly to execution mode
+4. Maintain planning context for execution reference
 
 ### Timeline Agent:
 ```markdown

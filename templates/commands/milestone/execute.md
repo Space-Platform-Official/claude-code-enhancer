@@ -19,14 +19,36 @@ When you run `/milestone/execute`, you are REQUIRED to:
 
 ## 🎯 USE MULTIPLE AGENTS FOR EXECUTION
 
-**MANDATORY TASK TOOL AGENT COORDINATION:**
+**ENHANCED MILESTONE AGENT INTEGRATION:**
+
+### Execution Complexity Assessment
+```javascript
+// Analyze execution complexity
+const complexity = assessMilestoneComplexity({
+  currentPhase: milestone.currentPhase,
+  remainingTasks: milestone.pendingTasks.length,
+  parallelismScore: calculateParallelismPotential(milestone),
+  resourceAvailability: checkAgentAvailability()
+});
+
+if (complexity >= 'medium' && parallelismScore > 0.6) {
+  // Deploy milestone-coordinator for orchestration
+  // Use milestone-executor for parallel phase execution
+  console.log('Using agent-based execution for 3-5x performance boost');
+} else {
+  // Use sequential execution for simple milestones
+  console.log('Using direct execution for this simple milestone');
+}
 ```
-"I'll spawn 5 specialized agents using the Task tool for true parallel execution:
-- Task Executor Agent: Execute milestone tasks with kiro workflow progression
-- Progress Monitor Agent: Track phase-weighted progress and visualization
-- Git Integration Agent: Manage commits and branch operations
-- Dependency Validator Agent: Validate prerequisites and dependencies
-- Blocker Detector Agent: Monitor for execution issues and failures"
+
+**MANDATORY ENHANCED AGENT COORDINATION:**
+```
+"I'll spawn specialized milestone agents for optimal parallel execution:
+- Milestone Coordinator Agent: Orchestrate KIRO phases with weighted progress
+- Milestone Executor Agents: Execute Design/Spec/Task/Execute phases in parallel
+- Git Operator Agent: Professional git operations and conflict resolution
+- Quality Enforcer Agent: Validate deliverables and standards
+- File Processor Agent: Handle bulk file operations efficiently"
 ```
 
 ## 🚨 FORBIDDEN BEHAVIORS
@@ -39,16 +61,39 @@ When you run `/milestone/execute`, you are REQUIRED to:
 - ❌ Execute without session management → NO! Resume capability essential!
 - ❌ Continue execution with unresolved blockers → NO! Escalate immediately!
 
-**MANDATORY TASK TOOL EXECUTION WORKFLOW:**
+**MANDATORY ENHANCED EXECUTION WORKFLOW:**
 ```
-1. Validate milestone state → Ensure milestone is ready for execution
-2. Create session infrastructure → Setup directories and shared state
-3. IMMEDIATELY spawn 5 agents using Task tool (NOT bash functions!)
-4. Monitor agent coordination → Track progress from all agents
-5. Execute kiro phases → Design→Spec→Task→Execute with validation
-6. Handle blockers → Detect and escalate execution issues
-7. Track progress → Real-time monitoring and visualization
-8. VERIFY all tasks complete and milestone objectives achieved
+1. Assess complexity → Determine optimal execution strategy
+2. Deploy coordinator → Spawn milestone-coordinator for orchestration
+3. Deploy executors → Spawn milestone-executor agents per phase
+4. Leverage specialized agents → git-operator, quality-enforcer, file-processor
+5. Execute KIRO phases → Parallel execution with 15/25/20/40% weighting
+6. Coordinate state → Synchronize via /tmp/milestone-state-*.json
+7. Aggregate progress → Unified tracking across all agents
+8. VERIFY completion → All phases complete with deliverables validated
+```
+
+### Native Agent Invocation:
+```markdown
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Coordinate milestone execution</parameter>
+<parameter name="prompt">You are the Milestone Coordinator Agent.
+
+Using milestone-coordinator capabilities:
+1. Orchestrate KIRO phase execution (Design 15%, Spec 25%, Task 20%, Execute 40%)
+2. Deploy milestone-executor agents for each phase
+3. Coordinate with git-operator for version control
+4. Track weighted progress across all phases
+5. Handle phase transitions and dependencies
+
+Milestone: {{MILESTONE_ID}}
+Current State: {{MILESTONE_STATE}}
+
+Begin orchestrated execution.</parameter>
+</invoke>
+</function_calls>
 ```
 
 **YOU ARE NOT DONE UNTIL:**
