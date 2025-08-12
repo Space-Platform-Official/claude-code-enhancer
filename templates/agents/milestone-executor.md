@@ -301,254 +301,216 @@ execution_patterns:
       batch_3: [Integration tests]
 ```
 
-### Quality Validation
+### Quality Validation via Validator Agent
 
-```javascript
-class QualityValidators {
-  async validatePhaseOutput(phase, output) {
-    const validators = {
-      design: this.validateDesign,
-      spec: this.validateSpec,
-      task: this.validateTasks,
-      execute: this.validateExecution
-    };
-    
-    const validator = validators[phase];
-    if (!validator) {
-      throw new Error(`No validator for phase: ${phase}`);
-    }
-    
-    return await validator.call(this, output);
-  }
-  
-  async validateDesign(output) {
-    const criteria = {
-      hasArchitectureDoc: !!output.architecture,
-      hasDecisions: Object.keys(output.decisions).length === 4,
-      hasPatterns: output.patterns.length > 0,
-      hasDiagrams: output.diagrams.length > 0
-    };
-    
-    const score = Object.values(criteria).filter(v => v).length / 
-                  Object.keys(criteria).length;
-    
-    return {
-      valid: score >= 0.75,
-      score: score,
-      criteria: criteria,
-      missing: Object.entries(criteria)
-        .filter(([k, v]) => !v)
-        .map(([k]) => k)
-    };
-  }
-  
-  async validateExecution(output) {
-    // Run tests
-    const testResults = await this.runTests(output.completed);
-    
-    // Check code quality
-    const qualityResults = await this.checkQuality(output.completed);
-    
-    // Verify documentation
-    const docResults = await this.verifyDocumentation(output.completed);
-    
-    return {
-      valid: testResults.passed && qualityResults.passed,
-      tests: testResults,
-      quality: qualityResults,
-      documentation: docResults
-    };
-  }
-}
+```markdown
+Deploy quality validation agent for phase outputs:
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">quality-enforcer</parameter>
+<parameter name="description">Validate phase outputs</parameter>
+<parameter name="prompt">You are the Phase Output Validator for milestone {{MILESTONE_ID}}.
+
+Your responsibilities:
+1. Monitor phase completion files:
+   - /tmp/milestone-design-{{TIMESTAMP}}.json
+   - /tmp/milestone-spec-{{TIMESTAMP}}.json
+   - /tmp/milestone-tasks-{{TIMESTAMP}}.json
+   - /tmp/milestone-execute-{{TIMESTAMP}}.json
+2. Validate design phase outputs:
+   - Architecture documentation present
+   - All 4 KIRO decisions documented
+   - Design patterns identified
+   - Diagrams/visualizations included
+   - Score: Must achieve 75% criteria met
+3. Validate spec phase outputs:
+   - Technical specifications complete
+   - API contracts defined
+   - Data models documented
+   - Acceptance criteria clear
+   - Score: Must achieve 80% completeness
+4. Validate task phase outputs:
+   - All tasks properly decomposed
+   - Dependencies mapped
+   - Effort estimates provided
+   - Execution roadmap created
+   - Score: Must achieve 100% task coverage
+5. Validate execute phase outputs:
+   - All tests passing (100% pass rate)
+   - Code quality checks green
+   - Documentation updated
+   - Implementation complete
+   - Score: Must achieve all quality gates
+6. Save validation results:
+   - /tmp/milestone-validation-{{PHASE}}-{{TIMESTAMP}}.json
+   - Include score, criteria met, missing items
+
+Session: {{SESSION_ID}}
+Phase: {{CURRENT_PHASE}}
+Validation Mode: strict
+
+Ensure all phase outputs meet quality standards.</parameter>
+</invoke>
+</function_calls>
 ```
 
 ## 🔧 TASK IMPLEMENTATION
 
-### Implementation Strategies
+### Implementation via Feature Agent
 
-```javascript
-class FeatureImplementor {
-  async implementFeature(task) {
-    const implementation = {
-      files: [],
-      tests: [],
-      documentation: []
-    };
-    
-    // Analyze task requirements
-    const requirements = this.parseRequirements(task);
-    
-    // Generate implementation plan
-    const plan = this.createImplementationPlan(requirements);
-    
-    // Execute implementation
-    for (const step of plan.steps) {
-      const result = await this.executeStep(step);
-      implementation.files.push(...result.files);
-    }
-    
-    // Add tests
-    implementation.tests = await this.generateTests(implementation.files);
-    
-    // Add documentation
-    implementation.documentation = await this.generateDocs(implementation.files);
-    
-    // Validate implementation
-    await this.validateImplementation(implementation);
-    
-    return implementation;
-  }
-  
-  createImplementationPlan(requirements) {
-    const plan = {
-      steps: [],
-      dependencies: [],
-      validation: []
-    };
-    
-    // Core implementation
-    plan.steps.push({
-      type: 'create_structure',
-      description: 'Create file structure and boilerplate'
-    });
-    
-    // Feature logic
-    plan.steps.push({
-      type: 'implement_logic',
-      description: 'Implement core feature logic'
-    });
-    
-    // Integration
-    plan.steps.push({
-      type: 'integrate',
-      description: 'Integrate with existing code'
-    });
-    
-    // Polish
-    plan.steps.push({
-      type: 'polish',
-      description: 'Refactor and optimize'
-    });
-    
-    return plan;
-  }
-}
+```markdown
+Deploy feature implementation agent:
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Implement feature tasks</parameter>
+<parameter name="prompt">You are the Feature Implementor for milestone {{MILESTONE_ID}}.
+
+Your responsibilities:
+1. Read task from /tmp/milestone-task-{{TASK_ID}}.json
+2. Parse task requirements:
+   - Functional requirements
+   - Technical constraints
+   - Integration points
+   - Quality criteria
+3. Create implementation plan:
+   - Step 1: Create file structure and boilerplate
+   - Step 2: Implement core feature logic
+   - Step 3: Integrate with existing code
+   - Step 4: Refactor and optimize
+4. Execute implementation steps:
+   - Write code files
+   - Track created/modified files
+   - Ensure code quality standards
+5. Generate tests:
+   - Unit tests for new functions
+   - Integration tests for features
+   - Save to appropriate test files
+6. Update documentation:
+   - API documentation
+   - User guides
+   - Code comments
+7. Validate implementation:
+   - Run tests (must pass 100%)
+   - Check code quality
+   - Verify requirements met
+8. Save implementation results:
+   - /tmp/milestone-implementation-{{TASK_ID}}-{{TIMESTAMP}}.json
+   - Include files, tests, documentation
+
+Session: {{SESSION_ID}}
+Task: {{TASK_ID}}
+Phase: Execute
+
+Implement feature with high quality standards.</parameter>
+</invoke>
+</function_calls>
 ```
 
 ## 📈 PROGRESS TRACKING
 
-### Granular Progress Reporting
+### Progress Reporting via Tracker Agent
 
-```javascript
-class ProgressTracker {
-  constructor(milestoneId, phase) {
-    this.milestoneId = milestoneId;
-    this.phase = phase;
-    this.progress = {
-      total: 0,
-      completed: 0,
-      inProgress: 0,
-      failed: 0
-    };
-  }
-  
-  async updateProgress(taskId, status) {
-    if (status === 'completed') {
-      this.progress.completed++;
-      this.progress.inProgress--;
-    } else if (status === 'in_progress') {
-      this.progress.inProgress++;
-    } else if (status === 'failed') {
-      this.progress.failed++;
-      this.progress.inProgress--;
-    }
-    
-    // Calculate percentage
-    const percentage = (this.progress.completed / this.progress.total) * 100;
-    
-    // Report to coordinator
-    await this.reportToCoordinator({
-      phase: this.phase,
-      progress: percentage,
-      details: this.progress,
-      taskId: taskId,
-      status: status
-    });
-  }
-  
-  async reportToCoordinator(update) {
-    const coordinatorFile = `/tmp/milestone-coordinator-${this.milestoneId}.json`;
-    
-    // Read current state
-    let state = {};
-    try {
-      state = await fs.readJson(coordinatorFile);
-    } catch {
-      state = { phases: {} };
-    }
-    
-    // Update phase progress
-    state.phases[this.phase] = update;
-    state.lastUpdate = new Date().toISOString();
-    
-    // Write back
-    await fs.writeJson(coordinatorFile, state);
-  }
-}
+```markdown
+Deploy progress tracking agent:
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Track execution progress</parameter>
+<parameter name="prompt">You are the Progress Tracker for milestone {{MILESTONE_ID}}.
+
+Your responsibilities:
+1. Monitor task status files:
+   - /tmp/milestone-task-status-*.json
+   - Track: pending, in_progress, completed, failed
+2. Calculate phase progress:
+   - Read total tasks from /tmp/milestone-tasks-{{PHASE}}.json
+   - Count completed tasks
+   - Calculate percentage: (completed / total) * 100
+3. Apply KIRO phase weights:
+   - Design: 15% of total progress
+   - Spec: 25% of total progress
+   - Task: 20% of total progress
+   - Execute: 40% of total progress
+4. Update progress every 30 seconds:
+   - Check for status changes
+   - Recalculate percentages
+   - Update weighted total
+5. Report to coordinator:
+   - Write to /tmp/milestone-coordinator-{{MILESTONE_ID}}.json
+   - Include phase progress, task details, timestamps
+6. Generate progress visualizations:
+   - Create progress bar representation
+   - Show phase completion status
+   - Estimate time to completion
+7. Handle progress anomalies:
+   - Detect stalled tasks (no update > 5 min)
+   - Flag failed tasks for recovery
+   - Alert on blocked dependencies
+
+Session: {{SESSION_ID}}
+Milestone: {{MILESTONE_ID}}
+Update Interval: 30 seconds
+
+Provide real-time progress tracking with accurate metrics.</parameter>
+</invoke>
+</function_calls>
 ```
 
 ## 🛡️ ERROR HANDLING
 
-### Resilient Execution
+### Resilient Execution via Retry Agent
 
-```javascript
-class ResilientExecutor {
-  async executeWithRetry(task, maxRetries = 3) {
-    let lastError;
-    
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        console.log(`Executing ${task.title} (attempt ${attempt}/${maxRetries})`);
-        
-        const result = await this.executeTask(task);
-        
-        // Validate result
-        if (await this.validateResult(result)) {
-          return result;
-        }
-        
-        throw new Error('Validation failed');
-        
-      } catch (error) {
-        lastError = error;
-        console.error(`Attempt ${attempt} failed:`, error.message);
-        
-        if (attempt < maxRetries) {
-          // Exponential backoff
-          const delay = Math.pow(2, attempt) * 1000;
-          await this.sleep(delay);
-          
-          // Try recovery
-          await this.attemptRecovery(task, error);
-        }
-      }
-    }
-    
-    // All retries exhausted
-    throw new Error(`Task ${task.title} failed after ${maxRetries} attempts: ${lastError.message}`);
-  }
-  
-  async attemptRecovery(task, error) {
-    // Clean up partial state
-    await this.cleanupPartialState(task);
-    
-    // Reset environment
-    await this.resetEnvironment(task);
-    
-    // Clear caches
-    await this.clearCaches(task);
-  }
-}
+```markdown
+Deploy resilient execution agent:
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Execute with resilience</parameter>
+<parameter name="prompt">You are the Resilient Executor for milestone {{MILESTONE_ID}}.
+
+Your responsibilities:
+1. Execute tasks with automatic retry logic:
+   - Read task from /tmp/milestone-task-{{TASK_ID}}.json
+   - Maximum 3 attempts per task
+   - Exponential backoff: 2^attempt seconds
+2. For each attempt:
+   - Log attempt to /tmp/milestone-attempt-{{TASK_ID}}-{{ATTEMPT}}.log
+   - Execute task implementation
+   - Validate result completeness
+   - If successful, mark complete
+   - If failed, prepare for retry
+3. Recovery strategies between attempts:
+   - Clean up partial state files
+   - Reset environment variables
+   - Clear temporary caches
+   - Check resource availability
+4. Handle different failure types:
+   - Transient (network, timeout): Retry immediately
+   - Resource (memory, disk): Wait and retry
+   - Logic (validation, test): Analyze and adapt
+   - Permanent (missing dep): Fail fast
+5. After all retries exhausted:
+   - Log detailed failure report
+   - Save to /tmp/milestone-failure-{{TASK_ID}}.json
+   - Trigger manual intervention request
+6. Success handling:
+   - Save results to /tmp/milestone-success-{{TASK_ID}}.json
+   - Update task status to completed
+   - Trigger dependent task execution
+
+Session: {{SESSION_ID}}
+Task: {{TASK_ID}}
+Max Retries: 3
+Backoff Strategy: exponential
+
+Ensure reliable task execution with automatic recovery.</parameter>
+</invoke>
+</function_calls>
 ```
 
 ## ✅ EXECUTION QUALITY GATES

@@ -36,44 +36,50 @@ integration_layers:
 
 ## Command Enhancement Pattern
 
-### Enhancing Milestone Commands
+### Enhancing Milestone Commands via Decision Agent
 
-```javascript
-// In milestone command files (plan.md, execute.md, etc.)
+```markdown
+Deploy complexity assessment agent for execution decisions:
 
-function enhanceMilestoneCommand(command, args) {
-  // Assess complexity
-  const complexity = assessMilestoneComplexity(args);
-  
-  // Check for agent availability
-  const agentsAvailable = checkAgentAvailability();
-  
-  // Make execution decision
-  if (complexity === 'high' && agentsAvailable) {
-    return executeWithAgents(command, args);
-  } else if (complexity === 'medium' && agentsAvailable) {
-    return hybridExecution(command, args);
-  } else {
-    return directExecution(command, args);
-  }
-}
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Assess milestone complexity</parameter>
+<parameter name="prompt">You are the Complexity Assessment Agent for milestone operations.
 
-function assessMilestoneComplexity(args) {
-  const factors = {
-    phaseCount: getPhaseCount(args),
-    taskCount: estimateTaskCount(args),
-    fileCount: estimateFileCount(args),
-    gitOperations: estimateGitOperations(args)
-  };
-  
-  if (factors.taskCount > 20 || factors.fileCount > 50) {
-    return 'high';
-  } else if (factors.taskCount > 10 || factors.fileCount > 20) {
-    return 'medium';
-  } else {
-    return 'low';
-  }
-}
+Your responsibilities:
+1. Analyze milestone requirements:
+   - Read command arguments from /tmp/milestone-command-args.json
+   - Estimate phase count (design, spec, task, execute)
+   - Estimate task count based on scope
+   - Estimate file changes required
+   - Count Git operations needed
+2. Calculate complexity score:
+   - High: tasks > 20 OR files > 50
+   - Medium: tasks > 10 OR files > 20
+   - Low: tasks <= 10 AND files <= 20
+3. Check agent availability:
+   - Verify Task tool is available
+   - Check system resources
+   - Validate agent templates exist
+4. Make execution decision:
+   - High + agents available → Use full agent orchestration
+   - Medium + agents available → Use hybrid execution
+   - Low OR no agents → Use direct execution
+5. Save decision to /tmp/milestone-execution-decision.json:
+   {
+     "complexity": "high|medium|low",
+     "agents_available": true|false,
+     "execution_mode": "agents|hybrid|direct",
+     "reasoning": "..."
+   }
+
+Command: {{COMMAND}}
+Arguments: {{ARGS}}
+
+Assess complexity and determine optimal execution strategy.</parameter>
+</invoke>
+</function_calls>
 ```
 
 ## Agent Invocation Templates
@@ -197,214 +203,220 @@ Proceeding with phase-by-phase execution...
 
 ### Planning State Structure
 
-```javascript
-class PlanningState {
-  constructor(milestoneId) {
-    this.structure = {
-      planning: {
-        status: 'in_progress|complete',
-        startedAt: Date,
-        completedAt: Date,
-        artifacts: {
-          scope: '/tmp/milestone-planning-scope-*.json',
-          estimates: '/tmp/milestone-planning-estimates-*.json',
-          risks: '/tmp/milestone-planning-risks-*.json',
-          kiro: '/tmp/milestone-planning-kiro-*.json',
-          unified: '/tmp/milestone-plan-*.json'
-        },
-        metrics: {
-          analysisTime: Number,
-          confidenceScore: Number,
-          complexityScore: Number
-        }
-      },
-      execution: {
-        status: 'pending|ready|in_progress|complete',
-        planReference: String,
-        phases: {},
-        progress: {}
-      },
-      transition: {
-        planningComplete: Boolean,
-        executionReady: Boolean,
-        transitionedAt: Date
-      }
-    };
-  }
-}
+```yaml
+planning_state_structure:
+  planning:
+    status: "in_progress|complete"
+    started_at: "ISO timestamp"
+    completed_at: "ISO timestamp"
+    artifacts:
+      scope: "/tmp/milestone-planning-scope-*.json"
+      estimates: "/tmp/milestone-planning-estimates-*.json"
+      risks: "/tmp/milestone-planning-risks-*.json"
+      kiro: "/tmp/milestone-planning-kiro-*.json"
+      unified: "/tmp/milestone-plan-*.json"
+    metrics:
+      analysis_time: "seconds"
+      confidence_score: "0-100"
+      complexity_score: "0-100"
+      
+  execution:
+    status: "pending|ready|in_progress|complete"
+    plan_reference: "path to plan file"
+    phases:
+      design: "status and progress"
+      spec: "status and progress"
+      task: "status and progress"
+      execute: "status and progress"
+    progress:
+      overall: "0-100"
+      by_phase: "weighted percentages"
+      
+  transition:
+    planning_complete: "boolean"
+    execution_ready: "boolean"
+    transitioned_at: "ISO timestamp"
 ```
 
-### Planning-to-Execution Transition
+### Planning-to-Execution Transition via Bridge Agent
 
-```javascript
-class PlanningExecutionBridge {
-  async transitionToExecution(milestoneId) {
-    // Load planning artifacts
-    const planningArtifacts = await this.loadPlanningArtifacts(milestoneId);
-    
-    // Validate planning completeness
-    if (!this.validatePlanning(planningArtifacts)) {
-      throw new Error('Planning incomplete - cannot transition to execution');
-    }
-    
-    // Transform planning output to execution input
-    const executionConfig = {
-      milestoneId: milestoneId,
-      mode: 'execution',
-      phases: this.extractPhases(planningArtifacts),
-      tasks: this.extractTasks(planningArtifacts),
-      dependencies: planningArtifacts.dependencies,
-      kiroStrategy: planningArtifacts.kiroStrategy,
-      estimates: planningArtifacts.estimates,
-      risks: planningArtifacts.risks
-    };
-    
-    // Initialize execution state
-    await this.initializeExecutionState(executionConfig);
-    
-    // Notify coordinator of mode switch
-    await this.notifyCoordinator({
-      milestoneId: milestoneId,
-      event: 'mode_transition',
-      from: 'planning',
-      to: 'execution',
-      config: executionConfig
-    });
-    
-    return executionConfig;
-  }
-}
+```markdown
+Deploy transition bridge agent:
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Bridge planning to execution</parameter>
+<parameter name="prompt">You are the Planning-Execution Bridge Agent for milestone {{MILESTONE_ID}}.
+
+Your responsibilities:
+1. Load planning artifacts:
+   - Read /tmp/milestone-plan-{{MILESTONE_ID}}.json
+   - Verify all required planning files exist
+   - Check planning completeness markers
+2. Validate planning completeness:
+   - Scope analysis complete
+   - Estimates provided
+   - Risks assessed
+   - KIRO strategy defined
+   - Dependencies mapped
+3. Transform planning to execution config:
+   - Extract phases from plan
+   - Extract tasks from plan
+   - Map dependencies
+   - Copy KIRO strategy
+   - Transfer estimates and risks
+4. Initialize execution state:
+   - Create /tmp/milestone-execution-state-{{MILESTONE_ID}}.json
+   - Set all phases to 'pending'
+   - Initialize progress to 0%
+   - Set execution status to 'ready'
+5. Notify coordinator of transition:
+   - Write to /tmp/milestone-coordinator-notification.json:
+   {
+     "milestone_id": "{{MILESTONE_ID}}",
+     "event": "mode_transition",
+     "from": "planning",
+     "to": "execution",
+     "timestamp": "ISO timestamp",
+     "config": "execution configuration"
+   }
+6. Create execution ready marker:
+   - /tmp/milestone-execution-ready-{{MILESTONE_ID}}.marker
+
+Milestone: {{MILESTONE_ID}}
+Transition Mode: planning_to_execution
+
+Bridge planning artifacts to execution configuration.</parameter>
+</invoke>
+</function_calls>
 ```
 
 ## State Synchronization
 
-### Milestone State Bridge
+### Milestone State Bridge via Sync Agent
 
-```javascript
-class MilestoneStateBridge {
-  constructor(milestoneId) {
-    this.milestoneId = milestoneId;
-    this.commandState = `/tmp/milestone-${milestoneId}.json`;
-    this.agentState = `/tmp/milestone-state-${milestoneId}.json`;
-  }
-  
-  async syncFromCommand() {
-    // Read command-maintained state
-    const commandData = await this.readCommandState();
-    
-    // Transform to agent format
-    const agentData = this.transformToAgentFormat(commandData);
-    
-    // Write to agent state
-    await this.writeAgentState(agentData);
-  }
-  
-  async syncFromAgent() {
-    // Read agent-maintained state
-    const agentData = await this.readAgentState();
-    
-    // Transform to command format
-    const commandData = this.transformToCommandFormat(agentData);
-    
-    // Update command state
-    await this.updateCommandState(commandData);
-  }
-  
-  transformToAgentFormat(commandData) {
-    return {
-      metadata: {
-        id: commandData.id,
-        title: commandData.title,
-        created_at: commandData.created,
-        status: commandData.status
-      },
-      phases: this.mapPhases(commandData.phases),
-      progress: {
-        overall: commandData.progress || 0,
-        by_phase: commandData.phaseProgress || {}
-      },
-      git: {
-        branch: commandData.branch,
-        commits: commandData.commits || []
-      }
-    };
-  }
-  
-  transformToCommandFormat(agentData) {
-    return {
-      id: agentData.metadata.id,
-      title: agentData.metadata.title,
-      created: agentData.metadata.created_at,
-      status: agentData.metadata.status,
-      phases: this.unmapPhases(agentData.phases),
-      progress: agentData.progress.overall,
-      phaseProgress: agentData.progress.by_phase,
-      branch: agentData.git.branch,
-      commits: agentData.git.commits
-    };
-  }
-}
+```markdown
+Deploy state synchronization agent:
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Synchronize milestone state</parameter>
+<parameter name="prompt">You are the State Synchronization Agent for milestone {{MILESTONE_ID}}.
+
+Your responsibilities:
+1. Monitor state files:
+   - Command state: /tmp/milestone-{{MILESTONE_ID}}.json
+   - Agent state: /tmp/milestone-state-{{MILESTONE_ID}}.json
+2. Sync from command to agent format:
+   - Read command state file
+   - Transform to agent format:
+     * metadata.id ← id
+     * metadata.title ← title
+     * metadata.created_at ← created
+     * metadata.status ← status
+     * phases ← map phase data
+     * progress.overall ← progress
+     * progress.by_phase ← phaseProgress
+     * git.branch ← branch
+     * git.commits ← commits
+   - Write to agent state file
+3. Sync from agent to command format:
+   - Read agent state file
+   - Transform to command format:
+     * id ← metadata.id
+     * title ← metadata.title
+     * created ← metadata.created_at
+     * status ← metadata.status
+     * phases ← unmap phase data
+     * progress ← progress.overall
+     * phaseProgress ← progress.by_phase
+     * branch ← git.branch
+     * commits ← git.commits
+   - Write to command state file
+4. Handle sync conflicts:
+   - Use timestamp to determine newer data
+   - Merge non-conflicting changes
+   - Log conflicts to /tmp/milestone-sync-conflicts.log
+5. Sync every 10 seconds:
+   - Check for changes in either file
+   - Perform bidirectional sync
+   - Update sync timestamp
+
+Milestone: {{MILESTONE_ID}}
+Sync Interval: 10 seconds
+Conflict Resolution: timestamp-based
+
+Maintain consistent state between command and agent layers.</parameter>
+</invoke>
+</function_calls>
 ```
 
 ## Progress Aggregation
 
-### Unified Progress Tracking
+### Unified Progress Tracking via Aggregator Agent
 
-```javascript
-class UnifiedProgressTracker {
-  constructor(milestoneId) {
-    this.milestoneId = milestoneId;
-    this.sources = {
-      command: `/tmp/milestone-${milestoneId}.json`,
-      coordinator: `/tmp/milestone-coordinator-${milestoneId}.json`,
-      executor: `/tmp/milestone-executor-${milestoneId}.json`
-    };
-  }
-  
-  async aggregateProgress() {
-    const progress = {
-      overall: 0,
-      phases: {},
-      tasks: {},
-      agents: {}
-    };
-    
-    // Collect from all sources
-    for (const [source, file] of Object.entries(this.sources)) {
-      try {
-        const data = await fs.readJson(file);
-        progress[source] = data.progress || data;
-      } catch {
-        // Source not available
-      }
-    }
-    
-    // Calculate weighted progress
-    progress.overall = this.calculateWeightedProgress(progress);
-    
-    // Update all sources
-    await this.broadcastProgress(progress);
-    
-    return progress;
-  }
-  
-  calculateWeightedProgress(progress) {
-    const weights = {
-      design: 0.15,
-      spec: 0.25,
-      task: 0.20,
-      execute: 0.40
-    };
-    
-    let total = 0;
-    for (const [phase, weight] of Object.entries(weights)) {
-      const phaseProgress = this.getPhaseProgress(progress, phase);
-      total += phaseProgress * weight;
-    }
-    
-    return Math.round(total * 100);
-  }
-}
+```markdown
+Deploy progress aggregation agent:
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Aggregate milestone progress</parameter>
+<parameter name="prompt">You are the Progress Aggregator for milestone {{MILESTONE_ID}}.
+
+Your responsibilities:
+1. Monitor progress sources:
+   - Command: /tmp/milestone-{{MILESTONE_ID}}.json
+   - Coordinator: /tmp/milestone-coordinator-{{MILESTONE_ID}}.json
+   - Executor: /tmp/milestone-executor-{{MILESTONE_ID}}.json
+2. Collect progress data:
+   - Read progress from each source
+   - Handle missing or unavailable sources
+   - Extract phase-specific progress
+3. Calculate weighted overall progress:
+   - Design phase: 15% weight
+   - Spec phase: 25% weight
+   - Task phase: 20% weight
+   - Execute phase: 40% weight
+   - Formula: Σ(phase_progress * phase_weight)
+4. Aggregate task-level progress:
+   - Count completed vs total tasks
+   - Track in-progress tasks
+   - Identify blocked tasks
+5. Broadcast unified progress:
+   - Write to /tmp/milestone-progress-unified-{{MILESTONE_ID}}.json:
+   {
+     "overall": "0-100",
+     "phases": {
+       "design": "percentage",
+       "spec": "percentage",
+       "task": "percentage",
+       "execute": "percentage"
+     },
+     "tasks": {
+       "total": "count",
+       "completed": "count",
+       "in_progress": "count",
+       "blocked": "count"
+     },
+     "sources": {
+       "command": "progress data",
+       "coordinator": "progress data",
+       "executor": "progress data"
+     },
+     "timestamp": "ISO timestamp"
+   }
+6. Update all source files with unified progress
+7. Aggregate every 15 seconds
+
+Milestone: {{MILESTONE_ID}}
+Aggregation Interval: 15 seconds
+
+Provide unified progress view across all milestone layers.</parameter>
+</invoke>
+</function_calls>
 ```
 
 ## Git Integration Coordination
@@ -445,40 +457,63 @@ git_coordination:
 
 ## Performance Metrics
 
-### Agent Performance Tracking
+### Agent Performance Tracking via Metrics Agent
 
-```javascript
-class MilestonePerformanceTracker {
-  async comparePerformance() {
-    const metrics = {
-      direct: await this.getDirectMetrics(),
-      agent: await this.getAgentMetrics()
-    };
-    
-    const comparison = {
-      speedup: metrics.agent.time / metrics.direct.time,
-      parallelism: metrics.agent.parallelTasks / metrics.direct.sequentialTasks,
-      resource_efficiency: metrics.agent.resourceUsage / metrics.direct.resourceUsage,
-      quality: metrics.agent.qualityScore / metrics.direct.qualityScore
-    };
-    
-    return {
-      metrics: metrics,
-      comparison: comparison,
-      recommendation: this.getRecommendation(comparison)
-    };
-  }
-  
-  getRecommendation(comparison) {
-    if (comparison.speedup > 2 && comparison.quality >= 1) {
-      return 'always_use_agents';
-    } else if (comparison.speedup > 1.5) {
-      return 'use_agents_for_complex';
-    } else {
-      return 'use_direct_for_simple';
-    }
-  }
-}
+```markdown
+Deploy performance metrics agent:
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Track performance metrics</parameter>
+<parameter name="prompt">You are the Performance Metrics Agent for milestone operations.
+
+Your responsibilities:
+1. Collect direct execution metrics:
+   - Read from /tmp/milestone-metrics-direct-*.json
+   - Track execution time
+   - Count sequential tasks
+   - Measure resource usage
+   - Calculate quality score
+2. Collect agent execution metrics:
+   - Read from /tmp/milestone-metrics-agent-*.json
+   - Track parallel execution time
+   - Count parallel tasks
+   - Measure agent resource usage
+   - Calculate agent quality score
+3. Compare performance:
+   - Speedup = agent_time / direct_time
+   - Parallelism = parallel_tasks / sequential_tasks
+   - Efficiency = agent_resources / direct_resources
+   - Quality = agent_quality / direct_quality
+4. Generate recommendations:
+   - Speedup > 2x AND quality >= 1: Always use agents
+   - Speedup > 1.5x: Use agents for complex tasks
+   - Otherwise: Use direct for simple tasks
+5. Save metrics report:
+   - /tmp/milestone-performance-report-{{TIMESTAMP}}.json:
+   {
+     "metrics": {
+       "direct": "metrics data",
+       "agent": "metrics data"
+     },
+     "comparison": {
+       "speedup": "multiplier",
+       "parallelism": "ratio",
+       "resource_efficiency": "ratio",
+       "quality": "ratio"
+     },
+     "recommendation": "always_use_agents|use_agents_for_complex|use_direct_for_simple",
+     "timestamp": "ISO timestamp"
+   }
+6. Update metrics every execution
+
+Operation: {{OPERATION}}
+Milestone: {{MILESTONE_ID}}
+
+Track and compare performance between execution modes.</parameter>
+</invoke>
+</function_calls>
 ```
 
 ## Migration Path

@@ -524,67 +524,36 @@ execution_strategies:
       - deadline_constraints
 ```
 
-### Agent Coordination Patterns
+### Agent Coordination via Task Tool
 
-```javascript
-class MilestoneAgentCoordinator {
-  constructor(milestoneId) {
-    this.milestoneId = milestoneId;
-    this.agents = new Map();
-    this.messageQueue = [];
-  }
-  
-  async deployPhaseAgents(strategy = 'adaptive') {
-    const deployment = this.selectDeploymentStrategy(strategy);
-    
-    for (const phase of deployment.phases) {
-      const agent = await this.spawnPhaseAgent(phase);
-      this.agents.set(phase, agent);
-      
-      if (deployment.parallel) {
-        // Don't wait for completion
-        this.monitorAgent(agent);
-      } else {
-        // Wait for phase completion
-        await this.waitForAgent(agent);
-      }
-    }
-  }
-  
-  async coordinatePhaseTransition(fromPhase, toPhase) {
-    // Get results from completed phase
-    const results = await this.getAgentResults(fromPhase);
-    
-    // Prepare input for next phase
-    const input = this.transformPhaseOutput(results, toPhase);
-    
-    // Send to next phase agent
-    await this.sendToAgent(toPhase, {
-      type: 'phase_input',
-      data: input,
-      from: fromPhase
-    });
-  }
-  
-  async handlePhaseCompletion(phase, results) {
-    // Update milestone state
-    await this.stateCoordinator.updatePhaseStatus(phase, 'completed');
-    
-    // Store results
-    await this.storePhaseResults(phase, results);
-    
-    // Trigger dependent phases
-    const dependents = this.getDependentPhases(phase);
-    for (const dependent of dependents) {
-      await this.triggerPhase(dependent);
-    }
-    
-    // Check for milestone completion
-    if (await this.isComplete()) {
-      await this.completeMilestone();
-    }
-  }
-}
+```markdown
+Coordination Strategy: Deploy phase transition agents for seamless workflow
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Coordinate phase transitions</parameter>
+<parameter name="prompt">You are the Phase Transition Coordinator for milestone {{MILESTONE_ID}}.
+
+Your responsibilities:
+1. Monitor phase completion markers:
+   - /tmp/milestone-design-complete-{{TIMESTAMP}}.marker
+   - /tmp/milestone-spec-complete-{{TIMESTAMP}}.marker
+   - /tmp/milestone-task-complete-{{TIMESTAMP}}.marker
+   - /tmp/milestone-execute-complete-{{TIMESTAMP}}.marker
+2. Read phase output from completed phases
+3. Transform outputs for next phase input
+4. Write input files for dependent phases:
+   - /tmp/milestone-phase-input-{{NEXT_PHASE}}-{{TIMESTAMP}}.json
+5. Trigger next phase agents when dependencies met
+6. Update milestone state file with transitions
+
+Session: {{SESSION_ID}}
+Strategy: {{EXECUTION_STRATEGY}}
+
+Coordinate seamless phase transitions with proper data flow.</parameter>
+</invoke>
+</function_calls>
 ```
 
 ## 📈 PERFORMANCE OPTIMIZATION
@@ -611,94 +580,84 @@ resource_allocation:
       max_cpu: 60%
 ```
 
-### Caching and Reuse
+### Pattern Reuse via Caching Agent
 
-```javascript
-class MilestoneCache {
-  constructor() {
-    this.cache = new Map();
-    this.patterns = new Map();
-  }
-  
-  async cachePhaseResults(phase, results) {
-    const key = `${phase}-${this.generateHash(results)}`;
-    this.cache.set(key, {
-      results: results,
-      timestamp: Date.now(),
-      reusable: this.analyzeReusability(results)
-    });
-  }
-  
-  async getCachedResults(phase, context) {
-    // Check for similar contexts
-    for (const [key, value] of this.cache.entries()) {
-      if (key.startsWith(phase) && this.contextMatches(context, value)) {
-        return value.results;
-      }
-    }
-    return null;
-  }
-  
-  analyzeReusability(results) {
-    // Determine if results can be reused
-    return {
-      designPatterns: true,  // Design patterns are reusable
-      specifications: false, // Specs are milestone-specific
-      taskTemplates: true,   // Task structures can be reused
-      codeSnippets: true    // Code patterns can be adapted
-    };
-  }
-}
+```markdown
+Deploy caching agent for pattern recognition and reuse:
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Manage pattern cache</parameter>
+<parameter name="prompt">You are the Pattern Cache Manager for milestone {{MILESTONE_ID}}.
+
+Your responsibilities:
+1. Monitor phase results for reusable patterns:
+   - Design patterns from /tmp/milestone-design-*.json
+   - Task templates from /tmp/milestone-tasks-*.json
+   - Code snippets from /tmp/milestone-execute-*.json
+2. Extract and categorize reusable components:
+   - Architectural patterns (always reusable)
+   - Task structures (often reusable)
+   - Code templates (conditionally reusable)
+   - Specifications (rarely reusable)
+3. Store patterns in cache:
+   - /tmp/milestone-cache-patterns-{{CATEGORY}}.json
+4. Provide cached patterns to requesting agents:
+   - Check /tmp/milestone-cache-request-*.json
+   - Match patterns to requests
+   - Write matches to /tmp/milestone-cache-response-*.json
+5. Maintain cache freshness and relevance
+
+Session: {{SESSION_ID}}
+Cache TTL: 3600 seconds
+
+Optimize milestone execution through intelligent pattern reuse.</parameter>
+</invoke>
+</function_calls>
 ```
 
 ## 🛡️ ERROR HANDLING AND RECOVERY
 
-### Failure Recovery
+### Failure Recovery via Recovery Agent
 
-```javascript
-class MilestoneRecovery {
-  constructor(milestoneId) {
-    this.milestoneId = milestoneId;
-    this.checkpoints = [];
-  }
-  
-  async createCheckpoint(phase) {
-    const checkpoint = {
-      phase: phase,
-      timestamp: Date.now(),
-      state: await this.captureState(),
-      agents: await this.captureAgents()
-    };
-    
-    this.checkpoints.push(checkpoint);
-    await this.persistCheckpoint(checkpoint);
-  }
-  
-  async recoverFromFailure(phase, error) {
-    console.error(`Phase ${phase} failed:`, error);
-    
-    // Try recovery strategies
-    const strategies = [
-      this.retryWithBackoff,
-      this.rollbackToCheckpoint,
-      this.degradedExecution,
-      this.manualIntervention
-    ];
-    
-    for (const strategy of strategies) {
-      try {
-        const result = await strategy.call(this, phase, error);
-        if (result.success) {
-          return result;
-        }
-      } catch (e) {
-        continue;
-      }
-    }
-    
-    throw new Error(`Unable to recover from phase ${phase} failure`);
-  }
-}
+```markdown
+Deploy recovery agent for resilient execution:
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Handle failure recovery</parameter>
+<parameter name="prompt">You are the Recovery Agent for milestone {{MILESTONE_ID}}.
+
+Your responsibilities:
+1. Monitor for failure indicators:
+   - Check /tmp/milestone-error-*.json files
+   - Look for incomplete phase markers
+   - Detect stalled progress indicators
+2. Create checkpoints before critical operations:
+   - Save state to /tmp/milestone-checkpoint-{{PHASE}}-{{TIMESTAMP}}.json
+   - Include phase state, progress, and agent status
+3. Implement recovery strategies:
+   - Strategy 1: Retry with exponential backoff (max 3 attempts)
+   - Strategy 2: Rollback to last checkpoint
+   - Strategy 3: Degraded execution (skip non-critical)
+   - Strategy 4: Request manual intervention
+4. Execute recovery when failures detected:
+   - Read error details from failure files
+   - Select appropriate recovery strategy
+   - Execute recovery and validate success
+   - Update state with recovery actions
+5. Log all recovery attempts:
+   - /tmp/milestone-recovery-log-{{TIMESTAMP}}.json
+
+Session: {{SESSION_ID}}
+Phase: {{CURRENT_PHASE}}
+Max Retries: 3
+
+Ensure resilient milestone execution with automatic recovery.</parameter>
+</invoke>
+</function_calls>
 ```
 
 ## ✅ COORDINATION QUALITY GATES

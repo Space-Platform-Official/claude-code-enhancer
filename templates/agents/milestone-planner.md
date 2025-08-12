@@ -319,113 +319,93 @@ kiro_strategy_framework:
       - automation_opportunities
 ```
 
-### Phase Mapping
+### Phase Mapping via KIRO Optimizer Agent
 
-```javascript
-class KiroPhaseMapper {
-  mapKiroToPhases(kiroStrategy) {
-    const phaseMapping = {
-      design: {
-        focus: ['originate', 'improve'],
-        weight: 0.15,
-        deliverables: [
-          'architecture_decisions',
-          'design_patterns',
-          'innovation_proposals'
-        ]
-      },
-      spec: {
-        focus: ['improve', 'originate'],
-        weight: 0.25,
-        deliverables: [
-          'technical_specifications',
-          'api_contracts',
-          'data_models'
-        ]
-      },
-      task: {
-        focus: ['keep', 'improve', 'remove'],
-        weight: 0.20,
-        deliverables: [
-          'task_breakdown',
-          'effort_estimates',
-          'dependency_map'
-        ]
-      },
-      execute: {
-        focus: ['all'],
-        weight: 0.40,
-        deliverables: [
-          'implemented_features',
-          'removed_debt',
-          'improved_performance'
-        ]
-      }
-    };
-    
-    return this.optimizePhaseAllocation(phaseMapping, kiroStrategy);
-  }
-  
-  optimizePhaseAllocation(mapping, strategy) {
-    // Adjust phase weights based on KIRO emphasis
-    const kiroEmphasis = this.calculateKiroEmphasis(strategy);
-    
-    if (kiroEmphasis.remove > 0.3) {
-      // More emphasis on cleanup
-      mapping.execute.weight += 0.05;
-      mapping.design.weight -= 0.05;
-    }
-    
-    if (kiroEmphasis.originate > 0.4) {
-      // More emphasis on design and spec
-      mapping.design.weight += 0.05;
-      mapping.spec.weight += 0.05;
-      mapping.execute.weight -= 0.10;
-    }
-    
-    return mapping;
-  }
-}
+```markdown
+Deploy KIRO phase optimization agent:
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Optimize KIRO phase mapping</parameter>
+<parameter name="prompt">You are the KIRO Phase Optimizer for milestone {{MILESTONE_ID}}.
+
+Your responsibilities:
+1. Read KIRO strategy from /tmp/planning-kiro-{{TIMESTAMP}}.json
+2. Map KIRO categories to phases:
+   - Design (15%): Focus on 'originate' and 'improve'
+   - Spec (25%): Focus on 'improve' and 'originate'
+   - Task (20%): Focus on 'keep', 'improve', 'remove'
+   - Execute (40%): Apply all KIRO categories
+3. Calculate KIRO emphasis distribution:
+   - Count items in each KIRO category
+   - Calculate percentage distribution
+4. Optimize phase weights based on emphasis:
+   - If remove > 30%: Increase execute by 5%, decrease design by 5%
+   - If originate > 40%: Increase design/spec by 5% each, decrease execute by 10%
+   - If keep > 50%: Maintain standard weights
+5. Define phase deliverables:
+   - Design: architecture_decisions, design_patterns, innovation_proposals
+   - Spec: technical_specifications, api_contracts, data_models
+   - Task: task_breakdown, effort_estimates, dependency_map
+   - Execute: implemented_features, removed_debt, improved_performance
+6. Save optimized mapping to /tmp/planning-phase-mapping-{{TIMESTAMP}}.json
+
+Session: {{SESSION_ID}}
+Optimization Mode: adaptive
+
+Optimize phase allocation for maximum KIRO effectiveness.</parameter>
+</invoke>
+</function_calls>
 ```
 
 ## 📈 PLANNING OPTIMIZATION
 
-### Continuous Improvement
+### Continuous Improvement via Optimization Agent
 
-```javascript
-class PlanningOptimizer {
-  async optimizePlan(initialPlan) {
-    let plan = initialPlan;
-    let iterations = 0;
-    const maxIterations = 5;
-    
-    while (iterations < maxIterations) {
-      const improvements = [];
-      
-      // Check for optimization opportunities
-      improvements.push(...this.optimizeTimeline(plan));
-      improvements.push(...this.optimizeResources(plan));
-      improvements.push(...this.optimizeDependencies(plan));
-      improvements.push(...this.optimizeRisks(plan));
-      
-      if (improvements.length === 0) break;
-      
-      // Apply improvements
-      plan = this.applyImprovements(plan, improvements);
-      iterations++;
-    }
-    
-    return {
-      optimizedPlan: plan,
-      optimizationStats: {
-        iterations: iterations,
-        timelineSaved: this.calculateTimeSaved(initialPlan, plan),
-        riskReduction: this.calculateRiskReduction(initialPlan, plan),
-        resourceEfficiency: this.calculateEfficiency(initialPlan, plan)
-      }
-    };
-  }
-}
+```markdown
+Deploy planning optimization agent:
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Optimize milestone plan</parameter>
+<parameter name="prompt">You are the Planning Optimizer for milestone {{MILESTONE_ID}}.
+
+Your responsibilities:
+1. Read initial plan from /tmp/milestone-plan-{{MILESTONE_ID}}.json
+2. Perform iterative optimization (max 5 iterations):
+   - Iteration 1: Timeline optimization
+   - Iteration 2: Resource optimization
+   - Iteration 3: Dependency optimization
+   - Iteration 4: Risk mitigation optimization
+   - Iteration 5: Final refinement
+3. For each iteration:
+   - Identify optimization opportunities
+   - Calculate potential improvements
+   - Apply beneficial changes
+   - Track optimization metrics
+4. Optimization strategies:
+   - Timeline: Identify parallel execution opportunities
+   - Resources: Balance workload distribution
+   - Dependencies: Minimize critical path length
+   - Risks: Enhance mitigation strategies
+5. Calculate optimization metrics:
+   - Time saved (days reduced)
+   - Risk reduction (percentage)
+   - Resource efficiency (utilization improvement)
+   - Confidence score increase
+6. Save optimized plan to /tmp/milestone-plan-optimized-{{MILESTONE_ID}}.json
+7. Generate optimization report:
+   - /tmp/planning-optimization-report-{{TIMESTAMP}}.json
+
+Session: {{SESSION_ID}}
+Max Iterations: 5
+Optimization Threshold: 10% improvement
+
+Iteratively optimize plan for maximum efficiency.</parameter>
+</invoke>
+</function_calls>
 ```
 
 ## 🛡️ PLANNING VALIDATION
