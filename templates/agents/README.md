@@ -25,7 +25,7 @@ The Claude Code Agent System transforms sequential command execution into effici
 | **code-analyzer** | Code analysis | Refactoring, optimization, review | Low |
 | **git-operator** | Version control | Commits, merges, conflicts | Low |
 | **file-processor** | Batch operations | Large-scale transformations | High |
-| **quality-enforcer** | Quality standards | Linting, formatting, compliance | Medium |
+| **code-quality-enforcer** | Quality standards | Linting, formatting, compliance | Medium |
 
 ## Architecture
 
@@ -108,7 +108,7 @@ execution_strategy:
     code_analysis: code-analyzer
     git_operations: git-operator
     file_processing: file-processor
-    quality_checks: quality-enforcer
+    quality_checks: code-quality-enforcer
 ```
 
 ### Example: Test Command with Agents
@@ -245,7 +245,7 @@ workflow: {
   stages: [
     { agent: 'code-analyzer', task: 'identify_issues' },
     { agent: 'file-processor', task: 'apply_fixes' },
-    { agent: 'quality-enforcer', task: 'validate_quality' },
+    { agent: 'code-quality-enforcer', task: 'validate_quality' },
     { agent: 'git-operator', task: 'commit_changes' }
   ]
 }

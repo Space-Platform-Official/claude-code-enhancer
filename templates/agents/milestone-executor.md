@@ -235,7 +235,7 @@ Phase: Execute (40% weight)
 Execute all testing tasks with quality validation.</parameter>
 </invoke>
 <invoke name="Task">
-<parameter name="subagent_type">quality-enforcer</parameter>
+<parameter name="subagent_type">code-quality-enforcer</parameter>
 <parameter name="description">Validate implementation quality</parameter>
 <parameter name="prompt">You are the Quality Validator for milestone {{MILESTONE_ID}}.
 
@@ -308,7 +308,7 @@ Deploy quality validation agent for phase outputs:
 
 <function_calls>
 <invoke name="Task">
-<parameter name="subagent_type">quality-enforcer</parameter>
+<parameter name="subagent_type">code-quality-enforcer</parameter>
 <parameter name="description">Validate phase outputs</parameter>
 <parameter name="prompt">You are the Phase Output Validator for milestone {{MILESTONE_ID}}.
 

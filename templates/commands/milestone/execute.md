@@ -66,7 +66,7 @@ if (complexity >= 'medium' && parallelismScore > 0.6) {
 1. Assess complexity → Determine optimal execution strategy
 2. Deploy coordinator → Spawn milestone-coordinator for orchestration
 3. Deploy executors → Spawn milestone-executor agents per phase
-4. Leverage specialized agents → git-operator, quality-enforcer, file-processor
+4. Leverage specialized agents → git-operator, code-quality-enforcer, file-processor
 5. Execute KIRO phases → Parallel execution with 15/25/20/40% weighting
 6. Coordinate state → Synchronize via /tmp/milestone-state-*.json
 7. Aggregate progress → Unified tracking across all agents

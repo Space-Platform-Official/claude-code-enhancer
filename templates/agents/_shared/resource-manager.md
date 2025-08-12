@@ -43,7 +43,7 @@ resource_limits:
       timeout: 600s
       priority: low
       
-    quality-enforcer:
+    code-quality-enforcer:
       max_memory: 400MB
       max_cpu_percent: 20
       timeout: 240s
@@ -203,7 +203,7 @@ class AgentResourceTracker {
       'code-analyzer': { memory: 400 * 1024 * 1024, cpu: 20, timeout: 180000 },
       'git-operator': { memory: 300 * 1024 * 1024, cpu: 15, timeout: 120000 },
       'file-processor': { memory: 600 * 1024 * 1024, cpu: 30, timeout: 600000 },
-      'quality-enforcer': { memory: 400 * 1024 * 1024, cpu: 20, timeout: 240000 },
+      'code-quality-enforcer': { memory: 400 * 1024 * 1024, cpu: 20, timeout: 240000 },
       'orchestrator': { memory: 200 * 1024 * 1024, cpu: 10, timeout: 60000 }
     };
     
@@ -428,7 +428,7 @@ class AgentSpawnController {
       'test-fixer': 4,       // High
       'git-operator': 4,     // High
       'code-analyzer': 3,    // Medium
-      'quality-enforcer': 3, // Medium
+      'code-quality-enforcer': 3, // Medium
       'file-processor': 2    // Low
     };
     
@@ -441,7 +441,7 @@ class AgentSpawnController {
       'code-analyzer': { memory: 400 * 1024 * 1024, cpu: 20 },
       'git-operator': { memory: 300 * 1024 * 1024, cpu: 15 },
       'file-processor': { memory: 600 * 1024 * 1024, cpu: 30 },
-      'quality-enforcer': { memory: 400 * 1024 * 1024, cpu: 20 },
+      'code-quality-enforcer': { memory: 400 * 1024 * 1024, cpu: 20 },
       'orchestrator': { memory: 200 * 1024 * 1024, cpu: 10 }
     };
     

@@ -101,7 +101,7 @@ agent_selection_rules:
     
   code_analysis:
     primary: code-analyzer
-    support: [quality-enforcer]
+    support: [code-quality-enforcer]
     threshold: "> 10 files OR complex analysis"
     
   git_operations:
@@ -115,7 +115,7 @@ agent_selection_rules:
     threshold: "> 20 files"
     
   quality_enforcement:
-    primary: quality-enforcer
+    primary: code-quality-enforcer
     support: [code-analyzer]
     threshold: "full codebase scan"
     

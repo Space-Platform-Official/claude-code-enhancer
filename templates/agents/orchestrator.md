@@ -91,7 +91,7 @@ agent_registry:
     optimal_for: [bulk_updates, format_conversion, restructuring]
     resource_usage: high
     
-  quality-enforcer:
+  code-quality-enforcer:
     capabilities: [linting, formatting, style_checking]
     optimal_for: [code_quality, consistency, standards]
     resource_usage: medium
@@ -105,7 +105,7 @@ Analysis: Complex task with parallelism benefit
 Selected agents:
 1. test-fixer (primary) - Fix failures
 2. code-analyzer (support) - Identify uncovered code
-3. quality-enforcer (support) - Ensure test quality
+3. code-quality-enforcer (support) - Ensure test quality
 
 Coordination: Parallel execution with result aggregation
 ```
@@ -271,7 +271,7 @@ orchestration_metrics:
 Active Agents:
 • test-fixer-001: Running unit tests (45%)
 • code-analyzer-002: Scanning for patterns (78%)
-• quality-enforcer-003: Formatting code (92%)
+• code-quality-enforcer-003: Formatting code (92%)
 ```
 
 ## 🛡️ FAILURE HANDLING
