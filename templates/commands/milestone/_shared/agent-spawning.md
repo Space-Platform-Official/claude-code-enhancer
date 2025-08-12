@@ -1,15 +1,15 @@
 ---
-description: Real multi-agent spawning patterns using Task tool for milestone execution
+description: Real multi-agent spawning patterns using Task tool for milestone execution with enhanced agent integration
 ---
 
 # Milestone Agent Spawning Framework
 
-Real multi-agent orchestration using Claude Code's Task tool for parallel milestone execution.
+Real multi-agent orchestration using Claude Code's Task tool for parallel milestone execution with full integration to specialized milestone agents.
 
-## 🚨 MANDATORY: Use Task Tool, Not Bash Functions!
+## 🚨 MANDATORY: Use Task Tool with Native Milestone Agents!
 
 **CRITICAL REQUIREMENT:**
-When executing milestones, you MUST use the Task tool to spawn real agents, NOT bash background processes.
+When executing milestones, you MUST use the Task tool to spawn real agents, leveraging the specialized milestone-coordinator and milestone-executor agents for optimal performance.
 
 ### ❌ WRONG (Old Way - No Real Parallelism):
 ```bash
@@ -17,12 +17,67 @@ spawn_task_execution_agent "$milestone_id" &  # Just a bash function
 spawn_progress_monitoring_agent "$milestone_id" &  # Another bash function
 ```
 
-### ✅ CORRECT (New Way - Real Task Tool Agents):
-Use the Task tool with these exact patterns to spawn real parallel agents.
+### ✅ CORRECT (New Way - Native Milestone Agents):
+Use the Task tool with milestone-specific agents for 3-5x performance improvement.
+
+## 🚀 Enhanced Agent Integration
+
+### Decision Engine Integration
+Before spawning agents, assess complexity:
+
+```javascript
+// Assess milestone complexity
+const complexity = assessMilestoneComplexity({
+  phaseCount: 4,  // KIRO phases
+  taskCount: estimatedTasks,
+  fileCount: affectedFiles,
+  parallelismBenefit: calculateParallelismBenefit()
+});
+
+// Decision: Use agents for medium/high complexity
+if (complexity >= 'medium') {
+  // Spawn milestone-coordinator for orchestration
+  // Spawn milestone-executor for phase execution
+} else {
+  // Use direct execution for simple milestones
+}
+```
 
 ## Core Agent Templates
 
-### 1. Task Executor Agent
+### 0. Milestone Coordinator Agent (Master Orchestrator)
+```markdown
+For complex milestone orchestration, spawn the coordinator:
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Orchestrate milestone {{MILESTONE_ID}}</parameter>
+<parameter name="prompt">You are the Milestone Coordinator Agent using the milestone-coordinator capabilities.
+
+Milestone: {{MILESTONE_ID}}
+Title: {{MILESTONE_TITLE}}
+Phases: Design (15%), Spec (25%), Task (20%), Execute (40%)
+
+Your orchestration responsibilities:
+1. Deploy specialized agents for each KIRO phase
+2. Coordinate phase transitions and dependencies
+3. Aggregate progress from all phase agents
+4. Manage state synchronization across agents
+5. Handle phase-level error recovery
+6. Create consolidated progress reports
+
+Coordination files:
+- State: /tmp/milestone-state-{{MILESTONE_ID}}.json
+- Progress: /tmp/milestone-progress-{{MILESTONE_ID}}.json
+- Registry: /tmp/milestone-agents-{{MILESTONE_ID}}.json
+
+Begin by initializing the milestone state and deploying phase agents.</parameter>
+</invoke>
+</function_calls>
+```
+
+### 1. Task Executor Agent (Phase Implementation)
 ```markdown
 When spawning the Task Executor Agent, use:
 
@@ -52,7 +107,42 @@ Begin by reading the milestone file and listing all pending tasks.</parameter>
 </function_calls>
 ```
 
-### 2. Progress Monitor Agent
+### 2. Milestone Executor Agent (Phase Specialist)
+```markdown
+For phase-specific execution, spawn the executor:
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Execute {{PHASE}} phase for milestone {{MILESTONE_ID}}</parameter>
+<parameter name="prompt">You are the Milestone Executor Agent using the milestone-executor capabilities.
+
+Milestone: {{MILESTONE_ID}}
+Phase: {{PHASE}} (Weight: {{WEIGHT}}%)
+Current State: {{PHASE_STATE}}
+
+Phase execution responsibilities:
+1. Execute all tasks within the {{PHASE}} phase
+2. Apply KIRO methodology (Keep/Improve/Remove/Originate)
+3. Generate phase deliverables and artifacts
+4. Validate phase completion criteria
+5. Update milestone state with phase results
+6. Report progress to coordinator
+
+Phase-specific focus:
+- Design: Architecture decisions and patterns
+- Spec: Technical specifications and contracts
+- Task: Work breakdown and planning
+- Execute: Implementation and validation
+
+Output location: /tmp/milestone-{{PHASE}}-{{MILESTONE_ID}}.json
+
+Begin executing the {{PHASE}} phase tasks.</parameter>
+</invoke>
+</function_calls>
+```
+
+### 3. Progress Monitor Agent
 ```markdown
 When spawning the Progress Monitor Agent, use:
 
