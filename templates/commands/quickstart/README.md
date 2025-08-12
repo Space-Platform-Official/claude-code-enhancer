@@ -1,129 +1,129 @@
-# Quickstart Git Commands
+# Git Commands Quick Reference
 
-Convenient shortcuts for frequently used git operations with full safety and intelligence features.
+Essential git operations with full safety and intelligence features. Use the full command paths for access to all Claude Code git functionality.
 
-## Available Commands
+## Available Git Commands
 
 ### Core Git Operations
 
-| Command | Alias To | Description |
-|---------|----------|-------------|
-| `/quickstart/gs` | `/git/status` | Quick git status with intelligent insights |
-| `/quickstart/gc` | `/git/commit` | Quick git commit with smart validation |
-| `/quickstart/gp` | `/git/push` | Quick git push with safety checks |
-| `/quickstart/gf` | `/git/workflows/feature` | Quick git feature workflow |
+| Command | Description |
+|---------|-------------|
+| `/git/status` | Intelligent git status with insights and recommendations |
+| `/git/commit` | Smart git commit with validation and conventional formatting |
+| `/git/push` | Safe git push with comprehensive protection |
+| `/git/workflows/feature` | Complete git feature workflow lifecycle |
 
 ## Quick Reference
 
 ### Daily Development Flow
 ```bash
 # Check current status
-/quickstart/gs
+/git/status
 
 # Make changes, then commit
-/quickstart/gc "feat: add new feature"
+/git/commit "feat: add new feature"
 
 # Push safely
-/quickstart/gp
+/git/push
 
 # Or use complete feature workflow
-/quickstart/gf init    # Start new feature
-/quickstart/gf dev     # Development iterations  
-/quickstart/gf review  # Prepare for review
-/quickstart/gf merge   # Integrate feature
+/git/workflows/feature init    # Start new feature
+/git/workflows/feature dev     # Development iterations  
+/git/workflows/feature review  # Prepare for review
+/git/workflows/feature merge   # Integrate feature
 ```
 
 ### Command Details
 
-#### `/quickstart/gs` - Git Status
+#### `/git/status` - Git Status
 - **Purpose:** Instant repository intelligence and workflow recommendations
 - **Features:** Branch status, file changes, team activity, quick actions
 - **Best For:** Understanding current state before any git operation
 
-#### `/quickstart/gc` - Git Commit  
+#### `/git/commit` - Git Commit  
 - **Purpose:** Smart commits with validation and conventional formatting
 - **Features:** Pre-commit hooks, branch protection, quality gates
 - **Best For:** Creating clean, validated commits that tell a story
 
-#### `/quickstart/gp` - Git Push
+#### `/git/push` - Git Push
 - **Purpose:** Safe pushes with comprehensive protection
 - **Features:** Branch protection, quality validation, CI/CD integration
 - **Best For:** Sharing code safely without breaking team workflows
 
-#### `/quickstart/gf` - Git Feature
+#### `/git/workflows/feature` - Git Feature
 - **Purpose:** End-to-end feature development lifecycle
 - **Features:** Planning, development, review, integration phases
 - **Best For:** Managing complete features from start to production
 
-## Benefits of Using Quickstart Commands
+## Benefits of Using Git Commands
 
-✅ **Speed** - Memorable shortcuts for common operations  
-✅ **Safety** - All full command protections included  
-✅ **Consistency** - Same arguments and options supported  
+✅ **Speed** - Direct access to git operations  
+✅ **Safety** - Comprehensive protection and validation included  
+✅ **Consistency** - Full arguments and options supported  
 ✅ **Intelligence** - Smart recommendations and insights  
 ✅ **Quality** - Built-in validation and best practices  
 
 ## Arguments Support
 
-All quickstart commands support the same arguments as their full counterparts:
+All git commands support comprehensive arguments and options:
 
 ```bash
 # Status with options
-/quickstart/gs --verbose --interactive
+/git/status --verbose --interactive
 
 # Commit with message
-/quickstart/gc "fix(auth): resolve login timeout"
+/git/commit "fix(auth): resolve login timeout"
 
 # Push with specific options
-/quickstart/gp --force-with-lease origin feature-branch
+/git/push --force-with-lease origin feature-branch
 
 # Feature workflow phases
-/quickstart/gf init
-/quickstart/gf dev  
-/quickstart/gf review
-/quickstart/gf merge
+/git/workflows/feature init
+/git/workflows/feature dev  
+/git/workflows/feature review
+/git/workflows/feature merge
 ```
 
-## When to Use Full Commands
+## Advanced Usage
 
-While quickstart aliases are perfect for daily use, consider the full commands for:
+These git commands provide comprehensive functionality for professional development workflows:
 
-- **Learning** - Understanding all available features
+- **Learning** - Understanding all available git features and patterns
 - **Advanced Options** - Complex scenarios requiring detailed configuration
-- **Documentation** - Referencing complete feature sets
-- **Troubleshooting** - Accessing detailed error handling
+- **Documentation** - Referencing complete feature sets and capabilities
+- **Troubleshooting** - Accessing detailed error handling and diagnostics
 
 ## Integration with Other Commands
 
-Quickstart commands work seamlessly with other Claude Code commands:
+Git commands work seamlessly with other Claude Code commands:
 
 ```bash
 # Check before committing
-/quickstart/gs
+/git/status
 /check                    # Run full codebase validation
-/quickstart/gc "feat: implement feature after validation"
+/git/commit "feat: implement feature after validation"
 
 # Feature development with testing
-/quickstart/gf dev
+/git/workflows/feature dev
 /test-coverage           # Check test coverage
-/quickstart/gc "test: improve coverage for auth module"
+/git/commit "test: improve coverage for auth module"
 
 # Review preparation
-/quickstart/gf review
+/git/workflows/feature review
 /security-audit         # Run security scan
 /docs                   # Update documentation
 ```
 
 ## Tips for Maximum Productivity
 
-1. **Start with Status** - Always run `/quickstart/gs` first
-2. **Small Commits** - Use `/quickstart/gc` frequently with focused changes
-3. **Safe Pushing** - Let `/quickstart/gp` validate before pushing
-4. **Feature Workflow** - Use `/quickstart/gf` for complete feature lifecycle
+1. **Start with Status** - Always run `/git/status` first
+2. **Small Commits** - Use `/git/commit` frequently with focused changes
+3. **Safe Pushing** - Let `/git/push` validate before pushing
+4. **Feature Workflow** - Use `/git/workflows/feature` for complete feature lifecycle
 
 ## Full Documentation
 
-Each quickstart command links to its full documentation:
+Access complete documentation for each git command:
 
 - [Git Status](/git/status.md) - Complete status analysis features
 - [Git Commit](/git/commit.md) - Advanced commit strategies  
@@ -132,4 +132,4 @@ Each quickstart command links to its full documentation:
 
 ---
 
-**Remember:** These shortcuts give you the full power of Claude Code's git intelligence in memorable, fast commands!
+**Remember:** These commands give you the full power of Claude Code's git intelligence with comprehensive safety and validation!

@@ -12,11 +12,7 @@ When you run `/debug`, you are REQUIRED to:
 1. **REPRODUCE** the issue consistently and reliably
 2. **ISOLATE** the root cause using systematic debugging techniques
 3. **FIX THE ACTUAL PROBLEM** - not just the symptoms!
-4. **USE MULTIPLE AGENTS** to trace different code paths in parallel:
-   - Spawn one agent to reproduce and isolate the issue
-   - Spawn another to trace execution flow
-   - Spawn more agents for different hypotheses
-   - Say: "I'll spawn multiple debugging agents to trace all possible root causes in parallel"
+4. **USE TASK TOOL AGENTS** for true parallel debugging investigation
 5. **DO NOT STOP** until:
    - ✅ Root cause is definitively identified
    - ✅ Fix addresses the underlying problem
@@ -32,8 +28,8 @@ When you run `/debug`, you are REQUIRED to:
 **MANDATORY WORKFLOW:**
 ```
 1. Reproduce issue → Confirm the problem
-2. IMMEDIATELY spawn agents for systematic analysis
-3. Binary search debugging → Narrow down the cause
+2. IMMEDIATELY spawn Task tool agents for systematic parallel analysis
+3. Aggregate findings → Coordinate agent results through /tmp state files
 4. Fix root cause → Eliminate the underlying issue
 5. VERIFY fix → Ensure problem is solved permanently
 ```
@@ -130,17 +126,101 @@ Generate and test specific hypotheses:
    - Security policy conflicts
    - Resource limit constraints
 
-**Step 4: Multi-Agent Debugging Approach**
-Deploy specialized debugging agents for parallel investigation:
+**Step 4: Task Tool Debugging Agent Deployment**
+Launch specialized debugging agents using Task tool for true parallelism:
 
-```
-"I've identified 5 potential root causes for this issue. I'll spawn debugging agents:
-- Agent 1: Trace the authentication flow and session handling
-- Agent 2: Investigate database query performance and locking
-- Agent 3: Analyze memory usage patterns and potential leaks  
-- Agent 4: Test race conditions in concurrent request handling
-- Agent 5: Examine third-party API integration failures
-Let me investigate all these potential causes in parallel..."
+```markdown
+I'll spawn 5 specialized debugging agents using Task tool:
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Log Analysis Agent</parameter>
+<parameter name="prompt">You are the Log Analysis Agent for debugging investigation.
+
+Your responsibilities:
+1. Analyze all available log files (application, system, error logs)
+2. Identify error patterns, warnings, and anomalies
+3. Correlate log entries with issue timeline
+4. Extract stack traces and error context
+5. Generate log analysis report with findings
+
+Provide comprehensive log analysis to identify root cause indicators.
+Save findings to /tmp/log-analysis-{{TIMESTAMP}}.json for coordination.</parameter>
+</invoke>
+</function_calls>
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Code Inspection Agent</parameter>
+<parameter name="prompt">You are the Code Inspection Agent for debugging investigation.
+
+Your responsibilities:
+1. Inspect code paths related to the reported issue
+2. Analyze function calls, data flow, and state changes
+3. Identify potential logic errors, race conditions, edge cases
+4. Review recent code changes that might have introduced the bug
+5. Generate code inspection report with suspect areas
+
+Provide detailed code analysis focusing on potential root causes.
+Save findings to /tmp/code-inspection-{{TIMESTAMP}}.json for coordination.</parameter>
+</invoke>
+</function_calls>
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Environment Validation Agent</parameter>
+<parameter name="prompt">You are the Environment Validation Agent for debugging investigation.
+
+Your responsibilities:
+1. Check system configuration, environment variables, dependencies
+2. Validate service availability, network connectivity, permissions
+3. Verify resource availability (memory, disk, CPU, network)
+4. Compare working vs. failing environment differences
+5. Generate environment validation report
+
+Provide comprehensive environment analysis to identify configuration issues.
+Save findings to /tmp/env-validation-{{TIMESTAMP}}.json for coordination.</parameter>
+</invoke>
+</function_calls>
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Issue Reproduction Agent</parameter>
+<parameter name="prompt">You are the Issue Reproduction Agent for debugging investigation.
+
+Your responsibilities:
+1. Create minimal reproducible test cases for the issue
+2. Systematically reproduce the issue under controlled conditions
+3. Test edge cases and boundary conditions that trigger the problem
+4. Document exact steps, timing, and conditions for reproduction
+5. Generate reproduction report with consistent trigger methods
+
+Provide reliable reproduction methods to enable systematic debugging.
+Save findings to /tmp/issue-reproduction-{{TIMESTAMP}}.json for coordination.</parameter>
+</invoke>
+</function_calls>
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Solution Synthesis Agent</parameter>
+<parameter name="prompt">You are the Solution Synthesis Agent for debugging investigation.
+
+Your responsibilities:
+1. Aggregate findings from all debugging agents
+2. Correlate evidence to identify the most likely root cause
+3. Propose specific fixes addressing the identified root cause
+4. Validate fix effectiveness through testing scenarios
+5. Generate comprehensive solution report with implementation plan
+
+Synthesize all debugging evidence into actionable root cause solution.
+Save solution to /tmp/solution-synthesis-{{TIMESTAMP}}.json for coordination.</parameter>
+</invoke>
+</function_calls>
 ```
 
 **Language-Specific Debugging Techniques:**
@@ -230,10 +310,33 @@ The issue is resolved when:
 ✓ Related potential issues have been reviewed and addressed
 ✓ Monitoring is in place to detect similar future issues
 
+**Step 8: Agent Coordination and Results Aggregation**
+Coordinate debugging agents and synthesize findings:
+
+```markdown
+**Debugging Agent Coordination Protocol:**
+
+1. **Launch Phase**: Spawn all 5 debugging agents using Task tool
+2. **Monitoring Phase**: Each agent writes findings to /tmp/debug-{agent}-{timestamp}.json
+3. **Aggregation Phase**: Solution Synthesis Agent reads all state files
+4. **Analysis Phase**: Correlate findings to identify definitive root cause
+5. **Implementation Phase**: Apply targeted fix addressing root cause
+6. **Verification Phase**: Validate fix with comprehensive testing
+```
+
+**State File Coordination:**
+- Log Analysis: `/tmp/log-analysis-{timestamp}.json`
+- Code Inspection: `/tmp/code-inspection-{timestamp}.json`
+- Environment Validation: `/tmp/env-validation-{timestamp}.json`
+- Issue Reproduction: `/tmp/issue-reproduction-{timestamp}.json`
+- Solution Synthesis: `/tmp/solution-synthesis-{timestamp}.json`
+- Final Coordination: `/tmp/debugging-final-report-{timestamp}.json`
+
 **Final Debugging Commitment:**
 I will now execute EVERY debugging step listed above and FIND THE ROOT CAUSE. I will:
 - ✅ Systematically reproduce and isolate the issue
-- ✅ SPAWN MULTIPLE DEBUGGING AGENTS to investigate in parallel
+- ✅ SPAWN TASK TOOL DEBUGGING AGENTS for true parallel investigation
+- ✅ Coordinate agent findings through /tmp state files
 - ✅ Use binary search and hypothesis-driven debugging
 - ✅ Keep working until the root cause is definitively identified
 - ✅ Fix the underlying problem, not just symptoms
@@ -251,4 +354,4 @@ I will NOT:
 
 The issue is resolved ONLY when the root cause is eliminated and verified.
 
-**Executing systematic debugging investigation and ROOT CAUSE ELIMINATION NOW...**
+**Executing systematic debugging investigation with Task tool agents and ROOT CAUSE ELIMINATION NOW...**
