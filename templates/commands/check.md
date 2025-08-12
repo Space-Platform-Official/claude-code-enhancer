@@ -11,12 +11,98 @@ When you run `/check`, you are REQUIRED to:
 
 1. **ANALYZE PROJECT** and select appropriate quality workflow
 2. **ORCHESTRATE QUALITY COMMANDS** in proper dependency order
-3. **SPAWN MULTIPLE AGENTS** to execute quality commands in parallel:
-   - Agent 1: Execute `/quality/format` for code formatting
-   - Agent 2: Execute `/quality/cleanup` for dead code removal
-   - Agent 3: Execute `/quality/dedupe` for duplicate detection
-   - Agent 4: Execute `/quality/verify` for final validation
-   - Say: "I'll spawn agents to orchestrate the complete quality pipeline"
+3. **SPAWN MULTIPLE TASK TOOL AGENTS** to execute quality commands in true parallel:
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Execute format quality command</parameter>
+<parameter name="prompt">You are the Format Quality Agent.
+
+Your responsibilities:
+1. Execute `/quality/format` command for comprehensive code formatting
+2. Apply consistent formatting across all languages in the project
+3. Handle formatting errors and retry with appropriate fixes
+4. Generate detailed formatting metrics and improvements
+5. Save results to /tmp/format-quality-{{timestamp}}.json
+6. Coordinate with other quality agents through shared state files
+
+Execute comprehensive code formatting and report all improvements.</parameter>
+</invoke>
+</function_calls>
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Execute cleanup quality command</parameter>
+<parameter name="prompt">You are the Cleanup Quality Agent.
+
+Your responsibilities:
+1. Execute `/quality/cleanup` command for dead code removal
+2. Remove unused imports, variables, and functions across all files
+3. Optimize code structure and eliminate redundancies
+4. Handle cleanup errors and ensure code integrity
+5. Save results to /tmp/cleanup-quality-{{timestamp}}.json
+6. Coordinate with other quality agents through shared state files
+
+Execute comprehensive code cleanup and report all optimizations.</parameter>
+</invoke>
+</function_calls>
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Execute dedupe quality command</parameter>
+<parameter name="prompt">You are the Dedupe Quality Agent.
+
+Your responsibilities:
+1. Execute `/quality/dedupe` command for duplicate detection and removal
+2. Identify and consolidate duplicate code patterns and functions
+3. Merge similar code blocks and extract common utilities
+4. Validate deduplication doesn't break functionality
+5. Save results to /tmp/dedupe-quality-{{timestamp}}.json
+6. Coordinate with other quality agents through shared state files
+
+Execute comprehensive code deduplication and report all consolidations.</parameter>
+</invoke>
+</function_calls>
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Execute verify quality command</parameter>
+<parameter name="prompt">You are the Verify Quality Agent.
+
+Your responsibilities:
+1. Execute `/quality/verify` command for final validation
+2. Run comprehensive syntax, style, and standards verification
+3. Perform security analysis and dependency auditing
+4. Validate all previous quality operations completed successfully
+5. Save results to /tmp/verify-quality-{{timestamp}}.json
+6. Generate final quality report aggregating all agent results
+
+Execute comprehensive code verification and generate final quality status.</parameter>
+</invoke>
+</function_calls>
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Coordinate quality pipeline execution</parameter>
+<parameter name="prompt">You are the Quality Coordinator Agent.
+
+Your responsibilities:
+1. Monitor all quality agents' progress through /tmp state files
+2. Aggregate results from format, cleanup, dedupe, and verify agents
+3. Handle error propagation and coordinate retry operations
+4. Ensure proper execution order and dependencies
+5. Generate unified quality report from all operations
+6. Save final coordination status to /tmp/quality-coordination-{{timestamp}}.json
+
+Coordinate the complete quality pipeline and ensure all operations succeed.</parameter>
+</invoke>
+</function_calls>
+
 4. **DO NOT STOP** until:
    - ✅ ALL quality commands complete successfully
    - ✅ ALL format/cleanup/dedupe/verify operations pass
@@ -32,9 +118,14 @@ When you run `/check`, you are REQUIRED to:
 **MANDATORY ORCHESTRATION WORKFLOW:**
 ```
 1. Analyze project → Select quality workflow
-2. IMMEDIATELY spawn agents for quality command pipeline
-3. Coordinate format → cleanup → dedupe → verify sequence
-4. Aggregate results and handle failures
+2. IMMEDIATELY spawn 5 Task tool agents in parallel:
+   - Format Quality Agent
+   - Cleanup Quality Agent  
+   - Dedupe Quality Agent
+   - Verify Quality Agent
+   - Quality Coordinator Agent
+3. Execute format → cleanup → dedupe → verify sequence through agent coordination
+4. Aggregate results through /tmp state file coordination
 5. REPEAT any failed stages until EVERYTHING passes
 ```
 
@@ -148,14 +239,58 @@ Run `make test` and ensure:
 
 **Failure Response Protocol:**
 When issues are found:
-1. **IMMEDIATELY SPAWN AGENTS** to fix issues in parallel:
-   ```
-   "I found 15 linting issues and 3 test failures. I'll spawn agents to fix these:
-   - Agent 1: Fix linting issues in files A, B, C
-   - Agent 2: Fix linting issues in files D, E, F  
-   - Agent 3: Fix the failing tests
-   Let me tackle all of these in parallel..."
-   ```
+1. **IMMEDIATELY SPAWN TASK TOOL AGENTS** to fix issues in parallel:
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Fix linting issues batch 1</parameter>
+<parameter name="prompt">You are the Lint Fix Agent 1.
+
+Your responsibilities:
+1. Fix linting issues in files A, B, C
+2. Apply automatic fixes where possible
+3. Handle complex linting violations manually
+4. Validate fixes don't break functionality
+5. Save results to /tmp/lint-fixes-batch1-{{timestamp}}.json
+
+Fix all assigned linting issues and report completion status.</parameter>
+</invoke>
+</function_calls>
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">general-purpose</parameter>
+<parameter name="description">Fix linting issues batch 2</parameter>
+<parameter name="prompt">You are the Lint Fix Agent 2.
+
+Your responsibilities:
+1. Fix linting issues in files D, E, F
+2. Apply automatic fixes where possible
+3. Handle complex linting violations manually
+4. Validate fixes don't break functionality
+5. Save results to /tmp/lint-fixes-batch2-{{timestamp}}.json
+
+Fix all assigned linting issues and report completion status.</parameter>
+</invoke>
+</function_calls>
+
+<function_calls>
+<invoke name="Task">
+<parameter name="subagent_type">test-fixer</parameter>
+<parameter name="description">Fix failing tests</parameter>
+<parameter name="prompt">You are the Test Fix Agent.
+
+Your responsibilities:
+1. Fix the 3 failing tests identified
+2. Analyze test failure root causes
+3. Update test implementation or fix underlying code
+4. Ensure all tests pass after fixes
+5. Save results to /tmp/test-fixes-{{timestamp}}.json
+
+Fix all failing tests and ensure 100% test pass rate.</parameter>
+</invoke>
+</function_calls>
 2. **FIX EVERYTHING** - Address EVERY issue, no matter how "minor"
 3. **VERIFY** - Re-run all checks after fixes
 4. **REPEAT** - If new issues found, spawn more agents and fix those too
@@ -177,9 +312,10 @@ The code is ready when:
 ✓ Error paths tested and handle gracefully
 
 **Final Commitment:**
-I will now execute EVERY check listed above and FIX ALL ISSUES. I will:
+I will now execute EVERY check listed above and FIX ALL ISSUES using Task tool agents. I will:
 - ✅ Run all checks to identify issues
-- ✅ SPAWN MULTIPLE AGENTS to fix issues in parallel
+- ✅ SPAWN MULTIPLE TASK TOOL AGENTS to fix issues in true parallel
+- ✅ Coordinate through /tmp state files for optimal performance
 - ✅ Keep working until EVERYTHING passes
 - ✅ Not stop until all checks show passing status
 
@@ -195,4 +331,28 @@ I will NOT:
 
 The code is ready ONLY when every single check shows ✅ GREEN.
 
-**Executing comprehensive validation and FIXING ALL ISSUES NOW...**
+**Executing comprehensive validation and FIXING ALL ISSUES NOW with Task tool parallel agents...**
+
+## Task Tool Agent Coordination Pattern
+
+**State File Management:**
+- `/tmp/format-quality-{timestamp}.json` - Format agent results
+- `/tmp/cleanup-quality-{timestamp}.json` - Cleanup agent results  
+- `/tmp/dedupe-quality-{timestamp}.json` - Dedupe agent results
+- `/tmp/verify-quality-{timestamp}.json` - Verify agent results
+- `/tmp/quality-coordination-{timestamp}.json` - Coordinator status
+- `/tmp/final-quality-report-{timestamp}.json` - Aggregated results
+
+**Performance Benefits:**
+- **3-5x faster execution** through true parallelism
+- **Isolated error handling** per quality operation
+- **Real-time progress monitoring** via state files
+- **Scalable agent coordination** for complex projects
+- **Automatic retry mechanisms** for failed operations
+
+**Agent Execution Flow:**
+1. **Launch Phase**: All 5 agents spawn simultaneously
+2. **Coordination Phase**: Agents coordinate through shared state files
+3. **Execution Phase**: Quality operations run in parallel with dependencies
+4. **Aggregation Phase**: Coordinator collects and validates all results
+5. **Reporting Phase**: Unified quality report with comprehensive metrics

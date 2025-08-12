@@ -1,143 +1,167 @@
 ---
 allowed-tools: all
-description: Intelligent code cleanup with safety-first approach and confidence-based decisions
+description: Unified cleanup system with multiple modes for intelligent code, artifact, backup, and dead code removal
 ---
 
-# 🧹 Intelligent Cleanup System - Phase 1: Safety-First Implementation
+# 🧹 Unified Cleanup System
 
-**THIS IS A PRECISION CLEANUP TASK - NOT A SLEDGEHAMMER!**
+**COMPREHENSIVE CLEANUP WITH MODE-BASED OPERATION**
 
 When you run `/cleanup`, you will:
 
-1. **ANALYZE** code with context awareness and confidence scoring
-2. **PRESERVE** valuable patterns, framework code, and dynamic usage
-3. **VERIFY** all changes with comprehensive testing
-4. **USE MULTIPLE AGENTS** for parallel analysis with safety checks
-5. **LEARN** from decisions to improve future cleanup operations
+1. **DETECT** the cleanup mode from arguments or context
+2. **ANALYZE** targets with appropriate safety checks
+3. **PRESERVE** valuable patterns and framework code
+4. **VERIFY** all changes with comprehensive testing
+5. **REPORT** detailed metrics for each cleanup operation
 
-## 🛡️ SAFETY-FIRST PRINCIPLES
+## 📋 CLEANUP MODES
 
-**MANDATORY PRESERVATION PATTERNS:**
-- ✅ Dynamically loaded modules and plugins
-- ✅ Framework-specific patterns (decorators, dependency injection)
-- ✅ Test fixtures and utilities
-- ✅ Performance-optimized code variants
-- ✅ Recent changes (< 30 days)
-- ✅ Code with active TODOs linked to issues
+### Available Modes
 
-**CONFIDENCE-BASED ACTIONS:**
-- 🟢 **High Confidence (>85%)**: Safe to clean automatically
-- 🟡 **Medium Confidence (60-85%)**: Require user confirmation
-- 🔴 **Low Confidence (<60%)**: Flag for manual review only
+```bash
+# Intelligent code cleanup (default)
+/cleanup
+/cleanup --mode=intelligent
 
-## 📋 MANDATORY WORKFLOW
+# Development artifacts cleanup
+/cleanup --mode=artifacts
 
-### Step 1: Pre-Cleanup Analysis
-```
-1. Run full test suite to establish baseline
-2. Generate dependency graph
-3. Analyze git history and code age
-4. Identify framework patterns
-5. Map dynamic loading points
+# Claude backup files cleanup  
+/cleanup --mode=backups
+
+# Dead code and imports cleanup
+/cleanup --mode=code
+
+# Comprehensive cleanup (all modes)
+/cleanup --mode=all
 ```
 
-### Step 2: Intelligent Detection
+## 🎯 MODE SPECIFICATIONS
 
-**SAFE CLEANUP TARGETS:**
+### Mode: Intelligent (Default)
+**Safety-first cleanup with confidence scoring**
+
 ```yaml
-high_confidence_removals:
-  - commented_code:
-      exclude: ["TODO", "FIXME", "HACK", "NOTE"]
-      age_minimum: 90_days
-      confidence: 0.95
-      
-  - empty_files:
-      exclude: ["__init__", "index"]
-      confidence: 0.90
-      
-  - console_logs:
-      exclude: ["error", "warn"]
-      in_production_code: true
-      confidence: 0.85
-
-medium_confidence_analysis:
-  - unused_functions:
-      check_dynamic_usage: true
-      check_test_coverage: true
-      confidence: 0.70
-      
-  - duplicate_code:
-      similarity_threshold: 0.95
-      verify_behavior: true
-      confidence: 0.75
+intelligent_cleanup:
+  targets:
+    - commented_code: # 90+ days old, no TODOs
+    - console_logs: # Production code only
+    - empty_files: # Not framework-required
+    - unused_imports: # No side effects
+  
+  confidence_levels:
+    high: # >85% - Auto-execute
+    medium: # 60-85% - User prompt
+    low: # <60% - Report only
+  
+  preserves:
+    - dynamic_patterns
+    - framework_magic
+    - test_utilities
+    - recent_changes
 ```
 
-### Step 3: Context-Aware Analysis
+### Mode: Artifacts
+**Clean development artifacts and temporary files**
 
-**For EACH cleanup candidate, analyze:**
-
-1. **Git Context**:
-   - Last modified date
-   - Number of contributors
-   - Commit frequency
-   - Related issues/PRs
-
-2. **Code Context**:
-   - Test coverage
-   - Dynamic references
-   - Framework patterns
-   - Performance implications
-
-3. **Dependency Context**:
-   - Import/export chains
-   - Circular dependencies
-   - External references
-   - Configuration usage
-
-### Step 4: Multi-Agent Safe Execution
-
-**SPAWN AGENTS WITH SAFETY CONSTRAINTS:**
-```
-"I'll spawn multiple agents to analyze the codebase safely:
-- Agent 1: Identify high-confidence dead code with preservation checks
-- Agent 2: Analyze potential duplicates with behavior verification
-- Agent 3: Check for dynamic usage patterns and framework magic
-- Agent 4: Validate all changes against test suite
-
-Each agent will report confidence scores before any action."
+```yaml
+artifacts_cleanup:
+  targets:
+    - "*.log"
+    - "*.tmp"
+    - "*~"
+    - "*.bak"
+    - ".DS_Store"
+    - "debug_*"
+    - "test_output_*"
+  
+  protected:
+    - ".env*"
+    - ".git/"
+    - ".claude/"
+    - "node_modules/"
+    - "vendor/"
+  
+  strategy:
+    - check_file_age
+    - verify_git_status
+    - create_checkpoint
 ```
 
-## 🔍 EDGE CASE DETECTION
+### Mode: Backups
+**Remove Claude Code backup files**
 
-**ALWAYS CHECK FOR:**
-
-```javascript
-// Dynamic imports - PRESERVE
-const module = await import(`./plugins/${name}`);
-const handler = require(`./${type}-handler`);
-
-// Event handlers - PRESERVE
-emitter.on('data', processData);
-bus.subscribe('user:login', handleLogin);
-
-// Reflection patterns - PRESERVE
-const method = obj[methodName];
-const Component = components[props.type];
-
-// Framework magic - PRESERVE
-@Injectable()
-@Component({ selector: 'app-root' })
-export default connect(mapState)(MyComponent);
-
-// Test utilities - PRESERVE
-export const mockUser = () => ({ id: 1 });
-export function createTestServer() { }
+```yaml
+backups_cleanup:
+  patterns:
+    - "*.backup.*"
+    - "*.claude-backup"
+    - "*_backup_*"
+  
+  retention:
+    default: 24_hours
+    configurable: true
+  
+  features:
+    - preview_before_delete
+    - size_reporting
+    - batch_operations
 ```
 
-## 📊 CONFIDENCE SCORING
+### Mode: Code
+**Dead code and import optimization**
 
-**Calculate confidence based on:**
+```yaml
+code_cleanup:
+  targets:
+    - unused_functions
+    - unreachable_code
+    - unused_imports
+    - duplicate_code
+    - orphaned_exports
+  
+  analysis:
+    - dependency_graph
+    - test_coverage
+    - dynamic_usage
+  
+  safety:
+    - ast_analysis
+    - test_validation
+    - incremental_cleanup
+```
 
+### Mode: All
+**Comprehensive cleanup - runs all modes sequentially**
+
+```yaml
+all_cleanup:
+  sequence:
+    1. artifacts # Remove temp files first
+    2. backups  # Clean old backups
+    3. code     # Optimize code structure
+    4. intelligent # Final smart cleanup
+  
+  coordination:
+    - shared_safety_checks
+    - unified_reporting
+    - single_checkpoint
+```
+
+## 🛡️ UNIVERSAL SAFETY FEATURES
+
+### Pre-Cleanup Validation
+```bash
+# Always performed regardless of mode
+1. Create git checkpoint
+2. Run test suite baseline
+3. Analyze project structure
+4. Map dependencies
+5. Identify framework patterns
+```
+
+### Confidence Scoring System
 ```typescript
 interface ConfidenceFactors {
   hasDirectReferences: boolean;      // -0.5 if false
@@ -150,165 +174,212 @@ interface ConfidenceFactors {
 }
 ```
 
-## 🚦 SAFE CLEANUP EXECUTION
+### Protection Patterns
+**ALWAYS PRESERVED across all modes:**
+- Dynamic imports and requires
+- Event handlers and listeners
+- Framework decorators and magic
+- Test fixtures and utilities
+- Recent changes (< 30 days)
+- Active TODOs and FIXMEs
 
-### High Confidence Actions (Auto-execute):
-- Remove commented code (90+ days old, no TODOs)
-- Delete empty files (not framework-required)
-- Remove console.logs in production code
-- Delete unused imports with no side effects
+## 📊 EXECUTION WORKFLOW
 
-### Medium Confidence Actions (User Prompt):
+### Step 1: Mode Detection
+```javascript
+function detectCleanupMode(args) {
+  // Explicit mode selection
+  if (args.mode) return args.mode;
+  
+  // Context-based detection
+  if (args.includes('backup')) return 'backups';
+  if (args.includes('artifact')) return 'artifacts';
+  if (args.includes('import') || args.includes('dead')) return 'code';
+  
+  // Default to intelligent mode
+  return 'intelligent';
+}
 ```
+
+### Step 2: Multi-Agent Execution
+```
+"I'll spawn specialized cleanup agents based on mode:
+- Mode Agent: Execute mode-specific cleanup logic
+- Safety Agent: Verify preservation patterns
+- Test Agent: Validate changes don't break functionality
+- Report Agent: Generate comprehensive metrics
+
+All agents coordinate through shared safety checks."
+```
+
+### Step 3: Interactive Decision Points
+```
+# Medium confidence items prompt
 Found potentially unused function: calculateDiscount
-Confidence: 72%
+Confidence: 72% | Mode: code
 
-Reasons to remove:
-- No direct calls found
-- Not covered by tests
-- Last modified 180 days ago
+Analysis:
+✓ No direct calls found
+✓ Not covered by tests
+✗ May be called dynamically
+✗ Contains business logic
 
-Reasons to keep:
-- Similar to other calculation functions
-- May be called dynamically
-- Contains business logic
-
-[Remove] [Keep] [Add TODO] [Investigate Further]
+[Remove] [Keep] [Add TODO] [Skip All Similar]
 ```
 
-### Low Confidence Actions (Report Only):
+### Step 4: Verification & Reporting
 ```
-Cleanup Analysis Report:
-- Possible unused exports (12 items) - manual review needed
-- Complex duplicates (5 groups) - behavior verification required  
-- Framework patterns (8 items) - preserved automatically
-```
+Cleanup Complete - Mode: intelligent
 
-## ✅ VERIFICATION PROTOCOL
-
-**After EACH change:**
-1. Run affected tests immediately
-2. Verify no runtime errors
-3. Check import/export integrity
-4. Validate framework functionality
-5. Ensure performance unchanged
-
-**Rollback Criteria:**
-- Any test failure → Rollback immediately
-- Runtime error → Restore and investigate
-- Performance regression → Revert and document
-
-## 📈 CLEANUP METRICS
-
-**Track and Report:**
-```
-Cleanup Summary:
-├── Analyzed: 1,234 potential items
-├── High Confidence: 156 items (auto-cleaned)
-├── Medium Confidence: 89 items (45 cleaned after review)
-├── Low Confidence: 989 items (flagged for manual review)
-├── Preserved: 234 edge cases detected
-└── Result: 15% code reduction, 0 functionality lost
+Summary:
+├── Files Analyzed: 234
+├── Items Cleaned: 45
+├── Space Saved: 1.2MB
+├── Confidence Breakdown:
+│   ├── High (auto): 32 items
+│   ├── Medium (reviewed): 13 items
+│   └── Low (skipped): 156 items
+└── Tests: All passing ✅
 
 Safety Metrics:
-├── Tests: 100% passing
-├── Coverage: Maintained at 87%
-├── Performance: No regression
-└── Rollbacks: 0 required
+├── Patterns Preserved: 78
+├── Framework Code: Protected
+├── Dynamic Usage: Detected & kept
+└── Rollbacks Required: 0
 ```
 
-## 🎯 CLEANUP CONFIGURATION
+## 🔧 CONFIGURATION
 
-**Default Configuration (Conservative):**
+### Default Settings
 ```yaml
 # .cleanup-config.yaml
-version: 1.0
-mode: conservative
+version: 2.0
+default_mode: intelligent
 
-confidence:
-  auto_threshold: 0.85
-  prompt_threshold: 0.60
-  
-preserve_patterns:
-  - "test_*"
-  - "*_test"
-  - "mock*"
-  - "@*" # decorators
-  - "use*" # React hooks
-  
-age_thresholds:
-  commented_code: 90
-  unused_functions: 180
-  todo_comments: 365
-  
+modes:
+  intelligent:
+    auto_threshold: 0.85
+    prompt_threshold: 0.60
+    
+  artifacts:
+    age_threshold: 7_days
+    size_limit: 10MB
+    
+  backups:
+    retention_hours: 24
+    batch_size: 100
+    
+  code:
+    unused_threshold: 0
+    coverage_required: false
+
 safety:
-  dry_run: true
+  dry_run: false
   backup: true
   atomic_commits: true
+  test_on_change: true
 ```
 
-## 🚨 FORBIDDEN BEHAVIORS
+### Command Options
+```bash
+# Mode selection
+--mode=<intelligent|artifacts|backups|code|all>
 
-**NEVER:**
-- ❌ Delete without understanding purpose
-- ❌ Remove code just because it "looks unused"
-- ❌ Ignore framework conventions
-- ❌ Skip test verification
-- ❌ Cleanup without confidence scoring
-- ❌ Merge duplicates without behavior verification
+# Safety options
+--dry-run         # Preview without changes
+--no-backup      # Skip checkpoint creation
+--force          # Skip confirmations
 
-**ALWAYS:**
-- ✅ Check for dynamic usage patterns
-- ✅ Preserve framework requirements
-- ✅ Verify with comprehensive tests
-- ✅ Document why code was kept/removed
-- ✅ Maintain rollback capability
-- ✅ Report confidence scores
+# Filtering
+--path=<path>    # Target specific directory
+--pattern=<glob> # Target specific files
+--exclude=<glob> # Exclude patterns
 
-## 💡 INTELLIGENT DECISION EXAMPLES
+# Thresholds
+--confidence=<0-100>  # Minimum confidence
+--age=<days>          # Minimum file age
+--retention=<hours>   # Backup retention
 
-**Example 1: Seemingly Unused Function**
-```javascript
-// PRESERVE - May be dynamically called
-export function handleUserAction() { }
-
-// Config file:
-handlers: ['handleUserAction']
+# Output
+--verbose        # Detailed output
+--quiet         # Minimal output
+--json          # JSON report format
 ```
 
-**Example 2: Duplicate-Looking Code**
-```javascript
-// PRESERVE BOTH - Different performance characteristics
-function fastSearch(arr) { /* O(log n) */ }
-function simpleSearch(arr) { /* O(n) but cache-friendly */ }
+## 🚨 MODE-SPECIFIC BEHAVIORS
+
+### Intelligent Mode Specifics
+- Uses AST analysis for code understanding
+- Applies machine learning confidence scoring
+- Preserves all edge cases automatically
+- Learns from user decisions
+
+### Artifacts Mode Specifics
+- Focuses on filesystem cleanup
+- Respects .gitignore patterns
+- Creates restore checkpoint
+- Reports space savings
+
+### Backups Mode Specifics
+- Targets Claude-specific backup patterns
+- Configurable retention policy
+- Batch deletion for performance
+- Size and count reporting
+
+### Code Mode Specifics
+- Language-specific analyzers
+- Import graph analysis
+- Test coverage integration
+- Incremental cleanup approach
+
+## 💡 USAGE EXAMPLES
+
+### Example 1: Quick Project Cleanup
+```bash
+# Remove all development artifacts
+/cleanup --mode=artifacts --dry-run
+/cleanup --mode=artifacts  # If preview looks good
 ```
 
-**Example 3: Framework Pattern**
-```typescript
-// PRESERVE - Angular DI pattern
-@Injectable({ providedIn: 'root' })
-export class DataService { }
+### Example 2: Code Optimization
+```bash
+# Clean dead code with high confidence
+/cleanup --mode=code --confidence=85
 ```
 
-## 🎬 FINAL EXECUTION
+### Example 3: Comprehensive Cleanup
+```bash
+# Full cleanup with all modes
+/cleanup --mode=all --verbose
+```
 
-**Begin intelligent cleanup with:**
+### Example 4: Targeted Cleanup
+```bash
+# Clean specific directory
+/cleanup --mode=intelligent --path=src/components
+```
 
-1. **ANALYZE** comprehensively with context
-2. **SCORE** confidence for each item
-3. **PRESERVE** all edge cases and patterns
-4. **PROMPT** for medium confidence items
-5. **VERIFY** every change with tests
-6. **REPORT** detailed metrics
+## ✅ SUCCESS CRITERIA
 
-**Success Criteria:**
-- ✅ Zero broken functionality
-- ✅ All tests passing
-- ✅ No performance regression
-- ✅ Clear audit trail
-- ✅ Improved code quality
-- ✅ Team confidence maintained
+**Cleanup is successful when:**
+- ✅ All tests remain passing
+- ✅ No functionality lost
+- ✅ Performance unchanged or improved
+- ✅ Clear audit trail maintained
+- ✅ User confidence preserved
+- ✅ Measurable improvement achieved
 
-Remember: **Good cleanup preserves intent while removing redundancy**
+## 🎬 EXECUTION
 
-Executing intelligent cleanup for: $ARGUMENTS
+Begin unified cleanup with selected mode:
+
+1. **DETECT** appropriate cleanup mode
+2. **ANALYZE** with mode-specific logic
+3. **SCORE** confidence for each item
+4. **PRESERVE** all protected patterns
+5. **EXECUTE** with safety verification
+6. **REPORT** comprehensive results
+
+Remember: **Effective cleanup preserves value while removing redundancy**
+
+Executing cleanup with mode: $ARGUMENTS
