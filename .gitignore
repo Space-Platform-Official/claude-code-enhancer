@@ -46,6 +46,12 @@ ehthumbs.db
 *.patch
 *.diff
 
+# Autofix and Formatter Backup Files
+*.autofix-backup.*
+*.eslint-backup.*
+*.prettier-backup.*
+*.format-backup.*
+
 # Environment Files
 .env
 .env.local

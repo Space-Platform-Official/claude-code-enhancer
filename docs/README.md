@@ -1,142 +1,166 @@
-# Claude Flow Documentation
+# 📚 Claude Code Documentation
 
-Welcome to the Claude Flow documentation! This comprehensive guide covers everything you need to know about using, configuring, and extending Claude Flow.
+> Comprehensive documentation for all Claude Code commands, agents, and workflows
 
-## 📚 Documentation Overview
+## 🚀 Quick Navigation
 
-### [Getting Started](getting-started/)
-New to Claude Flow? Start here!
-- [Prerequisites](getting-started/prerequisites.md) - What you need before installing
-- [Installation](getting-started/installation.md) - Step-by-step installation guide
-- [Quick Start](getting-started/quick-start.md) - Get running in minutes
-- [First Project](getting-started/first-project.md) - Build your first Claude Flow project
-- [Configuration](getting-started/configuration.md) - Initial setup options
+### Core Commands
+[**Core Commands Documentation →**](./core-commands.md)
+- `/architect` - System architecture and design
+- `/next` - Production implementation workflow
+- `/milestone` - Comprehensive milestone management
+- `/check` - Code quality verification
+- `/scaffold` - Intelligent code generation
 
-### [User Guide](user-guide/)
-Learn how to use Claude Flow effectively
-- [Overview](user-guide/overview.md) - Features and capabilities
-- [Using Templates](user-guide/using-templates.md) - Work with language/framework templates
-- [Smart Merge](user-guide/smart-merge.md) - Intelligent configuration merging
-- [Customization](user-guide/customization.md) - Make Claude Flow your own
-- [Best Practices](user-guide/best-practices.md) - Professional tips
-- [Workflows](user-guide/workflows.md) - Common development patterns
+### Development Commands
+[**Development Commands Documentation →**](./development-commands.md)
+- `/test/*` - Testing suite (unit, integration, e2e, TDD)
+- `/quality/*` - Code quality tools (format, dedupe, verify)
+- `/optimize` - Performance optimization
+- `/refactor` - Systematic code improvement
+- `/security-audit` - Security vulnerability scanning
 
-### [Milestone System](milestone/)
-Enhanced project management with intelligent scaling
-- [User Guide](milestone/USER_GUIDE.md) - Complete guide to using milestone commands
-- [Testing Guide](milestone/TESTING_GUIDE.md) - Validation and testing procedures
-- [Architecture Overview](milestone/README.md) - System capabilities and design
+### Git Commands
+[**Git Commands Documentation →**](./git-commands.md)
+- `/git/commit` - Smart commit creation
+- `/git/pr` - Pull request management
+- `/git/branch` - Branch operations
+- `/git/workflows/*` - Automated workflows (feature, hotfix, release)
 
-### [API & CLI Reference](api/)
-Technical reference documentation
-- [CLI Reference](api/cli-reference.md) - Command-line interface
-- [Script API](api/script-api.md) - Shell script functions
-- [Environment Variables](api/environment-variables.md) - Configuration options
-- [Exit Codes](api/exit-codes.md) - Error handling
-- [Options & Flags](api/options-flags.md) - Command parameters
-
-### [Architecture](architecture/)
-Understanding Claude Flow's design
-- [System Overview](architecture/system-overview.md) - High-level architecture
-- [Directory Structure](architecture/directory-structure.md) - Project organization
-- [Template System](architecture/template-system.md) - Template engine
-- [Merge Algorithm](architecture/merge-algorithm.md) - Smart merge logic
-- [Design Decisions](architecture/design-decisions.md) - Why things work this way
-
-### [Development](development/)
-Contributing to Claude Flow
-- [Setup](development/setup.md) - Developer environment
-- [Contributing](development/contributing.md) - Contribution guidelines
-- [Testing](development/testing.md) - Test suite
-- [Creating Templates](development/creating-templates.md) - Build new templates
-- [Extending Claude Flow](development/extending-claude-flow.md) - Add features
-- [Code Style](development/code-style.md) - Coding standards
-
-### [Deployment](deployment/)
-Installing and managing Claude Flow
-- [System Deployment](deployment/system-deployment.md) - Enterprise installation
-- [User Deployment](deployment/user-deployment.md) - Personal setup
-- [Enterprise Setup](deployment/enterprise-setup.md) - Large-scale deployment
-- [Updates](deployment/updates.md) - Keeping Claude Flow current
-- [Backup & Recovery](deployment/backup-recovery.md) - Data protection
-- [Security](deployment/security.md) - Security best practices
-
-### [Troubleshooting](troubleshooting/)
-Solving problems
-- [Common Issues](troubleshooting/common-issues.md) - Frequent problems
-- [Installation Problems](troubleshooting/installation-problems.md) - Setup issues
-- [Template Issues](troubleshooting/template-issues.md) - Template problems
-- [Merge Conflicts](troubleshooting/merge-conflicts.md) - Merge resolution
-- [FAQ](troubleshooting/faq.md) - Frequently asked questions
-- [Debugging](troubleshooting/debugging.md) - Advanced debugging
-
-### [Commands](commands/)
-Specialized command systems and workflows
-- [Quality System Architecture](commands/quality-system-architecture.md) - Orchestrated quality command suite
-- [Quality Usage Guide](commands/quality-usage-guide.md) - Practical quality workflow examples
-- [Milestone System](commands/milestone-system-architecture.md) - Project milestone management
-- [Cleanup Architecture](commands/comprehensive-cleanup-architecture.md) - Advanced cleanup strategies
-
-### [Examples](examples/)
-Learn by doing
-- [JavaScript Project](examples/javascript-project.md) - Node.js setup
-- [Python Project](examples/python-project.md) - Python development
-- [React Application](examples/react-app.md) - React with TypeScript
-- [Multi-Language](examples/multi-language.md) - Full-stack projects
-- [CI/CD Setup](examples/ci-cd-setup.md) - Continuous integration
-- [Migration Guide](examples/migration-guide.md) - Migrate existing projects
-
-## 🎯 Quick Start Paths
-
-### I'm new to Claude Flow
-1. Check the [Prerequisites](getting-started/prerequisites.md)
-2. Follow the [Installation Guide](getting-started/installation.md)
-3. Try the [Quick Start](getting-started/quick-start.md)
-4. Build something with the [First Project Tutorial](getting-started/first-project.md)
-
-### I have an existing project
-1. Read about [Smart Merge](user-guide/smart-merge.md)
-2. Follow the [Migration Guide](examples/migration-guide.md)
-3. Learn [Best Practices](user-guide/best-practices.md)
-4. Explore the [Quality System](commands/quality-usage-guide.md) for code quality workflows
-
-### I want to contribute
-1. Set up your [Development Environment](development/setup.md)
-2. Read the [Contributing Guidelines](development/contributing.md)
-3. Explore [Creating Templates](development/creating-templates.md)
-
-### I'm deploying for my team
-1. Review [Enterprise Setup](deployment/enterprise-setup.md)
-2. Plan with [System Deployment](deployment/system-deployment.md)
-3. Implement [Security Best Practices](deployment/security.md)
-
-## 📖 Documentation Standards
-
-This documentation follows these principles:
-
-- **Practical Examples**: Every concept includes working examples
-- **Progressive Disclosure**: Start simple, add complexity as needed
-- **Cross-References**: Related topics are linked throughout
-- **Platform Coverage**: Instructions for macOS, Linux, and Windows (WSL)
-- **Troubleshooting**: Common issues are addressed proactively
-
-## 🔍 Search Tips
-
-Looking for something specific?
-
-- **Commands**: Check [CLI Reference](api/cli-reference.md)
-- **Errors**: See [Troubleshooting](troubleshooting/)
-- **Setup**: Visit [Getting Started](getting-started/)
-- **Features**: Browse [User Guide](user-guide/)
-- **Code**: Explore [Examples](examples/)
-
-## 📝 Feedback
-
-Found an issue or have a suggestion? Please:
-- Report documentation issues on GitHub
-- Suggest improvements via pull requests
-- Join discussions in the community
+### Agents Reference
+[**Agents Reference Documentation →**](./agents-reference.md)
+- Testing Agents (test-orchestrator, unit-test-master, integration-test-master, test-fixer)
+- Milestone Agents (coordinator, planner, executor)
+- Code Quality Agents (analyzer, enforcer, processor)
+- Infrastructure Agents (orchestrator, git-operator, dependency-manager)
 
 ---
 
-*Last updated: Documentation created by Claude Flow's comprehensive documentation system*
+## 📖 Documentation Structure
+
+Each documentation file contains:
+- **Command Overview** - Purpose and key features
+- **Usage Examples** - Practical code samples
+- **Configuration** - Available options and settings
+- **Advanced Patterns** - Complex usage scenarios
+- **Troubleshooting** - Common issues and solutions
+
+## 🎯 Common Workflows
+
+### Feature Development
+```bash
+claude architect          # Design the architecture
+claude milestone          # Plan the milestone
+claude next              # Implement with quality gates
+claude test unit         # Test the implementation
+claude git commit        # Commit changes
+claude git pr            # Create pull request
+```
+
+### Bug Fixing
+```bash
+claude understand        # Analyze the codebase
+claude test workflows tdd  # Fix with test-driven development
+claude check --fix       # Verify and auto-fix issues
+claude git workflows hotfix  # Create hotfix
+```
+
+### Code Quality
+```bash
+claude quality verify    # Run all quality checks
+claude quality format    # Format code
+claude quality dedupe    # Remove duplicates
+claude optimize         # Optimize performance
+```
+
+## 🔧 Installation
+
+All commands and agents are distributed via `claude-merge`:
+
+```bash
+# Install all templates
+claude-merge
+
+# Templates are installed to .claude/ directory
+ls .claude/commands/
+ls .claude/agents/
+```
+
+## 📋 Command Categories
+
+### Architecture & Planning
+- System design and architecture analysis
+- Milestone planning and tracking
+- Project scaffolding
+
+### Development & Testing
+- Test-driven development
+- Unit, integration, and e2e testing
+- Performance testing and optimization
+
+### Code Quality
+- Formatting and linting
+- Deduplication and refactoring
+- Security auditing
+
+### Version Control
+- Commit management
+- Pull request automation
+- Branch workflows
+
+### Agent Coordination
+- Multi-agent task execution
+- Parallel processing
+- Result aggregation
+
+## 🚨 Important Notes
+
+### Quality Gates
+All commands enforce strict quality standards:
+- Zero-tolerance for linting errors
+- Mandatory test passing
+- Format compliance required
+- Security checks enforced
+
+### Hook Integration
+Commands integrate with git hooks:
+- Pre-commit validation
+- Pre-push quality gates
+- Post-edit formatting
+- Automatic standards enforcement
+
+### Multi-Agent Patterns
+Many commands use parallel agent execution:
+- Architecture analysis with 5 parallel agents
+- Test suite parallelization
+- Code analysis distribution
+
+## 📊 Quick Reference
+
+| Command | Purpose | Agent Support | Quality Gates |
+|---------|---------|---------------|---------------|
+| `/architect` | System design | 5 parallel agents | ADR generation |
+| `/next` | Implementation | Research agents | All gates required |
+| `/milestone` | Project tracking | Coordinator agents | Git integration |
+| `/test/*` | Testing suite | Test agents | 100% pass required |
+| `/quality/*` | Code quality | Enforcer agents | Zero tolerance |
+| `/git/*` | Version control | Git operator | Hook validation |
+
+## 🔍 Search Tips
+
+To find specific documentation:
+1. Use browser search (Ctrl+F) within category files
+2. Check the relevant category document
+3. Look for command patterns (e.g., all test commands in development-commands.md)
+4. Review agent spawning examples in agents-reference.md
+
+## 📚 Additional Resources
+
+- [Templates Source](../templates/) - Original template files
+- [CLAUDE.md](../CLAUDE.md) - Core development guidelines
+- [Hooks Documentation](../templates/hooks/README.md) - Hook integration guide
+
+---
+
+*Documentation auto-generated from templates/*
+*Last updated: 2025*
