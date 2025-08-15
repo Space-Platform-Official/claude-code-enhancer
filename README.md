@@ -121,52 +121,52 @@ cat CLAUDE.md           # View merged configuration
 ## 📖 Documentation
 
 ### 🎯 **Quick Start**
-- [**Installation Guide**](./docs/getting-started/installation.md) - Get up and running in minutes
-- [**First Project Setup**](./docs/getting-started/first-project.md) - Create your first enhanced project
-- [**Quick Reference**](./docs/getting-started/quick-start.md) - Essential commands and workflows
+- [**User Guide**](./docs/USER-GUIDE.md#getting-started) - Complete user documentation
+- [**Quick Start**](./docs/USER-GUIDE.md#quick-start) - Get up and running in minutes
+- [**Installation**](./docs/USER-GUIDE.md#installation) - Detailed setup instructions
 
 ### 👥 **User Guides**
-- [**System Overview**](./docs/user-guide/overview.md) - Understanding the Claude Code Enhancer
-- [**Command Workflows**](./docs/user-guide/workflows.md) - Daily development patterns and best practices
-- [**Template System**](./docs/user-guide/using-templates.md) - Language and framework templates
-- [**Advanced Features**](./docs/user-guide/advanced-features.md) - Multi-agent coordination and enterprise capabilities
-- [**Troubleshooting**](./docs/user-guide/troubleshooting.md) - Common issues and solutions
+- [**Core Features**](./docs/USER-GUIDE.md#core-features) - System overview and capabilities
+- [**Workflows & Best Practices**](./docs/USER-GUIDE.md#workflows--best-practices) - Development patterns
+- [**Template System**](./docs/USER-GUIDE.md#using-templates) - Language and framework templates
+- [**Examples & Use Cases**](./docs/USER-GUIDE.md#examples--use-cases) - Real-world scenarios
+- [**Troubleshooting**](./docs/USER-GUIDE.md#troubleshooting) - Common issues and solutions
 
 ### 📋 **Command Reference**
-- [**All Commands**](./docs/command-reference/README.md) - Complete command catalog with examples
-- [**Git Operations**](./docs/command-reference/git-commands.md) - Smart git workflow automation
-- [**Quality Assurance**](./docs/command-reference/quality-commands.md) - Code quality and validation tools
-- [**Testing Framework**](./docs/command-reference/testing-commands.md) - Comprehensive testing strategies
-- [**Milestone Management**](./docs/command-reference/milestone-commands.md) - Project planning and execution
+- [**Command Reference**](./docs/DEVELOPER-GUIDE.md#command-reference) - Complete command catalog
+- [**Development Guides**](./docs/DEVELOPER-GUIDE.md#development-guides) - Template and command development
+- [**Quality Standards**](./docs/DEVELOPER-GUIDE.md#quality--standards) - Testing and quality guidelines
+- [**Advanced Development**](./docs/DEVELOPER-GUIDE.md#advanced-development) - Performance and debugging
+- [**Milestone System**](./docs/USER-GUIDE.md#milestone-system) - Project planning and execution
 
 ### 🏗️ **Architecture**
-- [**System Architecture**](./docs/architecture/system-overview.md) - High-level design and components
-- [**Multi-Agent Coordination**](./docs/architecture/multi-agent-coordination.md) - AI agent orchestration patterns
-- [**Safety & Validation**](./docs/architecture/safety-validation-framework.md) - Quality enforcement and error prevention
-- [**Template System**](./docs/architecture/template-system-architecture.md) - Smart template inheritance and composition
-- [**Integration Architecture**](./docs/architecture/integration-architecture.md) - Tool ecosystem integration
+- [**System Overview**](./docs/ARCHITECTURE.md#system-overview) - High-level design and components
+- [**Core Systems**](./docs/ARCHITECTURE.md#core-systems) - Multi-agent, command, and template systems
+- [**Safety & Validation**](./docs/ARCHITECTURE.md#safety--validation) - Quality enforcement framework
+- [**Integration Layer**](./docs/ARCHITECTURE.md#integration-layer) - Tool ecosystem integration
+- [**Advanced Architecture**](./docs/ARCHITECTURE.md#advanced-architecture) - Performance and scalability
 
 ### 🔧 **Developer Resources**
-- [**Contributing Guide**](./docs/developer-guide/contributing-guidelines.md) - How to contribute to the project
-- [**Development Setup**](./docs/developer-guide/development-setup.md) - Local development environment
-- [**Creating Commands**](./docs/developer-guide/command-development.md) - Build custom commands and extensions
-- [**Template Development**](./docs/developer-guide/template-development.md) - Create and customize templates
-- [**Testing Guidelines**](./docs/developer-guide/testing-guidelines.md) - Testing strategies and requirements
+- [**Developer Guide**](./docs/DEVELOPER-GUIDE.md) - Complete development documentation
+- [**Contributing**](./docs/DEVELOPER-GUIDE.md#development-setup) - Setup and contribution guidelines
+- [**Creating Commands**](./docs/DEVELOPER-GUIDE.md#command-development) - Build custom commands and extensions
+- [**Template Development**](./docs/DEVELOPER-GUIDE.md#template-development) - Create and customize templates
+- [**Testing Guidelines**](./docs/DEVELOPER-GUIDE.md#testing-guidelines) - Testing strategies and requirements
 
 ### 📚 **Examples & Tutorials**
-- [**Example Projects**](./docs/examples/README.md) - Complete project examples and tutorials
-- [**JavaScript/TypeScript**](./docs/examples/javascript-project.md) - Node.js, React, testing workflows
-- [**Python Projects**](./docs/examples/python-project.md) - Django, Flask, data science patterns  
-- [**Multi-Language Setup**](./docs/examples/multi-language.md) - Go, Rust, PHP enterprise patterns
-- [**CI/CD Integration**](./docs/examples/ci-cd-setup.md) - Production deployment pipelines
-- [**Migration Guide**](./docs/examples/migration-guide.md) - Migrating from other development tools
+- [**Example Projects**](./docs/USER-GUIDE.md#examples--use-cases) - Complete project examples and tutorials
+- [**JavaScript Projects**](./docs/USER-GUIDE.md#javascript-projects) - Node.js, React, testing workflows
+- [**Python Projects**](./docs/USER-GUIDE.md#python-projects) - Django, Flask, data science patterns  
+- [**Multi-Language Setup**](./docs/USER-GUIDE.md#multi-language-projects) - Go, Rust, PHP enterprise patterns
+- [**CI/CD Integration**](./docs/USER-GUIDE.md#cicd-integration) - Production deployment pipelines
+- [**Real-World Scenarios**](./docs/USER-GUIDE.md#real-world-scenarios) - Enterprise patterns and migration
 
 ### 🔌 **API Reference**
-- [**CLI Reference**](./docs/api/cli-reference.md) - Complete command-line interface
-- [**Environment Variables**](./docs/api/environment-variables.md) - Configuration and customization
-- [**Plugin Development**](./docs/api/plugin-extension-api.md) - Extending the system with custom plugins
-- [**Integration APIs**](./docs/api/integration-apis.md) - Git, CI/CD, and tool integrations
-- [**Template API**](./docs/api/template-api.md) - Template creation and distribution
+- [**Command Reference**](./docs/DEVELOPER-GUIDE.md#command-reference) - Complete CLI documentation
+- [**Configuration**](./docs/USER-GUIDE.md#configuration-guide) - Environment variables and settings
+- [**Development Guides**](./docs/DEVELOPER-GUIDE.md#development-guides) - Plugin and extension development
+- [**Integration Architecture**](./docs/ARCHITECTURE.md#integration-layer) - Git, CI/CD, and tool integrations
+- [**Template System**](./docs/ARCHITECTURE.md#core-systems) - Template architecture and APIs
 
 ### 🎯 Quick Links by User Type
 
