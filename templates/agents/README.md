@@ -1,379 +1,227 @@
-# Claude Code Native Agents
-
-A high-performance, parallel execution system for Claude Code operations using specialized agents and intelligent orchestration.
+# Claude Code Agents - Template Reference
 
 ## Overview
 
-The Claude Code Agent System transforms sequential command execution into efficient parallel operations through specialized agents, intelligent routing, and robust coordination mechanisms.
+This directory contains agent templates that can be spawned by Claude Code for specialized development tasks. For comprehensive documentation of all agents, see [/docs/agents.md](/docs/agents.md).
 
-### Key Benefits
+## Quick Reference
 
-- **3-10x Performance Improvement** for complex operations
-- **Intelligent Execution** with automatic mode selection
-- **Resource Management** preventing system overload
-- **Fault Tolerance** with isolated agent failures
-- **Scalable Architecture** supporting various workload types
+This directory contains 14 specialized agents across 4 categories:
 
-## Available Agents
+### Testing Agents (4)
+- `test-orchestrator` - Adaptive test orchestration
+- `unit-test-master` - Unit test specialist
+- `integration-test-master` - Integration test specialist  
+- `test-fixer` - Test failure resolution
 
-### Core Agents
+### Milestone Agents (3)
+- `milestone-coordinator` - Workflow orchestration
+- `milestone-planner` - Strategic planning
+- `milestone-executor` - Milestone execution
 
-| Agent | Purpose | Optimal For | Resource Usage |
-|-------|---------|-------------|----------------|
-| **orchestrator** | Master coordination | Complex multi-agent workflows | Low |
-| **test-fixer** | Test operations | Failing tests, coverage analysis | Medium |
-| **code-analyzer** | Code analysis | Refactoring, optimization, review | Low |
-| **git-operator** | Version control | Commits, merges, conflicts | Low |
-| **file-processor** | Batch operations | Large-scale transformations | High |
-| **code-quality-enforcer** | Quality standards | Linting, formatting, compliance | Medium |
+### Code Quality Agents (3)
+- `code-analyzer` - Code analysis and patterns
+- `code-quality-enforcer` - Standards enforcement
+- `file-processor` - Bulk file operations
+
+### Infrastructure Agents (4)
+- `orchestrator` - High-level workflow coordination
+- `git-operator` - Git operations automation
+- `dependency-manager` - Dependency management
+- `api-integration-tester` - API testing
+
+## Detailed Test Agent Documentation
+
+### 🎯 test-orchestrator
+**Hybrid Adaptive Test Orchestrator**
+- Intelligently switches between unit and integration testing modes
+- Automatically categorizes tests and selects optimal execution strategy
+- Coordinates multi-agent test execution for maximum efficiency
+- Achieves 100% test success rate through comprehensive orchestration
+
+**Use when:**
+- You need comprehensive test execution across multiple test types
+- You want intelligent test categorization and optimization
+- You have a mixed test suite with unit, integration, and e2e tests
+
+### 🚀 unit-test-master
+**Unit Test Specialist**
+- Focuses on fast, isolated component testing
+- Expert mock management and test isolation
+- Maximum parallelization for speed
+- Deep framework-specific optimizations
+
+**Use when:**
+- You need to run or fix unit tests specifically
+- You want to optimize unit test performance
+- You need expert mock management and isolation
+
+### 🌐 integration-test-master
+**Integration Test Specialist**
+- Handles complex service orchestration
+- Manages test environments and dependencies
+- Validates cross-service communication
+- Ensures data consistency across systems
+
+**Use when:**
+- You need to test service interactions
+- You want to validate API contracts
+- You need comprehensive end-to-end testing
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────┐
-│         Command Interface Layer         │
-└─────────────────┬───────────────────────┘
-                  │
-         ┌────────▼────────┐
-         │ Decision Engine │
-         └────────┬────────┘
-                  │
-    ┌─────────────┼─────────────┐
-    │             │             │
-┌───▼──┐    ┌────▼────┐    ┌───▼────┐
-│Direct│    │Enhanced │    │  Full  │
-│ Exec │    │  Agents │    │Orchestr│
-└──────┘    └─────────┘    └────────┘
-                  │             │
-          ┌───────┴───────┬─────┴────┐
-          │               │          │
-    ┌─────▼────┐   ┌─────▼────┐  ┌──▼──┐
-    │ Test Fix │   │Code Anal │  │ ... │
-    └──────────┘   └──────────┘  └─────┘
-```
+### Coordination Pattern
 
-## Usage
+The test agents use a sophisticated coordination pattern:
 
-### Agent Invocation
+1. **Test Orchestrator** acts as the main coordinator
+2. **Specialist Agents** (unit/integration) handle specific test types
+3. **Shared Intelligence** provides common capabilities
+4. **Coordination Mechanisms** enable agent communication
 
-Agents are invoked through the Task tool with specific parameters:
+### 5-Agent Spawning Pattern
+
+Each agent can spawn up to 5 sub-agents for parallel execution:
 
 ```markdown
-<function_calls>
-<invoke name="Task">
-<parameter name="subagent_type">test-fixer</parameter>
-<parameter name="description">Fix failing tests</parameter>
-<parameter name="prompt">You are the Test Fixing Agent...</parameter>
-</invoke>
-</function_calls>
+Agent 1: Analysis & Discovery
+Agent 2: Environment Setup
+Agent 3: Test Execution
+Agent 4: Failure Analysis
+Agent 5: Validation & Reporting
 ```
 
-### Execution Modes
+### Shared Components
 
-The Decision Engine automatically selects the optimal execution mode:
+Located in `_shared/`:
+- `test-intelligence.md` - Framework detection, failure analysis, coverage
+- `test-coordination.md` - Agent communication, state sync, reporting
 
-1. **Direct Execution** - Simple, single-file operations
-2. **Enhanced Execution** - Medium complexity with selective agents
-3. **Full Orchestration** - Complex operations requiring multiple agents
+## Usage Examples
 
-### Coordination
-
-Agents coordinate through shared state files in `/tmp/claude-agents/`:
-
-```
-/tmp/claude-agents/{session-id}/
-├── registry/       # Active agent tracking
-├── state/         # Shared state files
-├── messages/      # Inter-agent messages
-├── results/       # Agent outputs
-├── locks/         # Coordination locks
-└── metrics/       # Performance data
+### Basic Test Orchestration
+```bash
+# User: "Run all my tests and fix any failures"
+# Claude will use test-orchestrator to:
+# 1. Discover and categorize all tests
+# 2. Execute with optimal strategy
+# 3. Fix any failures
+# 4. Achieve 100% pass rate
 ```
 
-## Integration with Commands
-
-### Converting Commands to Use Agents
-
-Commands can leverage agents through the decision engine:
-
-```yaml
-# In command file
-execution_strategy:
-  analyze_complexity: true
-  use_decision_engine: true
-  fallback: direct_execution
-  
-  agent_mapping:
-    test_operations: test-fixer
-    code_analysis: code-analyzer
-    git_operations: git-operator
-    file_processing: file-processor
-    quality_checks: code-quality-enforcer
+### Unit Test Focus
+```bash
+# User: "Fix my failing unit tests"
+# Claude will use unit-test-master to:
+# 1. Identify unit test failures
+# 2. Analyze mock and isolation issues
+# 3. Fix with maximum speed
+# 4. Optimize performance
 ```
 
-### Example: Test Command with Agents
-
-```markdown
-# Complexity Assessment
-Files to test: 25
-Estimated time: 30s sequential, 8s parallel
-Decision: Use enhanced execution with test-fixer agents
-
-# Agent Deployment
-Spawning 3 test-fixer agents for parallel execution:
-- Agent 1: Unit tests
-- Agent 2: Integration tests
-- Agent 3: Coverage analysis
-
-# Coordination
-Results aggregated from all agents
-Final report generated
+### Integration Testing
+```bash
+# User: "Test my API integrations"
+# Claude will use integration-test-master to:
+# 1. Setup test environment
+# 2. Orchestrate services
+# 3. Validate contracts
+# 4. Ensure data consistency
 ```
 
-## Performance Optimization
+## Framework Support
 
-### Parallel Execution Patterns
+All agents support major testing frameworks:
 
-#### Map-Reduce Pattern
-```
-Files → [Agent1, Agent2, Agent3] → Results → Aggregator → Report
-```
+**JavaScript/TypeScript:**
+- Jest
+- Vitest
+- Mocha
+- Jasmine
 
-#### Pipeline Pattern
-```
-Discovery → Analysis → Transformation → Validation → Complete
-```
+**Python:**
+- pytest
+- unittest
 
-#### Scatter-Gather Pattern
-```
-Task → [All Agents] → First Valid Result → Complete
-```
+**Go:**
+- Built-in testing
+
+**Ruby:**
+- RSpec
+- Minitest
+
+**Java:**
+- JUnit
+
+**PHP:**
+- PHPUnit
+
+**Rust:**
+- Built-in testing
+
+## Performance Features
+
+### Intelligent Parallelization
+- Unit tests: Maximum parallelization
+- Integration tests: Controlled parallelization
+- E2E tests: Sequential or limited parallel
 
 ### Resource Management
+- Automatic resource allocation
+- CPU and memory optimization
+- Adaptive scaling based on system capacity
 
-The system enforces strict resource limits:
+### Failure Recovery
+- Automatic agent recovery on failure
+- Work reassignment to healthy agents
+- Session persistence for interruption recovery
 
-- **Global Limits**
-  - Max 5 concurrent agents
-  - Max 2GB total memory
-  - Max 80% CPU usage
+## Quality Guarantees
 
-- **Per-Agent Limits**
-  - Memory: 200-600MB depending on type
-  - CPU: 10-30% depending on type
-  - Timeout: 60-600s depending on operation
+All test agents enforce:
+- ✅ 100% test success rate
+- ✅ Comprehensive coverage analysis
+- ✅ Flaky test elimination
+- ✅ Performance optimization
+- ✅ Detailed reporting
 
-## Monitoring
+## Integration with Claude Code
 
-### Agent Status
-
-Monitor active agents and their resource usage:
-
-```bash
-# View active agents
-ls /tmp/claude-agents/*/registry/agents.json
-
-# Check resource usage
-cat /tmp/claude-agents/*/metrics/*.json
-```
-
-### Performance Metrics
-
-The system tracks:
-- Execution time improvements
-- Resource utilization
-- Agent success rates
-- Coordination overhead
+These agents integrate seamlessly with:
+- Task tool for true parallelism
+- Existing test commands in `/test/`
+- Coverage and performance monitoring
+- CI/CD workflows
 
 ## Best Practices
 
-### When to Use Agents
-
-**Use Agents For:**
-- Operations on 5+ files
-- Complex analysis requiring specialization
-- Tasks with parallelization potential
-- Multi-step workflows
-
-**Use Direct Execution For:**
-- Simple, single-file edits
-- Quick lookups or searches
-- Operations < 100ms
-- Sequential dependencies
-
-### Agent Selection
-
-The Decision Engine considers:
-1. Task complexity and file count
-2. Available system resources
-3. Parallelization benefit
-4. Agent specialization match
-
-### Error Handling
-
-Agents provide isolated failure handling:
-- Agent failures don't affect others
-- Automatic retry with backoff
-- Fallback to direct execution
-- Comprehensive error reporting
-
-## Advanced Features
-
-### Custom Agent Creation
-
-Create specialized agents for specific workflows:
-
-```yaml
-name: custom-agent
-description: Specialized agent for custom operations
-model: sonnet
-capabilities:
-  - custom_analysis
-  - specialized_processing
-resource_requirements:
-  memory: 400MB
-  cpu: 20%
-  timeout: 180s
-```
-
-### Agent Composition
-
-Combine agents for complex workflows:
-
-```javascript
-workflow: {
-  stages: [
-    { agent: 'code-analyzer', task: 'identify_issues' },
-    { agent: 'file-processor', task: 'apply_fixes' },
-    { agent: 'code-quality-enforcer', task: 'validate_quality' },
-    { agent: 'git-operator', task: 'commit_changes' }
-  ]
-}
-```
+1. **Start with test-orchestrator** for comprehensive testing
+2. **Use specialist agents** for focused optimization
+3. **Monitor coordination files** in `/tmp/test-sessions/`
+4. **Review aggregated reports** for insights
+5. **Let agents handle parallelization** automatically
 
 ## Troubleshooting
 
 ### Common Issues
 
-**Agent Spawn Failures**
-- Check resource availability
-- Verify session initialization
-- Review agent limits
+**Tests not discovered:**
+- Check framework detection in test-intelligence
+- Verify test file naming conventions
 
-**Coordination Failures**
-- Check `/tmp/claude-agents/` permissions
-- Verify lock file cleanup
-- Review message queue status
+**Parallelization issues:**
+- Review resource allocation
+- Check test isolation
 
-**Performance Issues**
-- Monitor resource usage
-- Check for agent timeouts
-- Review parallelization settings
-
-### Debug Mode
-
-Enable detailed logging:
-
-```bash
-export CLAUDE_AGENT_DEBUG=1
-export CLAUDE_AGENT_LOG_LEVEL=verbose
-```
-
-## Migration Guide
-
-### From Sequential Commands
-
-1. Identify parallelization opportunities
-2. Map operations to agent capabilities
-3. Integrate decision engine
-4. Test with various workloads
-5. Monitor performance improvements
-
-### Gradual Adoption
-
-Start with:
-1. Test commands (highest benefit)
-2. Quality enforcement
-3. File processing operations
-4. Complex orchestrations
-
-## API Reference
-
-### Task Tool Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `subagent_type` | string | Agent type to spawn |
-| `description` | string | Brief task description |
-| `prompt` | string | Detailed agent instructions |
-
-### Decision Engine API
-
-```javascript
-const decision = decisionEngine.decide({
-  type: 'test_operation',
-  files: ['test1.js', 'test2.js'],
-  complexity: 'medium'
-});
-
-// Returns:
-{
-  mode: 'enhanced',
-  agents: ['test-fixer'],
-  expectedSpeedup: '3x'
-}
-```
-
-### Coordination API
-
-```javascript
-// Initialize session
-const session = coordination.initSession('test-operation');
-
-// Register agent
-coordination.registerAgent(session, {
-  id: 'test-fixer-001',
-  type: 'test-fixer',
-  capabilities: ['test_execution']
-});
-
-// Share state
-coordination.setState(session, 'progress', { percent: 50 });
-
-// Send message
-coordination.sendMessage(session, {
-  from: 'agent-001',
-  to: 'agent-002',
-  type: 'task_complete'
-});
-```
+**Agent coordination failures:**
+- Verify `/tmp/` permissions
+- Check session file integrity
 
 ## Future Enhancements
 
-- **Dynamic Agent Scaling** - Auto-scale based on workload
-- **Cross-Project Coordination** - Share agents across projects
-- **Machine Learning Optimization** - Learn optimal agent selection
-- **Custom Agent Marketplace** - Share specialized agents
-- **Visual Monitoring Dashboard** - Real-time agent visualization
-
-## Contributing
-
-To contribute new agents or improvements:
-
-1. Follow the agent template structure
-2. Implement required agent interface
-3. Add resource requirements
-4. Include coordination patterns
-5. Document capabilities and usage
-
-## Support
-
-For issues or questions:
-- Check troubleshooting guide
-- Review agent logs in `/tmp/claude-agents/`
-- Consult decision engine reasoning
-- Report issues with full context
-
----
-
-The Claude Code Agent System represents a significant evolution in command execution, delivering dramatic performance improvements while maintaining reliability and ease of use.
+Planned improvements:
+- Mutation testing capabilities
+- Visual regression testing
+- Performance baseline tracking
+- Contract testing specialization
+- Chaos testing integration
