@@ -206,6 +206,7 @@ Verify the generated command against existing patterns:
 
 **Step 5: Intelligent Command Placement Strategy**
 
+
 **MANDATORY FOLDER-FIRST DETECTION:**
 Before creating any command, you MUST:
 1. **Analyze command name** for existing folder matches
@@ -270,7 +271,7 @@ The custom command is complete when:
 ✓ YAML front matter is valid and complete
 ✓ Workflow steps are logical and actionable
 ✓ Agent spawning strategy is well-defined
-✓ File is properly saved to .claude/commands/
+✓ File is properly saved to templates/commands/
 ✓ Command can be used immediately without modification
 
 **Final Command Generation Commitment:**
